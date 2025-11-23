@@ -17,6 +17,7 @@ using UIElementInspector.Core.Detectors;
 using UIElementInspector.Core.Models;
 using UIElementInspector.Core.Utils;
 using UIElementInspector.Services;
+using UIElementInspector.Windows;
 using Newtonsoft.Json;
 
 namespace UIElementInspector
@@ -35,6 +36,7 @@ namespace UIElementInspector
         private CancellationTokenSource _inspectionCts;
         private DispatcherTimer _memoryTimer;
         private DispatcherTimer _mouseTimer;
+        private FloatingControlWindow _floatingWindow;
 
         public MainWindow()
         {
@@ -46,6 +48,9 @@ namespace UIElementInspector
 
             // Bind tree view to collection
             tvElements.ItemsSource = _collectedElements;
+
+            // Initialize floating control window
+            InitializeFloatingWindow();
 
             // Initialize services
             InitializeServices();
@@ -59,6 +64,13 @@ namespace UIElementInspector
             // Log startup
             LogToConsole("Universal UI Element Inspector started successfully.");
             LogToConsole($"Available detectors: {string.Join(", ", _detectors.Select(d => d.Name))}");
+        }
+
+        private void InitializeFloatingWindow()
+        {
+            _floatingWindow = new FloatingControlWindow();
+            _floatingWindow.StopInspectionRequested += (s, e) => StopInspection_Click(s, new RoutedEventArgs());
+            _floatingWindow.ShowMainWindowRequested += (s, e) => ShowMainWindow();
         }
 
         private void InitializeServices()
@@ -162,6 +174,12 @@ namespace UIElementInspector
 
             LogToConsole($"Starting inspection in mode: {((ComboBoxItem)cmbInspectionMode.SelectedItem).Content}");
 
+            // Hide main window and show floating toolbar for hover and click modes
+            if (mode == 0 || mode == 1)
+            {
+                HideMainWindowShowFloating();
+            }
+
             try
             {
                 switch (mode)
@@ -208,6 +226,9 @@ namespace UIElementInspector
             // Stop mouse hook
             _mouseHook.StopHook();
 
+            // Show main window and hide floating toolbar
+            ShowMainWindow();
+
             LogToConsole("Inspection stopped.");
             LogToConsole($"Total elements collected: {_collectedElements.Count}");
         }
@@ -248,6 +269,7 @@ namespace UIElementInspector
                 if (detector == null)
                 {
                     LogToConsole("No detector available for the current target.");
+                    UpdateFloatingWindow("No detector available", 0);
                     return;
                 }
 
@@ -274,12 +296,16 @@ namespace UIElementInspector
                         }
 
                         sbElementInfo.Text = $"{element.ElementType}: {element.Name ?? "Unnamed"}";
+
+                        // Update floating window
+                        UpdateFloatingWindow($"Detected: {element.ElementType}", _collectedElements.Count);
                     });
                 }
             }
             catch (Exception ex)
             {
                 LogToConsole($"Error capturing element: {ex.Message}");
+                UpdateFloatingWindow($"Error: {ex.Message}", _collectedElements.Count);
             }
         }
 
@@ -639,6 +665,41 @@ namespace UIElementInspector
         #endregion
 
         #region Helper Methods
+
+        private void HideMainWindowShowFloating()
+        {
+            // Hide main window
+            this.WindowState = WindowState.Minimized;
+            this.Hide();
+
+            // Update and show floating window
+            var modeText = ((ComboBoxItem)cmbInspectionMode.SelectedItem).Content.ToString();
+            _floatingWindow.UpdateMode(modeText);
+            _floatingWindow.UpdateStatus("Waiting for input...");
+            _floatingWindow.UpdateElementCount(_collectedElements.Count);
+            _floatingWindow.Show();
+        }
+
+        private void ShowMainWindow()
+        {
+            // Hide floating window
+            _floatingWindow.Hide();
+
+            // Show main window
+            this.Show();
+            this.WindowState = WindowState.Normal;
+            this.Activate();
+            this.Focus();
+        }
+
+        private void UpdateFloatingWindow(string status, int elementCount)
+        {
+            if (_floatingWindow.IsVisible)
+            {
+                _floatingWindow.UpdateStatus(status);
+                _floatingWindow.UpdateElementCount(elementCount);
+            }
+        }
 
         private CollectionProfile GetSelectedProfile()
         {
@@ -1176,6 +1237,7 @@ Supports multiple detection technologies:
             _memoryTimer?.Stop();
             _mouseTimer?.Stop();
             _inspectionCts?.Cancel();
+            _floatingWindow?.Close();
         }
     }
 }

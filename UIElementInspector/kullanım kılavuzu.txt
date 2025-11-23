@@ -1,0 +1,459 @@
+================================================================================
+           UNIVERSAL UI ELEMENT INSPECTOR - KULLANIM KILAVUZU
+================================================================================
+
+PROGRAMIN AMACI
+================================================================================
+
+Universal UI Element Inspector, Windows işletim sisteminde çalışan uygulamalar
+ve web tarayıcılarındaki kullanıcı arayüzü (UI) elementlerini detaylı bir
+şekilde incelemek, özelliklerini toplamak ve analiz etmek için geliştirilmiş
+kapsamlı bir araçtır.
+
+Program, test otomasyonu, erişilebilirlik testleri, UI/UX analizi ve yazılım
+geliştirme süreçlerinde kullanılmak üzere tasarlanmıştır.
+
+
+YAPABILDIĞI İŞLER
+================================================================================
+
+1. UI ELEMENT TESPİTİ
+   - Mouse ile üzerine gelinen elementleri gerçek zamanlı algılama
+   - Tıklanan elementleri yakalama ve inceleme
+   - Belirli bir bölgedeki tüm elementleri toplama
+   - Tam pencere taraması yaparak tüm elementleri listeleme
+
+2. ÇOK KATMANLI ALGILAMA TEKNOLOJİSİ
+   - Windows UI Automation: Masaüstü uygulamaları için
+   - WebView2/Chrome DevTools Protocol: Modern tarayıcılar için (Chrome, Edge)
+   - MSHTML: Internet Explorer ve eski web uygulamaları için
+
+3. ELEMENT ÖZELLİKLERİNİ TOPLAMA
+   - Temel özellikler: İsim, tip, değer, sınıf, ID
+   - UI Automation özellikleri: AutomationId, ControlType, Pattern'ler
+   - Web özellikleri: TagName, innerHTML, href, XPath, CSS seçiciler
+   - Pozisyon bilgileri: X, Y koordinatları, genişlik, yükseklik
+   - Hiyerarşi bilgileri: Parent-child ilişkileri, ağaç seviyesi
+   - Erişilebilirlik: ARIA nitelikleri, rol, etiket bilgileri
+
+4. EKRAN GÖRÜNTÜSÜ ALMA
+   - Seçili elementin ekran görüntüsünü alma
+   - Belirli bir bölgenin ekran görüntüsünü alma
+   - Tam ekran görüntüsü alma
+
+5. VERİ EXPORT İŞLEMLERİ
+   - CSV formatı: Excel ve veri analizi için
+   - JSON formatı: Programatik işleme ve API entegrasyonu için
+   - XML formatı: Kurumsal sistemler için
+   - HTML formatı: İnteraktif web görüntüleme için
+   - TXT formatı: inspect.exe uyumlu metin formatı
+
+6. OTURUM YÖNETİMİ
+   - İnceleme oturumlarını kaydetme
+   - Geçmiş oturumları tekrar yükleme
+   - Oturum verilerini arşivleme
+
+
+PROGRAM ÖZELLİKLERİ
+================================================================================
+
+TEMEL ÖZELLİKLER
+----------------
+✓ 100+ farklı UI element özelliği toplama kapasitesi
+✓ Gerçek zamanlı element algılama ve inceleme
+✓ Evrensel uygulama desteği (masaüstü + web)
+✓ Global klavye kısayolları (F1, ESC, F5, vb.)
+✓ Kullanıcı dostu arayüz
+✓ Hızlı ve performanslı çalışma
+✓ AUTO-HIDE ÖZELLİĞİ: Inceleme sırasında ana pencere otomatik gizlenir
+✓ FLOATING TOOLBAR: Küçük kontrol paneli ile tıklanacak alanlara erişim
+
+ALGILAMA MODLARİ
+----------------
+1. HOVER MODE (Üzerine Gelme Modu)
+   - Mouse imleci hangi elementin üzerindeyse onu algılar
+   - Gerçek zamanlı güncelleme
+   - Sürekli inceleme için idealdir
+
+2. CLICK MODE (Tıklama Modu)
+   - Tıklanan elementi yakalar
+   - İncelemeyi otomatik durdurur
+   - Tek bir elementi detaylı incelemek için kullanılır
+
+3. REGION MODE (Bölge Modu) - Geliştirme Aşamasında
+   - Dikdörtgen bölge seçimi
+   - Seçilen bölgedeki tüm elementleri toplar
+   - Çoklu element analizi için kullanılır
+
+4. FULL WINDOW MODE (Tam Pencere Modu)
+   - Aktif penceredeki tüm elementleri tarar
+   - Kapsamlı analiz için kullanılır
+   - Hiyerarşik yapıyı görüntüler
+
+COLLECTION PROFİLLERİ
+---------------------
+QUICK (Hızlı)
+- Temel özellikler
+- Toplama süresi: < 1 saniye
+- Hızlı kontroller için idealdir
+
+STANDARD (Standart)
+- Standart özellikler
+- Toplama süresi: 1-3 saniye
+- Genel kullanım için önerilir
+
+FULL (Tam)
+- Tüm özellikler
+- Toplama süresi: 3-10 saniye
+- Detaylı analiz için kullanılır
+
+CUSTOM (Özel)
+- Kullanıcı tarafından özelleştirilebilir
+- İhtiyaca göre ayarlanabilir
+
+
+KULLANIM KILAVUZU
+================================================================================
+
+SİSTEM GEREKSİNİMLERİ
+---------------------
+- İşletim Sistemi: Windows 10 veya Windows 11
+- Framework: .NET 8.0 Runtime
+- Geliştirme (Opsiyonel): Visual Studio 2022
+- Bellek: Minimum 4 GB RAM
+- Disk Alanı: 100 MB boş alan
+
+KURULUM VE ÇALIŞTIRMA
+---------------------
+1. .NET 8.0 Runtime'ın kurulu olduğundan emin olun
+2. Projeyi indirin veya klonlayın
+3. Terminal/Command Prompt'u açın
+4. Proje klasörüne gidin:
+   cd UIElementInspector/UIElementInspector
+
+5. Projeyi derleyin:
+   dotnet build
+
+6. Uygulamayı çalıştırın:
+   dotnet run
+
+   VEYA
+
+   Yönetici olarak çalıştırın (yükseltilmiş uygulamalar için):
+   - Visual Studio'da projeyi açın
+   - "Run as Administrator" seçeneği ile çalıştırın
+
+
+TEMEL KULLANIM ADIMLARI
+-----------------------
+1. PROGRAMA BAŞLAMA
+   - Uygulamayı açın
+   - Ana pencere görüntülenecektir
+
+2. İNCELEME MODUNU SEÇİN
+   - Üst menüden istediğiniz modu seçin:
+     * Hover Mode (varsayılan)
+     * Click Mode
+     * Region Mode
+     * Full Window Mode
+
+3. COLLECTION PROFİLİNİ BELİRLEYİN
+   - Settings > Collection Profile menüsünden seçim yapın
+   - Hız/Detay dengesi için "Standard" önerilir
+
+4. İNCELEMEYİ BAŞLATIN
+   - F1 tuşuna basın
+   VEYA
+   - "Start Inspection" butonuna tıklayın
+
+   ÖNEMLİ: Hover ve Click modlarında ana pencere otomatik olarak gizlenir!
+   - Ana pencere yerine sağ üst köşede küçük bir kontrol paneli görünür
+   - Bu sayede incelemek istediğiniz elementlere rahatlıkla erişebilirsiniz
+   - Floating toolbar'da durum bilgileri ve kontrol butonları yer alır
+
+5. ELEMENT SEÇİMİ
+   HOVER MODE için:
+   - Mouse'unuzu incelemek istediğiniz elementin üzerine getirin
+   - Element otomatik olarak algılanır
+   - Floating toolbar'da anlık bilgiler güncellenir
+   - Toplanan element sayısı gerçek zamanlı görüntülenir
+
+   CLICK MODE için:
+   - İncelemek istediğiniz elemente tıklayın
+   - İnceleme otomatik durur ve seçili element analiz edilir
+   - Ana pencere otomatik olarak geri gelir
+
+   FULL WINDOW MODE için:
+   - İncelemek istediğiniz pencereyi aktif edin
+   - F1'e basın, tüm elementler toplanacaktır
+   - Bu modda ana pencere gizlenmez (Region Mode için de aynı)
+
+6. ÖZELLİKLERİ İNCELEYİN
+   - Sağ panelde element özellikleri görüntülenir
+   - Properties tabında detaylı özellikler
+   - Hierarchy tabında parent-child ilişkileri
+   - Patterns tabında desteklenen UI Automation pattern'leri
+
+7. ELEMENTİ YENİLEME
+   - F5 tuşuna basarak seçili elementi yenileyin
+   - Güncel verileri görüntüleyin
+
+8. SCREENSHOT ALMA
+   - Screenshot butonuna tıklayın
+   - Element Screenshot: Sadece seçili element
+   - Region Screenshot: Belirli bölge
+   - Full Screen: Tam ekran
+
+9. VERİ EXPORT ETME
+   - File > Export menüsüne gidin
+   - İstediğiniz formatı seçin (CSV/JSON/XML/HTML/TXT)
+   - Kaydetmek istediğiniz konumu seçin
+   VEYA
+   - Ctrl+S ile hızlı export
+
+10. İNCELEMEYİ DURDURMA
+    - ESC tuşuna basın (Floating toolbar açıkken de çalışır)
+    VEYA
+    - Floating toolbar'daki "Stop" butonuna tıklayın
+    VEYA
+    - Floating toolbar'daki "Show Results" butonuna tıklayın
+
+    İnceleme durdurulduğunda:
+    - Floating toolbar otomatik gizlenir
+    - Ana pencere tekrar görünür
+    - Toplanan tüm element verileri ana pencerede gösterilir
+
+
+KLAVYE KISAYOLLARI
+------------------
+F1              - İncelemeyi başlat
+ESC             - İncelemeyi durdur
+F5              - Seçili elementi yenile
+Ctrl+S          - Hızlı export (varsayılan format)
+Ctrl+C          - Element verilerini panoya kopyala
+Ctrl+E          - Export menüsünü aç
+Ctrl+,          - Settings penceresini aç
+Alt+F4          - Programı kapat
+
+
+GELİŞMİŞ ÖZELLİKLER
+====================
+
+AUTO-HIDE VE FLOATING TOOLBAR
+------------------------------
+Program, inceleme sırasında ekranda yer kaplamaması için özel olarak
+tasarlanmış bir auto-hide özelliğine sahiptir.
+
+NASIL ÇALIŞIR?
+- F1'e bastığınızda (Hover veya Click modlarında):
+  * Ana pencere otomatik minimize olur ve gizlenir
+  * Sağ üst köşede küçük bir kontrol paneli (320x140 pixel) belirir
+  * Bu sayede incelemek istediğiniz uygulamanın tüm alanına erişebilirsiniz
+
+FLOATING TOOLBAR ÖZELLİKLERİ:
+- Always on Top: Her zaman en üstte kalır
+- Minimal Tasarım: Minimum yer kaplar
+- Gerçek Zamanlı Bilgi: Mod, durum ve element sayısını gösterir
+- Kolay Kontrol: Stop ve Show Results butonları
+- ESC Desteği: Klavye kısayolu çalışır
+
+AVANTAJLARI:
+✓ Tıklanacak elementlerin önünü kapatmaz
+✓ İnceleme yaparken sonuçları görmek için pencere değiştirmeye gerek yok
+✓ Küçük kontrol paneli ile tam kontrol
+✓ Ekran görüntüsü alırken ana pencere görüntüye girmez
+
+NOT: Full Window ve Region modlarında auto-hide çalışmaz çünkü bu modlarda
+     inceleme sırasında kullanıcı etkileşimi gerekmez.
+
+OTURUM YÖNETİMİ
+---------------
+- File > Save Session: Mevcut incelemeyi kaydet
+- File > Load Session: Önceki oturumu yükle
+- Oturum dosyaları .json formatında saklanır
+- Tüm element verileri ve ayarlar korunur
+
+FİLTRELEME VE ARAMA
+-------------------
+- Özellikler panelinde arama kutusu kullanın
+- Element tipine göre filtreleme
+- Özellik adına göre arama
+- Değer bazlı filtreleme
+
+ÖZEL AYARLAR
+------------
+Settings penceresinden yapılandırılabilir:
+- Collection timeout süresi
+- Screenshot kalitesi
+- Export varsayılan formatı
+- Hotkey konfigürasyonu
+- UI tema ayarları
+
+
+SORUN GİDERME
+================================================================================
+
+PROBLEM: Playwright paketi yüklenemiyor
+ÇÖZÜM:
+  - VPN bağlantınızı kapatın
+  - Farklı bir network'e bağlanmayı deneyin
+  - Manuel olarak NuGet paket yöneticisinden yükleyin
+
+PROBLEM: WebView2 başlangıçta null hatası
+ÇÖZÜM:
+  - Uygulamayı kapatıp tekrar açın
+  - Birkaç saniye bekleyin, async initialization tamamlanmasını bekleyin
+
+PROBLEM: Yükseltilmiş uygulamalar algılanmıyor
+ÇÖZÜM:
+  - Uygulamayı "Yönetici olarak çalıştır" ile açın
+  - UAC kısıtlamalarını aşmak için gereklidir
+
+PROBLEM: Element özellikleri eksik görünüyor
+ÇÖZÜM:
+  - Collection Profile'ı "Full" olarak değiştirin
+  - F5 ile elementi yenileyin
+  - Farklı algılama teknolojisi deneyin
+
+PROBLEM: Screenshot alınamıyor
+ÇÖZÜM:
+  - Elementin ekranda görünür olduğundan emin olun
+  - Yeterli disk alanı olduğunu kontrol edin
+  - Screenshot klasörü için yazma izni olduğunu doğrulayın
+
+PROBLEM: Export başarısız oluyor
+ÇÖZÜM:
+  - Hedef klasörün yazılabilir olduğunu kontrol edin
+  - Dosya adında geçersiz karakter olmadığından emin olun
+  - Yeterli disk alanı olduğunu kontrol edin
+
+
+KULLANIM ÖRNEKLERİ
+================================================================================
+
+ÖRNEK 1: WEB FORM ANALİZİ
+-------------------------
+Amaç: Bir web formundaki tüm input alanlarını analiz etmek
+
+1. Tarayıcıda formu açın
+2. UI Element Inspector'ı başlatın
+3. Collection Profile: Standard
+4. Mode: Hover
+5. F1 ile başlatın
+6. Her input alanının üzerine gelerek özelliklerini inceleyin
+7. Ctrl+S ile CSV formatında export edin
+8. Excel'de açarak tüm alanları analiz edin
+
+ÖRNEK 2: MASAÜSTÜ UYGULAMASI TEST OTOMASYONU
+---------------------------------------------
+Amaç: Bir masaüstü uygulamasındaki butonların AutomationId'lerini toplamak
+
+1. Hedef uygulamayı açın
+2. UI Element Inspector'ı yönetici olarak çalıştırın
+3. Mode: Full Window
+4. Collection Profile: Standard
+5. Uygulamayı aktif edin ve F1'e basın
+6. Tüm elementler toplanacak
+7. Export > JSON ile kaydedin
+8. JSON dosyasından AutomationId değerlerini test scriptlerinde kullanın
+
+ÖRNEK 3: ERİŞİLEBİLİRLİK TESTİ
+-------------------------------
+Amaç: Web sayfasındaki ARIA attribute'larını kontrol etmek
+
+1. Chrome/Edge'de web sayfasını açın
+2. UI Element Inspector başlatın
+3. Mode: Hover
+4. Collection Profile: Full
+5. Her interaktif element üzerinde gezin
+6. ARIA properties sekmesini kontrol edin
+7. Eksik/hatalı ARIA attribute'ları not edin
+8. HTML formatında export ederek rapor oluşturun
+
+
+DESTEKLENEN TEKNOLOJİLER
+================================================================================
+
+UI AUTOMATION (Aktif)
+- Windows Forms uygulamaları
+- WPF uygulamaları
+- Win32 uygulamaları
+- UWP uygulamaları
+- .NET uygulamaları
+
+WEBVIEW2/CDP (Aktif)
+- Google Chrome tarayıcısı
+- Microsoft Edge tarayıcısı
+- Chromium tabanlı tarayıcılar
+- Electron uygulamaları
+
+MSHTML (Aktif)
+- Internet Explorer
+- IE tabanlı uygulamalar
+- Eski web kontrolleri
+
+PLAYWRIGHT (Planlanan)
+- Cross-browser desteği
+- Firefox
+- Safari/WebKit
+- Test otomasyonu entegrasyonu
+
+
+EXPORT FORMAT DETAYLARI
+================================================================================
+
+CSV (Comma-Separated Values)
+- Excel ve veri analizi araçlarında açılabilir
+- Her satır bir element
+- Sütunlar: Name, Type, Value, AutomationId, vb.
+- Toplu veri analizi için ideal
+
+JSON (JavaScript Object Notation)
+- Yapılandırılmış veri formatı
+- API entegrasyonu için uygun
+- Programatik işleme için ideal
+- Hiyerarşik yapıyı korur
+
+XML (Extensible Markup Language)
+- Kurumsal sistemler için
+- Şema doğrulaması yapılabilir
+- XSLT ile dönüştürülebilir
+
+HTML (HyperText Markup Language)
+- Web tarayıcısında açılabilir
+- İnteraktif tablo görünümü
+- Filtreleme ve sıralama özellikleri
+- Raporlama için uygun
+
+TXT (Text - inspect.exe formatı)
+- Düz metin formatı
+- Windows Inspect.exe uyumlu
+- Metin editörlerinde açılabilir
+- Loglama için kullanılabilir
+
+
+VERSİYON BİLGİLERİ
+================================================================================
+Program Versiyonu: 1.0.0
+Geliştirme Durumu: Aktif Geliştirme (%95 Tamamlandı)
+Son Güncelleme: 2024-11-23
+Framework: .NET 8.0
+UI Framework: WPF (Windows Presentation Foundation)
+
+
+TEKNİK DESTEK VE GERI BİLDİRİM
+================================================================================
+Sorularınız, önerileriniz veya hata bildirimleriniz için:
+- GitHub Issues: https://github.com/Emrelic/Uibul/issues
+
+Proje Deposu: https://github.com/Emrelic/Uibul
+
+
+LİSANS VE KULLANIM HAKKI
+================================================================================
+Bu program eğitim ve geliştirme amaçlı oluşturulmuştur.
+Ticari ve kişisel projelerde kullanılabilir.
+
+
+İYİ KULANIMLAR!
+================================================================================
