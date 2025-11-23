@@ -128,8 +128,9 @@ namespace UIElementInspector
                 _detectors.Add(new MSHTMLDetector());
                 _logger.LogInfo("MSHTML detector added");
 
-                // TODO: Add other detectors as they are implemented
-                // _detectors.Add(new PlaywrightDetector());
+                // Add Playwright detector for browser automation
+                _detectors.Add(new PlaywrightDetector());
+                _logger.LogInfo("Playwright detector added");
 
                 _logger.LogInfo($"Total detectors initialized: {_detectors.Count}");
                 LogToConsole($"Initialized {_detectors.Count} detector(s).");
@@ -992,6 +993,10 @@ namespace UIElementInspector
             {
                 return _detectors.FirstOrDefault(d => d.Name == "MSHTML");
             }
+            else if (techIndex == 4) // Playwright
+            {
+                return _detectors.FirstOrDefault(d => d.Name == "Playwright");
+            }
             else if (techIndex == 5) // All Technologies
             {
                 // Return the first detector that can detect
@@ -999,7 +1004,6 @@ namespace UIElementInspector
                 var wpfPoint = new System.Windows.Point(point.X, point.Y);
                 return _detectors.FirstOrDefault(d => d.CanDetect(wpfPoint)) ?? _detectors.FirstOrDefault();
             }
-            // TODO: Add other detectors as they are implemented
 
             return _detectors.FirstOrDefault();
         }
