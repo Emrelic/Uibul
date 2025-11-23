@@ -262,6 +262,30 @@ namespace UIElementInspector.Core.Detectors
             {
                 // Use dynamic to work with COM objects
                 dynamic htmlDoc = document;
+
+                // Extract page source code if Full profile
+                if (profile >= CollectionProfile.Full)
+                {
+                    try
+                    {
+                        dynamic docElement = htmlDoc.documentElement;
+                        if (docElement != null)
+                        {
+                            info.SourceCode = docElement.outerHTML?.ToString();
+
+                            // Also get document info
+                            info.DocumentTitle = htmlDoc.title?.ToString();
+                            info.DocumentUrl = htmlDoc.url?.ToString();
+                            info.DocumentDomain = htmlDoc.domain?.ToString();
+                            info.DocumentReadyState = htmlDoc.readyState?.ToString();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        info.CollectionErrors.Add($"Document info extraction error: {ex.Message}");
+                    }
+                }
+
                 dynamic element = htmlDoc.elementFromPoint((int)point.X, (int)point.Y);
 
                 if (element != null)
@@ -283,7 +307,23 @@ namespace UIElementInspector.Core.Detectors
                 info.TagName = element.tagName?.ToString();
                 info.HtmlId = element.id?.ToString();
                 info.HtmlClassName = element.className?.ToString();
+
+                // Name - try multiple sources for button elements
                 info.Name = element.name?.ToString();
+                if (string.IsNullOrEmpty(info.Name))
+                {
+                    // For buttons, try innerText, outerText, or value
+                    try { info.Name = element.innerText?.ToString()?.Trim(); } catch { }
+                    if (string.IsNullOrEmpty(info.Name))
+                    {
+                        try { info.Name = element.outerText?.ToString()?.Trim(); } catch { }
+                    }
+                    if (string.IsNullOrEmpty(info.Name))
+                    {
+                        try { info.Name = element.value?.ToString()?.Trim(); } catch { }
+                    }
+                }
+
                 info.ElementType = info.TagName ?? "Unknown";
 
                 // Text content

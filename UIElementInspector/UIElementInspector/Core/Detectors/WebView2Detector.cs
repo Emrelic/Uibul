@@ -125,9 +125,11 @@ namespace UIElementInspector.Core.Detectors
                         const tableInfo = getTableInfo(element);
                         const treePath = getTreePath(element);
                         const elementPath = getElementPath(element);
+                        const pageSource = document.documentElement.outerHTML;
 
                         return {{
                             tagName: element.tagName,
+                            pageSource: pageSource,
                             id: element.id,
                             className: element.className,
                             innerHTML: element.innerHTML.substring(0, 1000),
@@ -551,6 +553,12 @@ namespace UIElementInspector.Core.Detectors
                     info.AriaDescribedBy = data["ariaDescribedby"]?.ToString();
                 if (data.ContainsKey("ariaLabelledby"))
                     info.AriaLabelledBy = data["ariaLabelledby"]?.ToString();
+
+                // Page source code (Full profile)
+                if (profile >= CollectionProfile.Full && data.ContainsKey("pageSource"))
+                {
+                    info.SourceCode = data["pageSource"]?.ToString();
+                }
 
                 // Selectors
                 if (data.ContainsKey("xpath"))
