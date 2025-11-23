@@ -37,10 +37,15 @@ namespace UIElementInspector
         private DispatcherTimer _memoryTimer;
         private DispatcherTimer _mouseTimer;
         private FloatingControlWindow _floatingWindow;
+        private Core.Utils.Logger _logger;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            // Initialize logger first
+            _logger = new Core.Utils.Logger();
+            _logger.LogSection("APPLICATION STARTUP");
 
             // Initialize collections
             _detectors = new List<IElementDetector>();
@@ -63,6 +68,7 @@ namespace UIElementInspector
 
             // Log startup
             LogToConsole("Universal UI Element Inspector started successfully.");
+            LogToConsole($"Log file: {_logger.GetLogFilePath()}");
             LogToConsole($"Available detectors: {string.Join(", ", _detectors.Select(d => d.Name))}");
         }
 
@@ -77,23 +83,30 @@ namespace UIElementInspector
         {
             try
             {
+                _logger.LogSection("SERVICE INITIALIZATION");
+
                 // Initialize mouse hook service
                 _mouseHook = new MouseHookService();
                 _mouseHook.MouseMove += OnGlobalMouseMove;
                 _mouseHook.MouseClick += OnGlobalMouseClick;
+                _logger.LogInfo("Mouse hook service initialized");
 
                 // Initialize hotkey service
                 _hotkeyService = new HotkeyService(this);
-                _hotkeyService.RegisterHotkey(Key.F1, ModifierKeys.None, StartInspection_Click);
-                _hotkeyService.RegisterHotkey(Key.F2, ModifierKeys.None, StopInspection_Click);
-                _hotkeyService.RegisterHotkey(Key.F5, ModifierKeys.None, Refresh_Click);
-                _hotkeyService.RegisterHotkey(Key.S, ModifierKeys.Control, ExportQuick_Click);
+                var f1 = _hotkeyService.RegisterHotkey(Key.F1, ModifierKeys.None, StartInspection_Click);
+                var f2 = _hotkeyService.RegisterHotkey(Key.F2, ModifierKeys.None, StopInspection_Click);
+                var f5 = _hotkeyService.RegisterHotkey(Key.F5, ModifierKeys.None, Refresh_Click);
+                var ctrlS = _hotkeyService.RegisterHotkey(Key.S, ModifierKeys.Control, ExportQuick_Click);
+
+                _logger.LogInfo($"Hotkey service initialized - F1: {f1}, F2: {f2}, F5: {f5}, Ctrl+S: {ctrlS}");
 
                 LogToConsole("Services initialized successfully.");
+                LogToConsole($"Global hotkeys registered: F1={f1}, F2={f2}, F5={f5}, Ctrl+S={ctrlS}");
             }
             catch (Exception ex)
             {
-                LogToConsole($"Error initializing services: {ex.Message}");
+                _logger.LogException(ex, "Service initialization failed");
+                LogToConsole($"Error initializing services: {ex.Message}", Core.Utils.LogLevel.Error);
             }
         }
 
@@ -101,23 +114,30 @@ namespace UIElementInspector
         {
             try
             {
+                _logger.LogSection("DETECTOR INITIALIZATION");
+
                 // Add UI Automation detector
                 _detectors.Add(new UIAutomationDetector());
+                _logger.LogInfo("UI Automation detector added");
 
                 // Add WebView2/CDP detector for modern web
                 _detectors.Add(new WebView2Detector());
+                _logger.LogInfo("WebView2/CDP detector added");
 
                 // Add MSHTML detector for IE and embedded browsers
                 _detectors.Add(new MSHTMLDetector());
+                _logger.LogInfo("MSHTML detector added");
 
                 // TODO: Add other detectors as they are implemented
                 // _detectors.Add(new PlaywrightDetector());
 
+                _logger.LogInfo($"Total detectors initialized: {_detectors.Count}");
                 LogToConsole($"Initialized {_detectors.Count} detector(s).");
             }
             catch (Exception ex)
             {
-                LogToConsole($"Error initializing detectors: {ex.Message}");
+                _logger.LogException(ex, "Detector initialization failed");
+                LogToConsole($"Error initializing detectors: {ex.Message}", Core.Utils.LogLevel.Error);
             }
         }
 
@@ -155,6 +175,8 @@ namespace UIElementInspector
                 return;
             }
 
+            _logger.LogSection("INSPECTION STARTED");
+
             _isInspecting = true;
             _inspectionCts = new CancellationTokenSource();
 
@@ -171,12 +193,15 @@ namespace UIElementInspector
 
             // Get inspection mode
             var mode = cmbInspectionMode.SelectedIndex;
+            var modeName = ((ComboBoxItem)cmbInspectionMode.SelectedItem).Content.ToString();
 
-            LogToConsole($"Starting inspection in mode: {((ComboBoxItem)cmbInspectionMode.SelectedItem).Content}");
+            _logger.LogInfo($"Inspection mode: {modeName} (Index: {mode})");
+            LogToConsole($"Starting inspection in mode: {modeName}");
 
             // Hide main window and show floating toolbar for hover and click modes
             if (mode == 0 || mode == 1)
             {
+                _logger.LogInfo("Hiding main window, showing floating toolbar");
                 HideMainWindowShowFloating();
             }
 
@@ -186,25 +211,30 @@ namespace UIElementInspector
                 {
                     case 0: // Hover (Real-time)
                         _mouseHook.StartHook();
+                        _logger.LogInfo("Mouse hook started for Hover mode");
                         break;
 
                     case 1: // Click (Snapshot)
                         _mouseHook.StartHook();
+                        _logger.LogInfo("Mouse hook started for Click mode");
                         LogToConsole("Click on an element to capture it.");
                         break;
 
                     case 2: // Region Select
+                        _logger.LogInfo("Starting region selection");
                         await StartRegionSelection();
                         break;
 
                     case 3: // Full Window
+                        _logger.LogInfo("Starting full window capture");
                         await CaptureFullWindow();
                         break;
                 }
             }
             catch (Exception ex)
             {
-                LogToConsole($"Error starting inspection: {ex.Message}");
+                _logger.LogException(ex, "Error during inspection start");
+                LogToConsole($"Error starting inspection: {ex.Message}", Core.Utils.LogLevel.Error);
                 StopInspection_Click(null, null);
             }
         }
@@ -212,6 +242,8 @@ namespace UIElementInspector
         private void StopInspection_Click(object sender, RoutedEventArgs e)
         {
             if (!_isInspecting) return;
+
+            _logger.LogSection("INSPECTION STOPPED");
 
             _isInspecting = false;
             _inspectionCts?.Cancel();
@@ -225,10 +257,13 @@ namespace UIElementInspector
 
             // Stop mouse hook
             _mouseHook.StopHook();
+            _logger.LogInfo("Mouse hook stopped");
 
             // Show main window and hide floating toolbar
             ShowMainWindow();
+            _logger.LogInfo("Main window restored");
 
+            _logger.LogInfo($"Total elements collected: {_collectedElements.Count}");
             LogToConsole("Inspection stopped.");
             LogToConsole($"Total elements collected: {_collectedElements.Count}");
         }
@@ -741,8 +776,12 @@ namespace UIElementInspector
             return _detectors.FirstOrDefault();
         }
 
-        private void LogToConsole(string message)
+        private void LogToConsole(string message, Core.Utils.LogLevel level = Core.Utils.LogLevel.Info)
         {
+            // Log to file
+            _logger?.Log(message, level);
+
+            // Log to UI console
             Dispatcher.Invoke(() =>
             {
                 var timestamp = DateTime.Now.ToString("HH:mm:ss");
@@ -1231,6 +1270,9 @@ Supports multiple detection technologies:
         {
             base.OnClosed(e);
 
+            _logger?.LogSection("APPLICATION SHUTDOWN");
+            _logger?.LogInfo("Cleaning up resources...");
+
             // Cleanup
             _mouseHook?.Dispose();
             _hotkeyService?.Dispose();
@@ -1238,6 +1280,9 @@ Supports multiple detection technologies:
             _mouseTimer?.Stop();
             _inspectionCts?.Cancel();
             _floatingWindow?.Close();
+
+            _logger?.LogInfo("All resources cleaned up successfully");
+            _logger?.Dispose();
         }
     }
 }

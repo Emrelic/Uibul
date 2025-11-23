@@ -7,3 +7,7 @@ obj/
 *.user
 *.suo
 .vs/
+
+# Application logs
+**/Logs/
+*.log

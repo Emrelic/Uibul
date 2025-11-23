@@ -40,14 +40,23 @@ namespace UIElementInspector.Services
         private readonly Window _window;
         private HwndSource _source;
         private readonly Dictionary<int, Action> _hotkeyActions;
+        private readonly List<PendingHotkey> _pendingHotkeys;
         private int _currentHotkeyId;
 
         #endregion
+
+        private class PendingHotkey
+        {
+            public Key Key { get; set; }
+            public System.Windows.Input.ModifierKeys Modifiers { get; set; }
+            public Action Callback { get; set; }
+        }
 
         public HotkeyService(Window window)
         {
             _window = window;
             _hotkeyActions = new Dictionary<int, Action>();
+            _pendingHotkeys = new List<PendingHotkey>();
             _currentHotkeyId = HOTKEY_ID_START;
 
             // Wait for window to be loaded
@@ -72,9 +81,35 @@ namespace UIElementInspector.Services
             var helper = new WindowInteropHelper(_window);
             _source = HwndSource.FromHwnd(helper.Handle);
             _source?.AddHook(HwndHook);
+
+            // Register all pending hotkeys
+            foreach (var pending in _pendingHotkeys)
+            {
+                RegisterHotkeyInternal(pending.Key, pending.Modifiers, pending.Callback);
+            }
+            _pendingHotkeys.Clear();
         }
 
         public bool RegisterHotkey(Key key, System.Windows.Input.ModifierKeys modifiers, Action callback)
+        {
+            if (callback == null) return false;
+
+            // If window is not loaded yet, add to pending list
+            if (_source == null)
+            {
+                _pendingHotkeys.Add(new PendingHotkey
+                {
+                    Key = key,
+                    Modifiers = modifiers,
+                    Callback = callback
+                });
+                return true;
+            }
+
+            return RegisterHotkeyInternal(key, modifiers, callback);
+        }
+
+        private bool RegisterHotkeyInternal(Key key, System.Windows.Input.ModifierKeys modifiers, Action callback)
         {
             if (callback == null) return false;
 
@@ -84,25 +119,24 @@ namespace UIElementInspector.Services
             var id = _currentHotkeyId++;
             _hotkeyActions[id] = callback;
 
-            if (_source != null)
-            {
-                var helper = new WindowInteropHelper(_window);
-                var result = RegisterHotKey(helper.Handle, id, (uint)modifierFlags, vk);
+            var helper = new WindowInteropHelper(_window);
+            var result = RegisterHotKey(helper.Handle, id, (uint)modifierFlags, vk);
 
-                if (!result)
-                {
-                    _hotkeyActions.Remove(id);
-                    return false;
-                }
+            if (!result)
+            {
+                _hotkeyActions.Remove(id);
+                System.Diagnostics.Debug.WriteLine($"Failed to register hotkey: {key} with modifiers {modifiers}");
+                return false;
             }
 
+            System.Diagnostics.Debug.WriteLine($"Successfully registered global hotkey: {key} with modifiers {modifiers}");
             return true;
         }
 
-        public void RegisterHotkey(Key key, System.Windows.Input.ModifierKeys modifiers,
+        public bool RegisterHotkey(Key key, System.Windows.Input.ModifierKeys modifiers,
             EventHandler<RoutedEventArgs> handler)
         {
-            RegisterHotkey(key, modifiers, () => handler?.Invoke(this, new RoutedEventArgs()));
+            return RegisterHotkey(key, modifiers, () => handler?.Invoke(this, new RoutedEventArgs()));
         }
 
         private ModifierKeys ConvertModifiers(System.Windows.Input.ModifierKeys modifiers)
