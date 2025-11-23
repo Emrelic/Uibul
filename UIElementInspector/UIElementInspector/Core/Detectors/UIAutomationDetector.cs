@@ -440,24 +440,64 @@ namespace UIElementInspector.Core.Detectors
             try
             {
                 var path = new List<string>();
+                var treePath = new List<string>();
+                var elementPath = new List<string>();
                 var current = element;
+                int childIndex = 0;
 
                 while (current != null && current != AutomationElement.RootElement)
                 {
                     var name = current.Current.Name;
                     var className = current.Current.ClassName;
                     var id = current.Current.AutomationId;
+                    var controlType = current.Current.ControlType?.ProgrammaticName ?? "Unknown";
 
+                    // Windows Path (simple, readable)
                     var pathPart = !string.IsNullOrEmpty(name) ? name :
                                    !string.IsNullOrEmpty(id) ? $"#{id}" :
                                    !string.IsNullOrEmpty(className) ? $".{className}" :
                                    "Unknown";
 
+                    // Tree Path (includes control type)
+                    var treePathPart = $"{controlType}";
+                    if (!string.IsNullOrEmpty(name))
+                        treePathPart += $"[Name='{name}']";
+                    else if (!string.IsNullOrEmpty(id))
+                        treePathPart += $"[AutomationId='{id}']";
+
+                    // Element Path (full details with index)
+                    var elemPathPart = $"{controlType}[{childIndex}]";
+                    if (!string.IsNullOrEmpty(name))
+                        elemPathPart += $"{{Name='{name}'}}";
+
                     path.Insert(0, pathPart);
+                    treePath.Insert(0, treePathPart);
+                    elementPath.Insert(0, elemPathPart);
+
+                    // Get child index for next iteration
+                    try
+                    {
+                        var parent = TreeWalker.RawViewWalker.GetParent(current);
+                        if (parent != null)
+                        {
+                            var children = parent.FindAll(TreeScope.Children, System.Windows.Automation.Condition.TrueCondition);
+                            childIndex = 0;
+                            foreach (AutomationElement child in children)
+                            {
+                                if (child == current)
+                                    break;
+                                childIndex++;
+                            }
+                        }
+                    }
+                    catch { }
+
                     current = TreeWalker.RawViewWalker.GetParent(current);
                 }
 
                 info.WindowsPath = string.Join(" > ", path);
+                info.TreePath = string.Join(" / ", treePath);
+                info.ElementPath = string.Join(" / ", elementPath);
 
                 // Also generate advanced Windows path using SelectorGenerator
                 if (string.IsNullOrEmpty(info.WindowsPath) || info.WindowsPath == "")

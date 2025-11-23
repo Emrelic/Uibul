@@ -1117,30 +1117,184 @@ Supports multiple detection technologies:
         {
             try
             {
-                var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-                var fileName = $"UIElements_{timestamp}.txt";
-                var filePath = System.IO.Path.Combine(desktop, fileName);
-
-                var sb = new StringBuilder();
-                foreach (var element in _collectedElements)
+                // Create SaveFileDialog
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
                 {
-                    sb.AppendLine(GenerateRawProperties(element));
-                    sb.AppendLine("=" + new string('=', 50));
+                    Title = "Export UI Elements Data",
+                    Filter = "Text Files (*.txt)|*.txt|JSON Files (*.json)|*.json|CSV Files (*.csv)|*.csv|XML Files (*.xml)|*.xml|All Files (*.*)|*.*",
+                    FilterIndex = 1,
+                    FileName = $"UIElements_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}",
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                };
+
+                // Show dialog and get user's choice
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    var filePath = saveFileDialog.FileName;
+                    var extension = System.IO.Path.GetExtension(filePath).ToLower();
+
+                    // Generate content based on file type
+                    string content;
+                    switch (extension)
+                    {
+                        case ".json":
+                            content = await GenerateJsonExport();
+                            break;
+                        case ".csv":
+                            content = await GenerateCsvExport();
+                            break;
+                        case ".xml":
+                            content = await GenerateXmlExport();
+                            break;
+                        case ".txt":
+                        default:
+                            content = GenerateTextExport();
+                            break;
+                    }
+
+                    await File.WriteAllTextAsync(filePath, content);
+
+                    LogToConsole($"Exported to: {filePath}");
+                    _logger?.LogInfo($"Exported {_collectedElements.Count} elements to: {filePath}");
+
+                    System.Windows.MessageBox.Show($"Data exported successfully to:\n{filePath}", "Export Successful",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-
-                await File.WriteAllTextAsync(filePath, sb.ToString());
-
-                LogToConsole($"Exported to: {filePath}");
-                System.Windows.MessageBox.Show($"Data exported to:\n{filePath}", "Export Successful",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                else
+                {
+                    LogToConsole("Export cancelled by user.");
+                }
             }
             catch (Exception ex)
             {
                 LogToConsole($"Export error: {ex.Message}");
+                _logger?.LogException(ex, "Export failed");
                 System.Windows.MessageBox.Show($"Export failed: {ex.Message}", "Export Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private string GenerateTextExport()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"UI Elements Export - {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            sb.AppendLine($"Total Elements: {_collectedElements.Count}");
+            sb.AppendLine(new string('=', 80));
+            sb.AppendLine();
+
+            foreach (var element in _collectedElements)
+            {
+                sb.AppendLine(GenerateRawProperties(element));
+                sb.AppendLine(new string('=', 80));
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
+        }
+
+        private async Task<string> GenerateJsonExport()
+        {
+            return await Task.Run(() =>
+            {
+                var export = new
+                {
+                    ExportDate = DateTime.Now,
+                    TotalElements = _collectedElements.Count,
+                    Elements = _collectedElements
+                };
+                return System.Text.Json.JsonSerializer.Serialize(export, new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            });
+        }
+
+        private async Task<string> GenerateCsvExport()
+        {
+            return await Task.Run(() =>
+            {
+                var sb = new StringBuilder();
+                // CSV Header
+                sb.AppendLine("DetectionMethod,ElementType,Name,ClassName,AutomationId,ControlType,TagName,HtmlId,X,Y,Width,Height,TreePath,ElementPath,RowIndex,ColumnIndex,XPath,CssSelector,PlaywrightTableSelector,Value,InnerText,IsVisible,IsEnabled");
+
+                foreach (var element in _collectedElements)
+                {
+                    sb.AppendLine($"\"{EscapeCsv(element.DetectionMethod)}\"," +
+                        $"\"{EscapeCsv(element.ElementType)}\"," +
+                        $"\"{EscapeCsv(element.Name)}\"," +
+                        $"\"{EscapeCsv(element.ClassName)}\"," +
+                        $"\"{EscapeCsv(element.AutomationId)}\"," +
+                        $"\"{EscapeCsv(element.ControlType)}\"," +
+                        $"\"{EscapeCsv(element.TagName)}\"," +
+                        $"\"{EscapeCsv(element.HtmlId)}\"," +
+                        $"{element.X},{element.Y},{element.Width},{element.Height}," +
+                        $"\"{EscapeCsv(element.TreePath)}\"," +
+                        $"\"{EscapeCsv(element.ElementPath)}\"," +
+                        $"{element.RowIndex},{element.ColumnIndex}," +
+                        $"\"{EscapeCsv(element.XPath)}\"," +
+                        $"\"{EscapeCsv(element.CssSelector)}\"," +
+                        $"\"{EscapeCsv(element.PlaywrightTableSelector)}\"," +
+                        $"\"{EscapeCsv(element.Value)}\"," +
+                        $"\"{EscapeCsv(element.InnerText)}\"," +
+                        $"{element.IsVisible},{element.IsEnabled}");
+                }
+
+                return sb.ToString();
+            });
+        }
+
+        private string EscapeCsv(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return "";
+            return value.Replace("\"", "\"\"").Replace("\n", " ").Replace("\r", "");
+        }
+
+        private async Task<string> GenerateXmlExport()
+        {
+            return await Task.Run(() =>
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                sb.AppendLine("<UIElementsExport>");
+                sb.AppendLine($"  <ExportDate>{DateTime.Now:yyyy-MM-dd HH:mm:ss}</ExportDate>");
+                sb.AppendLine($"  <TotalElements>{_collectedElements.Count}</TotalElements>");
+                sb.AppendLine("  <Elements>");
+
+                foreach (var element in _collectedElements)
+                {
+                    sb.AppendLine("    <Element>");
+                    sb.AppendLine($"      <DetectionMethod>{EscapeXml(element.DetectionMethod)}</DetectionMethod>");
+                    sb.AppendLine($"      <ElementType>{EscapeXml(element.ElementType)}</ElementType>");
+                    sb.AppendLine($"      <Name>{EscapeXml(element.Name)}</Name>");
+                    sb.AppendLine($"      <ClassName>{EscapeXml(element.ClassName)}</ClassName>");
+                    sb.AppendLine($"      <AutomationId>{EscapeXml(element.AutomationId)}</AutomationId>");
+                    sb.AppendLine($"      <ControlType>{EscapeXml(element.ControlType)}</ControlType>");
+                    sb.AppendLine($"      <TreePath>{EscapeXml(element.TreePath)}</TreePath>");
+                    sb.AppendLine($"      <ElementPath>{EscapeXml(element.ElementPath)}</ElementPath>");
+                    sb.AppendLine($"      <RowIndex>{element.RowIndex}</RowIndex>");
+                    sb.AppendLine($"      <ColumnIndex>{element.ColumnIndex}</ColumnIndex>");
+                    sb.AppendLine($"      <XPath>{EscapeXml(element.XPath)}</XPath>");
+                    sb.AppendLine($"      <CssSelector>{EscapeXml(element.CssSelector)}</CssSelector>");
+                    sb.AppendLine($"      <PlaywrightTableSelector>{EscapeXml(element.PlaywrightTableSelector)}</PlaywrightTableSelector>");
+                    sb.AppendLine($"      <Position X=\"{element.X}\" Y=\"{element.Y}\" Width=\"{element.Width}\" Height=\"{element.Height}\"/>");
+                    sb.AppendLine($"      <IsVisible>{element.IsVisible}</IsVisible>");
+                    sb.AppendLine($"      <IsEnabled>{element.IsEnabled}</IsEnabled>");
+                    sb.AppendLine("    </Element>");
+                }
+
+                sb.AppendLine("  </Elements>");
+                sb.AppendLine("</UIElementsExport>");
+
+                return sb.ToString();
+            });
+        }
+
+        private string EscapeXml(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return "";
+            return System.Security.SecurityElement.Escape(value);
         }
 
         private void ClearAllData_Click(object sender, RoutedEventArgs e)

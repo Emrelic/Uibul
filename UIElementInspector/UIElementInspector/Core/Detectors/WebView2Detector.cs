@@ -122,6 +122,10 @@ namespace UIElementInspector.Core.Detectors
                             attributes[attr.name] = attr.value;
                         }}
 
+                        const tableInfo = getTableInfo(element);
+                        const treePath = getTreePath(element);
+                        const elementPath = getElementPath(element);
+
                         return {{
                             tagName: element.tagName,
                             id: element.id,
@@ -153,6 +157,9 @@ namespace UIElementInspector.Core.Detectors
                             }},
                             xpath: getXPath(element),
                             cssPath: getCssPath(element),
+                            treePath: treePath,
+                            elementPath: elementPath,
+                            tableInfo: tableInfo,
                             styles: {{
                                 display: computed.display,
                                 position: computed.position,
@@ -212,6 +219,84 @@ namespace UIElementInspector.Core.Detectors
                                 element = element.parentElement;
                             }}
                             return path.join(' > ');
+                        }}
+
+                        function getTableInfo(element) {{
+                            let current = element;
+                            let rowIndex = -1;
+                            let columnIndex = -1;
+                            let tableSelector = '';
+
+                            // Check if element is inside a table
+                            while (current) {{
+                                if (current.tagName === 'TD' || current.tagName === 'TH') {{
+                                    columnIndex = Array.from(current.parentElement.children).indexOf(current);
+                                    current = current.parentElement;
+                                }}
+                                if (current.tagName === 'TR') {{
+                                    const tbody = current.closest('tbody') || current.closest('table');
+                                    if (tbody) {{
+                                        const rows = tbody.querySelectorAll('tr');
+                                        rowIndex = Array.from(rows).indexOf(current);
+                                    }}
+                                    break;
+                                }}
+                                current = current.parentElement;
+                            }}
+
+                            // Build Playwright table selector
+                            if (rowIndex >= 0) {{
+                                const table = element.closest('table');
+                                if (table) {{
+                                    let selector = 'table';
+                                    if (table.id) selector = 'table#' + table.id;
+                                    else if (table.className) selector = 'table.' + table.className.split(' ')[0];
+
+                                    tableSelector = selector + ` >> tr:nth-child(${{rowIndex + 1}})`;
+                                    if (columnIndex >= 0) {{
+                                        tableSelector += ` >> td:nth-child(${{columnIndex + 1}})`;
+                                    }}
+                                }}
+                            }}
+
+                            return {{
+                                rowIndex: rowIndex,
+                                columnIndex: columnIndex,
+                                tableSelector: tableSelector
+                            }};
+                        }}
+
+                        function getTreePath(element) {{
+                            if (!element) return '';
+                            let path = [];
+                            let current = element;
+
+                            while (current && current !== document.body) {{
+                                let part = current.tagName.toLowerCase();
+                                if (current.id) part += '#' + current.id;
+                                else if (current.className) part += '.' + current.className.split(' ')[0];
+                                path.unshift(part);
+                                current = current.parentElement;
+                            }}
+
+                            return path.join(' / ');
+                        }}
+
+                        function getElementPath(element) {{
+                            if (!element) return '';
+                            let path = [];
+                            let current = element;
+
+                            while (current && current !== document.body) {{
+                                const siblings = current.parentElement ? Array.from(current.parentElement.children) : [];
+                                const index = siblings.indexOf(current);
+                                let part = current.tagName.toLowerCase() + '[' + index + ']';
+                                if (current.id) part += '{{id=' + current.id + '}}';
+                                path.unshift(part);
+                                current = current.parentElement;
+                            }}
+
+                            return path.join(' / ');
                         }}
                     }})();
                 ";
@@ -472,6 +557,10 @@ namespace UIElementInspector.Core.Detectors
                     info.XPath = data["xpath"]?.ToString();
                 if (data.ContainsKey("cssPath"))
                     info.CssSelector = data["cssPath"]?.ToString();
+                if (data.ContainsKey("treePath"))
+                    info.TreePath = data["treePath"]?.ToString();
+                if (data.ContainsKey("elementPath"))
+                    info.ElementPath = data["elementPath"]?.ToString();
 
                 // Position and size
                 if (data.ContainsKey("rect") && data["rect"] is JsonElement rectElement)
@@ -490,6 +579,35 @@ namespace UIElementInspector.Core.Detectors
                 // Visibility
                 if (data.ContainsKey("visible"))
                     info.IsVisible = Convert.ToBoolean(data["visible"]);
+
+                // Table information
+                if (data.ContainsKey("tableInfo") && data["tableInfo"] is JsonElement tableElement)
+                {
+                    var tableInfo = tableElement.Deserialize<Dictionary<string, object>>();
+                    if (tableInfo != null)
+                    {
+                        if (tableInfo.ContainsKey("rowIndex"))
+                        {
+                            var rowIndexValue = tableInfo["rowIndex"];
+                            if (rowIndexValue is JsonElement rowElement && rowElement.ValueKind == JsonValueKind.Number)
+                            {
+                                info.RowIndex = rowElement.GetInt32();
+                            }
+                        }
+                        if (tableInfo.ContainsKey("columnIndex"))
+                        {
+                            var colIndexValue = tableInfo["columnIndex"];
+                            if (colIndexValue is JsonElement colElement && colElement.ValueKind == JsonValueKind.Number)
+                            {
+                                info.ColumnIndex = colElement.GetInt32();
+                            }
+                        }
+                        if (tableInfo.ContainsKey("tableSelector"))
+                        {
+                            info.PlaywrightTableSelector = tableInfo["tableSelector"]?.ToString();
+                        }
+                    }
+                }
 
                 // Attributes
                 if (profile == CollectionProfile.Full && data.ContainsKey("attributes"))

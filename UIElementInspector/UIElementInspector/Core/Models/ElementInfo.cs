@@ -79,12 +79,16 @@ namespace UIElementInspector.Core.Models
         public string FullXPath { get; set; }
         public string WindowsPath { get; set; } // Parent > Child notation for desktop
         public string AccessiblePath { get; set; }
+        public string TreePath { get; set; } // Complete element tree path
+        public string ElementPath { get; set; } // Full hierarchical path to element
 
         // === Hierarchy ===
         public ElementInfo Parent { get; set; }
         public List<ElementInfo> Children { get; set; } = new List<ElementInfo>();
         public int ChildIndex { get; set; }
         public int TreeLevel { get; set; }
+        public int RowIndex { get; set; } // Table row index if element is in a table
+        public int ColumnIndex { get; set; } // Table column index if element is in a table
         public string ParentName { get; set; }
         public string ParentId { get; set; }
         public string ParentClassName { get; set; }
@@ -104,6 +108,7 @@ namespace UIElementInspector.Core.Models
 
         // === Playwright Specific ===
         public string PlaywrightSelector { get; set; }
+        public string PlaywrightTableSelector { get; set; } // Table row selector for Playwright
         public bool IsVisible { get; set; }
         public bool IsHidden { get; set; }
         public bool IsChecked { get; set; }
