@@ -1,0 +1,525 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Automation;
+using UIElementInspector.Core.Models;
+
+namespace UIElementInspector.Core.Detectors
+{
+    /// <summary>
+    /// Detects elements using UI Automation API for native Windows applications
+    /// </summary>
+    public class UIAutomationDetector : IElementDetector
+    {
+        public string Name => "UI Automation";
+
+        public bool CanDetect(System.Windows.Point screenPoint)
+        {
+            try
+            {
+                var element = AutomationElement.FromPoint(new System.Windows.Point(screenPoint.X, screenPoint.Y));
+                return element != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<ElementInfo> GetElementAtPoint(System.Windows.Point screenPoint, CollectionProfile profile)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    var element = AutomationElement.FromPoint(new System.Windows.Point(screenPoint.X, screenPoint.Y));
+                    if (element == null) return null;
+
+                    return ExtractElementInfo(element, profile);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"UIAutomation detection error: {ex.Message}");
+                    return null;
+                }
+            });
+        }
+
+        public async Task<List<ElementInfo>> GetAllElements(IntPtr windowHandle, CollectionProfile profile)
+        {
+            return await Task.Run(() =>
+            {
+                var elements = new List<ElementInfo>();
+                try
+                {
+                    AutomationElement rootElement;
+                    if (windowHandle == IntPtr.Zero)
+                    {
+                        rootElement = AutomationElement.RootElement;
+                    }
+                    else
+                    {
+                        rootElement = AutomationElement.FromHandle(windowHandle);
+                    }
+
+                    if (rootElement != null)
+                    {
+                        CollectAllElements(rootElement, elements, profile, 0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"UIAutomation GetAllElements error: {ex.Message}");
+                }
+                return elements;
+            });
+        }
+
+        public async Task<List<ElementInfo>> GetElementsInRegion(Rect region, CollectionProfile profile)
+        {
+            return await Task.Run(() =>
+            {
+                var elements = new List<ElementInfo>();
+                try
+                {
+                    var condition = new System.Windows.Automation.PropertyCondition(AutomationElement.IsOffscreenProperty, false);
+                    var allElements = AutomationElement.RootElement.FindAll(TreeScope.Descendants, condition);
+
+                    foreach (AutomationElement element in allElements)
+                    {
+                        var bounds = element.Current.BoundingRectangle;
+                        if (!bounds.IsEmpty && region.Contains(bounds))
+                        {
+                            var info = ExtractElementInfo(element, profile);
+                            if (info != null)
+                                elements.Add(info);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"UIAutomation GetElementsInRegion error: {ex.Message}");
+                }
+                return elements;
+            });
+        }
+
+        public async Task<ElementInfo> GetElementTree(ElementInfo rootElement, CollectionProfile profile)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    if (rootElement?.NativeWindowHandle == IntPtr.Zero)
+                        return rootElement;
+
+                    var automationElement = AutomationElement.FromHandle(rootElement.NativeWindowHandle);
+                    if (automationElement != null)
+                    {
+                        var tree = BuildElementTree(automationElement, profile, 0);
+                        return tree;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"UIAutomation GetElementTree error: {ex.Message}");
+                }
+                return rootElement;
+            });
+        }
+
+        public async Task<ElementInfo> RefreshElement(ElementInfo element, CollectionProfile profile)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    if (element?.RuntimeId != null && !string.IsNullOrEmpty(element.RuntimeId))
+                    {
+                        var runtimeIdParts = element.RuntimeId.Split('.').Select(int.Parse).ToArray();
+                        var automationElement = AutomationElement.RootElement.FindFirst(
+                            TreeScope.Descendants,
+                            new System.Windows.Automation.PropertyCondition(AutomationElement.RuntimeIdProperty, runtimeIdParts)
+                        );
+
+                        if (automationElement != null)
+                        {
+                            return ExtractElementInfo(automationElement, profile);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"UIAutomation RefreshElement error: {ex.Message}");
+                }
+                return element;
+            });
+        }
+
+        private ElementInfo ExtractElementInfo(AutomationElement element, CollectionProfile profile)
+        {
+            if (element == null) return null;
+
+            var info = new ElementInfo
+            {
+                DetectionMethod = Name,
+                CollectionProfile = profile.ToString(),
+                CaptureTime = DateTime.Now
+            };
+
+            var stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                // Always collect basic properties
+                ExtractBasicProperties(element, info);
+
+                // Collect additional properties based on profile
+                switch (profile)
+                {
+                    case CollectionProfile.Quick:
+                        // Only basic properties (already collected)
+                        break;
+
+                    case CollectionProfile.Standard:
+                        ExtractStandardProperties(element, info);
+                        break;
+
+                    case CollectionProfile.Full:
+                        ExtractBasicProperties(element, info);
+                        ExtractStandardProperties(element, info);
+                        ExtractAdvancedProperties(element, info);
+                        ExtractPatterns(element, info);
+                        ExtractLegacyProperties(element, info);
+                        break;
+
+                    case CollectionProfile.Custom:
+                        // TODO: Implement custom settings
+                        ExtractStandardProperties(element, info);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Extraction error: {ex.Message}");
+            }
+
+            stopwatch.Stop();
+            info.CollectionDuration = stopwatch.Elapsed;
+
+            return info;
+        }
+
+        private void ExtractBasicProperties(AutomationElement element, ElementInfo info)
+        {
+            try
+            {
+                var current = element.Current;
+
+                info.Name = current.Name;
+                info.ClassName = current.ClassName;
+                info.AutomationId = current.AutomationId;
+                info.ControlType = current.ControlType?.ProgrammaticName;
+                info.LocalizedControlType = current.LocalizedControlType;
+
+                // Position and size
+                if (!current.BoundingRectangle.IsEmpty)
+                {
+                    info.BoundingRectangle = current.BoundingRectangle;
+                    info.X = current.BoundingRectangle.X;
+                    info.Y = current.BoundingRectangle.Y;
+                    info.Width = current.BoundingRectangle.Width;
+                    info.Height = current.BoundingRectangle.Height;
+                }
+
+                info.IsEnabled = current.IsEnabled;
+                info.IsOffscreen = current.IsOffscreen;
+                info.ProcessId = current.ProcessId;
+                info.NativeWindowHandle = new IntPtr(current.NativeWindowHandle);
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Basic properties error: {ex.Message}");
+            }
+        }
+
+        private void ExtractStandardProperties(AutomationElement element, ElementInfo info)
+        {
+            try
+            {
+                var current = element.Current;
+
+                info.FrameworkId = current.FrameworkId;
+                info.ItemType = current.ItemType;
+                info.ItemStatus = current.ItemStatus;
+                info.HelpText = current.HelpText;
+                info.AcceleratorKey = current.AcceleratorKey;
+                info.AccessKey = current.AccessKey;
+                info.HasKeyboardFocus = current.HasKeyboardFocus;
+                info.IsKeyboardFocusable = current.IsKeyboardFocusable;
+                info.IsPassword = current.IsPassword;
+                info.IsRequiredForForm = current.IsRequiredForForm;
+                info.IsContentElement = current.IsContentElement;
+                info.IsControlElement = current.IsControlElement;
+
+                // Runtime ID
+                try
+                {
+                    var runtimeId = element.GetRuntimeId();
+                    if (runtimeId != null && runtimeId.Length > 0)
+                    {
+                        info.RuntimeId = string.Join(".", runtimeId.Select(id => id.ToString()));
+                    }
+                }
+                catch { }
+
+                // Clickable point
+                System.Windows.Point clickPoint;
+                if (element.TryGetClickablePoint(out clickPoint))
+                {
+                    info.ClickablePoint = clickPoint;
+                }
+
+                // Orientation
+                var orientation = current.Orientation;
+                info.Orientation = orientation.ToString();
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Standard properties error: {ex.Message}");
+            }
+        }
+
+        private void ExtractAdvancedProperties(AutomationElement element, ElementInfo info)
+        {
+            try
+            {
+                // Get process information
+                if (info.ProcessId > 0)
+                {
+                    try
+                    {
+                        var process = Process.GetProcessById(info.ProcessId);
+                        info.ApplicationName = process.ProcessName;
+                        info.ApplicationPath = process.MainModule?.FileName;
+                        info.WindowTitle = process.MainWindowTitle;
+                    }
+                    catch { }
+                }
+
+                // Build Windows path (Parent > Child notation)
+                BuildWindowsPath(element, info);
+
+                // Get parent information
+                try
+                {
+                    var parent = TreeWalker.RawViewWalker.GetParent(element);
+                    if (parent != null)
+                    {
+                        info.ParentName = parent.Current.Name;
+                        info.ParentId = parent.Current.AutomationId;
+                        info.ParentClassName = parent.Current.ClassName;
+                    }
+                }
+                catch { }
+
+                // Count children
+                try
+                {
+                    var children = element.FindAll(TreeScope.Children, System.Windows.Automation.Condition.TrueCondition);
+                    if (children != null)
+                    {
+                        info.Children = new List<ElementInfo>();
+                        // Note: We don't recursively extract children here to avoid performance issues
+                        // Children count is enough for standard view
+                    }
+                }
+                catch { }
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Advanced properties error: {ex.Message}");
+            }
+        }
+
+        private void ExtractPatterns(AutomationElement element, ElementInfo info)
+        {
+            try
+            {
+                var patterns = element.GetSupportedPatterns();
+                foreach (var pattern in patterns)
+                {
+                    info.SupportedPatterns.Add(pattern.ProgrammaticName);
+
+                    // Extract pattern-specific properties
+                    if (pattern == ValuePattern.Pattern)
+                    {
+                        var valuePattern = element.GetCurrentPattern(ValuePattern.Pattern) as ValuePattern;
+                        if (valuePattern != null)
+                        {
+                            info.Value = valuePattern.Current.Value;
+                            info.CustomProperties["IsReadOnly"] = valuePattern.Current.IsReadOnly;
+                        }
+                    }
+                    else if (pattern == RangeValuePattern.Pattern)
+                    {
+                        var rangePattern = element.GetCurrentPattern(RangeValuePattern.Pattern) as RangeValuePattern;
+                        if (rangePattern != null)
+                        {
+                            info.CustomProperties["RangeMin"] = rangePattern.Current.Minimum;
+                            info.CustomProperties["RangeMax"] = rangePattern.Current.Maximum;
+                            info.CustomProperties["RangeValue"] = rangePattern.Current.Value;
+                        }
+                    }
+                    else if (pattern == SelectionPattern.Pattern)
+                    {
+                        var selectionPattern = element.GetCurrentPattern(SelectionPattern.Pattern) as SelectionPattern;
+                        if (selectionPattern != null)
+                        {
+                            info.CustomProperties["CanSelectMultiple"] = selectionPattern.Current.CanSelectMultiple;
+                            info.CustomProperties["IsSelectionRequired"] = selectionPattern.Current.IsSelectionRequired;
+                        }
+                    }
+                    else if (pattern == TogglePattern.Pattern)
+                    {
+                        var togglePattern = element.GetCurrentPattern(TogglePattern.Pattern) as TogglePattern;
+                        if (togglePattern != null)
+                        {
+                            info.CustomProperties["ToggleState"] = togglePattern.Current.ToggleState.ToString();
+                        }
+                    }
+                    else if (pattern == ExpandCollapsePattern.Pattern)
+                    {
+                        var expandPattern = element.GetCurrentPattern(ExpandCollapsePattern.Pattern) as ExpandCollapsePattern;
+                        if (expandPattern != null)
+                        {
+                            info.CustomProperties["ExpandCollapseState"] = expandPattern.Current.ExpandCollapseState.ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Pattern extraction error: {ex.Message}");
+            }
+        }
+
+        private void ExtractLegacyProperties(AutomationElement element, ElementInfo info)
+        {
+            try
+            {
+                // TODO: Fix LegacyIAccessiblePattern reference
+                /*
+                if (element.GetSupportedPatterns().Contains(LegacyIAccessiblePattern.Pattern))
+                {
+                    var legacyPattern = element.GetCurrentPattern(LegacyIAccessiblePattern.Pattern) as LegacyIAccessiblePattern;
+                    if (legacyPattern != null)
+                    {
+                        info.LegacyName = legacyPattern.Current.Name;
+                        info.LegacyValue = legacyPattern.Current.Value;
+                        info.LegacyDescription = legacyPattern.Current.Description;
+                        info.LegacyHelp = legacyPattern.Current.Help;
+                        info.LegacyKeyboardShortcut = legacyPattern.Current.KeyboardShortcut;
+                        info.LegacyState = legacyPattern.Current.State;
+                        info.LegacyRole = legacyPattern.Current.Role;
+                    }
+                }
+                */
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Legacy properties error: {ex.Message}");
+            }
+        }
+
+        private void BuildWindowsPath(AutomationElement element, ElementInfo info)
+        {
+            try
+            {
+                var path = new List<string>();
+                var current = element;
+
+                while (current != null && current != AutomationElement.RootElement)
+                {
+                    var name = current.Current.Name;
+                    var className = current.Current.ClassName;
+                    var id = current.Current.AutomationId;
+
+                    var pathPart = !string.IsNullOrEmpty(name) ? name :
+                                   !string.IsNullOrEmpty(id) ? $"#{id}" :
+                                   !string.IsNullOrEmpty(className) ? $".{className}" :
+                                   "Unknown";
+
+                    path.Insert(0, pathPart);
+                    current = TreeWalker.RawViewWalker.GetParent(current);
+                }
+
+                info.WindowsPath = string.Join(" > ", path);
+
+                // Also generate advanced Windows path using SelectorGenerator
+                if (string.IsNullOrEmpty(info.WindowsPath) || info.WindowsPath == "")
+                {
+                    info.WindowsPath = Utils.SelectorGenerator.GenerateWindowsPath(element);
+                }
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Windows path error: {ex.Message}");
+            }
+        }
+
+        private void CollectAllElements(AutomationElement parent, List<ElementInfo> elements, CollectionProfile profile, int level)
+        {
+            try
+            {
+                var info = ExtractElementInfo(parent, profile);
+                if (info != null)
+                {
+                    info.TreeLevel = level;
+                    elements.Add(info);
+                }
+
+                var children = parent.FindAll(TreeScope.Children, System.Windows.Automation.Condition.TrueCondition);
+                foreach (AutomationElement child in children)
+                {
+                    CollectAllElements(child, elements, profile, level + 1);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"CollectAllElements error at level {level}: {ex.Message}");
+            }
+        }
+
+        private ElementInfo BuildElementTree(AutomationElement element, CollectionProfile profile, int level)
+        {
+            var info = ExtractElementInfo(element, profile);
+            if (info == null) return null;
+
+            info.TreeLevel = level;
+
+            try
+            {
+                var children = element.FindAll(TreeScope.Children, System.Windows.Automation.Condition.TrueCondition);
+                foreach (AutomationElement child in children)
+                {
+                    var childInfo = BuildElementTree(child, profile, level + 1);
+                    if (childInfo != null)
+                    {
+                        childInfo.Parent = info;
+                        info.Children.Add(childInfo);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Tree building error: {ex.Message}");
+            }
+
+            return info;
+        }
+    }
+}

@@ -1,0 +1,9 @@
+# Claude Code local settings
+.claude/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
