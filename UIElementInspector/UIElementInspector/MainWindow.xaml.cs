@@ -85,7 +85,7 @@ namespace UIElementInspector
                 // Initialize hotkey service
                 _hotkeyService = new HotkeyService(this);
                 _hotkeyService.RegisterHotkey(Key.F1, ModifierKeys.None, StartInspection_Click);
-                _hotkeyService.RegisterHotkey(Key.Escape, ModifierKeys.None, StopInspection_Click);
+                _hotkeyService.RegisterHotkey(Key.F2, ModifierKeys.None, StopInspection_Click);
                 _hotkeyService.RegisterHotkey(Key.F5, ModifierKeys.None, Refresh_Click);
                 _hotkeyService.RegisterHotkey(Key.S, ModifierKeys.Control, ExportQuick_Click);
 
@@ -1020,8 +1020,8 @@ namespace UIElementInspector
         private void KeyboardShortcuts_Click(object sender, RoutedEventArgs e)
         {
             var shortcuts = @"Keyboard Shortcuts:
-F1 - Start Inspection
-Esc - Stop Inspection
+F1 - Start Inspection (Hide Main Window)
+F2 - Stop Inspection (Show Main Window)
 F5 - Refresh Current Element
 Ctrl+S - Quick Export
 Ctrl+C - Copy Element Data

@@ -62,7 +62,7 @@ TEMEL ÖZELLİKLER
 ✓ 100+ farklı UI element özelliği toplama kapasitesi
 ✓ Gerçek zamanlı element algılama ve inceleme
 ✓ Evrensel uygulama desteği (masaüstü + web)
-✓ Global klavye kısayolları (F1, ESC, F5, vb.)
+✓ Global klavye kısayolları (F1, F2, F5, vb.)
 ✓ Kullanıcı dostu arayüz
 ✓ Hızlı ve performanslı çalışma
 ✓ AUTO-HIDE ÖZELLİĞİ: Inceleme sırasında ana pencere otomatik gizlenir
@@ -212,9 +212,9 @@ TEMEL KULLANIM ADIMLARI
    - Ctrl+S ile hızlı export
 
 10. İNCELEMEYİ DURDURMA
-    - ESC tuşuna basın (Floating toolbar açıkken de çalışır)
+    - F2 tuşuna basın (Floating toolbar açıkken de çalışır - GLOBAL)
     VEYA
-    - Floating toolbar'daki "Stop" butonuna tıklayın
+    - Floating toolbar'daki "Stop (F2)" butonuna tıklayın
     VEYA
     - Floating toolbar'daki "Show Results" butonuna tıklayın
 
@@ -223,17 +223,21 @@ TEMEL KULLANIM ADIMLARI
     - Ana pencere tekrar görünür
     - Toplanan tüm element verileri ana pencerede gösterilir
 
+    ÖNEMLİ: F2 tuşu global olarak çalışır - başka bir pencere aktifken bile!
+
 
 KLAVYE KISAYOLLARI
 ------------------
-F1              - İncelemeyi başlat
-ESC             - İncelemeyi durdur
+F1              - İncelemeyi başlat (Ana pencereyi gizle)
+F2              - İncelemeyi durdur (Ana pencereyi göster)
 F5              - Seçili elementi yenile
 Ctrl+S          - Hızlı export (varsayılan format)
 Ctrl+C          - Element verilerini panoya kopyala
 Ctrl+E          - Export menüsünü aç
 Ctrl+,          - Settings penceresini aç
 Alt+F4          - Programı kapat
+
+NOT: F1 ve F2 tuşları GLOBAL olarak çalışır - program aktif olmasa bile!
 
 
 GELİŞMİŞ ÖZELLİKLER
@@ -255,7 +259,7 @@ FLOATING TOOLBAR ÖZELLİKLERİ:
 - Minimal Tasarım: Minimum yer kaplar
 - Gerçek Zamanlı Bilgi: Mod, durum ve element sayısını gösterir
 - Kolay Kontrol: Stop ve Show Results butonları
-- ESC Desteği: Klavye kısayolu çalışır
+- F2 Desteği: Global klavye kısayolu çalışır (pencere aktif değilken bile!)
 
 AVANTAJLARI:
 ✓ Tıklanacak elementlerin önünü kapatmaz

@@ -74,7 +74,7 @@
                     BorderThickness="0">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="⏹" FontSize="14" Margin="0,0,5,0"/>
-                    <TextBlock Text="Stop (ESC)" VerticalAlignment="Center" FontSize="11"/>
+                    <TextBlock Text="Stop (F2)" VerticalAlignment="Center" FontSize="11"/>
                 </StackPanel>
             </Button>
 
@@ -95,7 +95,7 @@
 
         <!-- Hint Text -->
         <TextBlock Grid.Row="3"
-                   Text="💡 Press ESC to stop and show results"
+                   Text="💡 Press F2 to stop and show results"
                    FontSize="10"
                    Foreground="#666"
                    TextAlignment="Center"

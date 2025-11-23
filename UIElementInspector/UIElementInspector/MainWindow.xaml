@@ -71,7 +71,7 @@
                     <TextBlock Text="Start" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
-            <Button Name="btnStopInspection" Click="StopInspection_Click" IsEnabled="False" ToolTip="Stop Inspection (Esc)">
+            <Button Name="btnStopInspection" Click="StopInspection_Click" IsEnabled="False" ToolTip="Stop Inspection (F2)">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="⏹" FontSize="16" Margin="0,0,5,0"/>
                     <TextBlock Text="Stop" VerticalAlignment="Center"/>

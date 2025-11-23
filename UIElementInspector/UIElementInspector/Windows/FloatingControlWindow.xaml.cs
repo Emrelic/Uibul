@@ -34,7 +34,7 @@ namespace UIElementInspector.Windows
 
         private void FloatingControlWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Escape)
+            if (e.Key == System.Windows.Input.Key.F2)
             {
                 StopInspection_Click(sender, new RoutedEventArgs());
             }
