@@ -299,17 +299,32 @@ namespace UIElementInspector
             try
             {
                 var profile = GetSelectedProfile();
-                var detector = GetSelectedDetector();
+                var techIndex = cmbDetectionTech.SelectedIndex;
 
-                if (detector == null)
+                ElementInfo element = null;
+                var stopwatch = Stopwatch.StartNew();
+
+                // Check if "All Technologies" mode is selected (index 5)
+                if (techIndex == 5)
                 {
-                    LogToConsole("No detector available for the current target.");
-                    UpdateFloatingWindow("No detector available", 0);
-                    return;
+                    // Collect data from ALL detectors and merge
+                    element = await CaptureFromAllDetectors(point, profile);
+                }
+                else
+                {
+                    // Use single detector (original behavior)
+                    var detector = GetSelectedDetector();
+
+                    if (detector == null)
+                    {
+                        LogToConsole("No detector available for the current target.");
+                        UpdateFloatingWindow("No detector available", 0);
+                        return;
+                    }
+
+                    element = await detector.GetElementAtPoint(point, profile);
                 }
 
-                var stopwatch = Stopwatch.StartNew();
-                var element = await detector.GetElementAtPoint(point, profile);
                 stopwatch.Stop();
 
                 if (element != null)
@@ -340,8 +355,221 @@ namespace UIElementInspector
             catch (Exception ex)
             {
                 LogToConsole($"Error capturing element: {ex.Message}");
+                _logger?.LogException(ex, "CaptureElementAtPoint");
                 UpdateFloatingWindow($"Error: {ex.Message}", _collectedElements.Count);
             }
+        }
+
+        private async Task<ElementInfo> CaptureFromAllDetectors(System.Windows.Point point, CollectionProfile profile)
+        {
+            var tasks = new List<Task<ElementInfo>>();
+            var detectorNames = new List<string>();
+
+            // Launch all detectors in parallel
+            foreach (var detector in _detectors)
+            {
+                try
+                {
+                    if (detector.CanDetect(point))
+                    {
+                        detectorNames.Add(detector.Name);
+                        tasks.Add(detector.GetElementAtPoint(point, profile));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogToConsole($"Detector {detector.Name} check failed: {ex.Message}");
+                }
+            }
+
+            if (tasks.Count == 0)
+            {
+                LogToConsole("No detectors available for this point.");
+                return null;
+            }
+
+            LogToConsole($"Using {tasks.Count} detectors: {string.Join(", ", detectorNames)}");
+            _logger?.LogInfo($"Collecting from {tasks.Count} technologies: {string.Join(", ", detectorNames)}");
+
+            // Wait for all detectors to complete
+            var results = await Task.WhenAll(tasks);
+
+            // Filter out null results
+            var validResults = results.Where(r => r != null).ToList();
+
+            if (validResults.Count == 0)
+            {
+                LogToConsole("All detectors failed to capture element.");
+                return null;
+            }
+
+            LogToConsole($"Successfully collected from {validResults.Count} detectors.");
+            _logger?.LogInfo($"Merging data from {validResults.Count} sources");
+
+            // Merge all results into a single ElementInfo
+            return MergeElementInfo(validResults);
+        }
+
+        private ElementInfo MergeElementInfo(List<ElementInfo> elements)
+        {
+            if (elements == null || elements.Count == 0)
+                return null;
+
+            if (elements.Count == 1)
+                return elements[0];
+
+            // Start with first element as base
+            var merged = new ElementInfo
+            {
+                Id = Guid.NewGuid(),
+                CaptureTime = DateTime.Now,
+                DetectionMethod = $"Combined ({string.Join(" + ", elements.Select(e => e.DetectionMethod))})",
+                CollectionProfile = elements[0].CollectionProfile
+            };
+
+            // Merge data from all elements
+            foreach (var element in elements)
+            {
+                // Basic properties - use first non-null/non-empty value
+                merged.ElementType = merged.ElementType ?? element.ElementType;
+                merged.Name = merged.Name ?? element.Name;
+                merged.ClassName = merged.ClassName ?? element.ClassName;
+                merged.Value = merged.Value ?? element.Value;
+                merged.Description = merged.Description ?? element.Description;
+
+                // UI Automation properties
+                merged.AutomationId = merged.AutomationId ?? element.AutomationId;
+                merged.ControlType = merged.ControlType ?? element.ControlType;
+                merged.LocalizedControlType = merged.LocalizedControlType ?? element.LocalizedControlType;
+                merged.FrameworkId = merged.FrameworkId ?? element.FrameworkId;
+                merged.RuntimeId = merged.RuntimeId ?? element.RuntimeId;
+                merged.ItemStatus = merged.ItemStatus ?? element.ItemStatus;
+                merged.HelpText = merged.HelpText ?? element.HelpText;
+                merged.AcceleratorKey = merged.AcceleratorKey ?? element.AcceleratorKey;
+                merged.AccessKey = merged.AccessKey ?? element.AccessKey;
+
+                // Position and size - prefer non-zero values
+                if (element.BoundingRectangle.Width > 0 && element.BoundingRectangle.Height > 0)
+                {
+                    merged.BoundingRectangle = element.BoundingRectangle;
+                    merged.X = element.X;
+                    merged.Y = element.Y;
+                    merged.Width = element.Width;
+                    merged.Height = element.Height;
+                }
+
+                // Web/HTML properties
+                merged.TagName = merged.TagName ?? element.TagName;
+                merged.HtmlId = merged.HtmlId ?? element.HtmlId;
+                merged.HtmlClassName = merged.HtmlClassName ?? element.HtmlClassName;
+                merged.InnerText = merged.InnerText ?? element.InnerText;
+                merged.InnerHTML = merged.InnerHTML ?? element.InnerHTML;
+                merged.OuterHTML = merged.OuterHTML ?? element.OuterHTML;
+                merged.Href = merged.Href ?? element.Href;
+                merged.Src = merged.Src ?? element.Src;
+                merged.Alt = merged.Alt ?? element.Alt;
+                merged.Title = merged.Title ?? element.Title;
+                merged.Role = merged.Role ?? element.Role;
+                merged.AriaLabel = merged.AriaLabel ?? element.AriaLabel;
+                merged.AriaDescribedBy = merged.AriaDescribedBy ?? element.AriaDescribedBy;
+                merged.AriaLabelledBy = merged.AriaLabelledBy ?? element.AriaLabelledBy;
+
+                // Selectors
+                merged.XPath = merged.XPath ?? element.XPath;
+                merged.CssSelector = merged.CssSelector ?? element.CssSelector;
+                merged.FullXPath = merged.FullXPath ?? element.FullXPath;
+                merged.WindowsPath = merged.WindowsPath ?? element.WindowsPath;
+                merged.AccessiblePath = merged.AccessiblePath ?? element.AccessiblePath;
+                merged.TreePath = merged.TreePath ?? element.TreePath;
+                merged.ElementPath = merged.ElementPath ?? element.ElementPath;
+                merged.PlaywrightSelector = merged.PlaywrightSelector ?? element.PlaywrightSelector;
+                merged.PlaywrightTableSelector = merged.PlaywrightTableSelector ?? element.PlaywrightTableSelector;
+
+                // Hierarchy
+                if (element.RowIndex >= 0) merged.RowIndex = element.RowIndex;
+                if (element.ColumnIndex >= 0) merged.ColumnIndex = element.ColumnIndex;
+                merged.ParentName = merged.ParentName ?? element.ParentName;
+                merged.ParentId = merged.ParentId ?? element.ParentId;
+                merged.ParentClassName = merged.ParentClassName ?? element.ParentClassName;
+
+                // Window info
+                merged.WindowTitle = merged.WindowTitle ?? element.WindowTitle;
+                merged.WindowClassName = merged.WindowClassName ?? element.WindowClassName;
+                merged.ApplicationName = merged.ApplicationName ?? element.ApplicationName;
+                merged.ApplicationPath = merged.ApplicationPath ?? element.ApplicationPath;
+                if (element.ProcessId > 0) merged.ProcessId = element.ProcessId;
+                if (element.WindowHandle != IntPtr.Zero) merged.WindowHandle = element.WindowHandle;
+                if (element.NativeWindowHandle != IntPtr.Zero) merged.NativeWindowHandle = element.NativeWindowHandle;
+
+                // Document info (MSHTML)
+                merged.DocumentTitle = merged.DocumentTitle ?? element.DocumentTitle;
+                merged.DocumentUrl = merged.DocumentUrl ?? element.DocumentUrl;
+                merged.DocumentDomain = merged.DocumentDomain ?? element.DocumentDomain;
+                merged.DocumentReadyState = merged.DocumentReadyState ?? element.DocumentReadyState;
+
+                // Playwright specific
+                merged.InputType = merged.InputType ?? element.InputType;
+                merged.InputValue = merged.InputValue ?? element.InputValue;
+
+                // Boolean properties - use OR logic (true if any is true)
+                merged.IsEnabled = merged.IsEnabled || element.IsEnabled;
+                merged.IsVisible = merged.IsVisible || element.IsVisible;
+                merged.IsOffscreen = merged.IsOffscreen && element.IsOffscreen; // false if any is not offscreen
+                merged.HasKeyboardFocus = merged.HasKeyboardFocus || element.HasKeyboardFocus;
+                merged.IsKeyboardFocusable = merged.IsKeyboardFocusable || element.IsKeyboardFocusable;
+                merged.IsPassword = merged.IsPassword || element.IsPassword;
+                merged.IsChecked = merged.IsChecked || element.IsChecked;
+                merged.IsDisabled = merged.IsDisabled || element.IsDisabled;
+                merged.IsEditable = merged.IsEditable || element.IsEditable;
+
+                // Merge collections
+                foreach (var pattern in element.SupportedPatterns)
+                {
+                    if (!merged.SupportedPatterns.Contains(pattern))
+                        merged.SupportedPatterns.Add(pattern);
+                }
+
+                foreach (var attr in element.HtmlAttributes)
+                {
+                    if (!merged.HtmlAttributes.ContainsKey(attr.Key))
+                        merged.HtmlAttributes[attr.Key] = attr.Value;
+                }
+
+                foreach (var style in element.ComputedStyles)
+                {
+                    if (!merged.ComputedStyles.ContainsKey(style.Key))
+                        merged.ComputedStyles[style.Key] = style.Value;
+                }
+
+                foreach (var aria in element.AriaAttributes)
+                {
+                    if (!merged.AriaAttributes.ContainsKey(aria.Key))
+                        merged.AriaAttributes[aria.Key] = aria.Value;
+                }
+
+                foreach (var data in element.DataAttributes)
+                {
+                    if (!merged.DataAttributes.ContainsKey(data.Key))
+                        merged.DataAttributes[data.Key] = data.Value;
+                }
+
+                foreach (var custom in element.CustomProperties)
+                {
+                    if (!merged.CustomProperties.ContainsKey(custom.Key))
+                        merged.CustomProperties[custom.Key] = custom.Value;
+                }
+
+                // Merge errors
+                foreach (var error in element.CollectionErrors)
+                {
+                    merged.CollectionErrors.Add($"[{element.DetectionMethod}] {error}");
+                }
+            }
+
+            LogToConsole($"Merged element data from {elements.Count} sources");
+            _logger?.LogInfo($"Successfully merged element data: {merged.ElementType} - {merged.Name}");
+
+            return merged;
         }
 
         private async Task StartRegionSelection()
