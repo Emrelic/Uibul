@@ -429,10 +429,158 @@ namespace UIElementInspector.Core.Detectors
             return Task.FromResult(rootElement);
         }
 
-        public Task<ElementInfo> RefreshElement(ElementInfo element, CollectionProfile profile)
+        public async Task<ElementInfo> RefreshElement(ElementInfo element, CollectionProfile profile)
         {
-            // TODO: Implement element refresh
-            return Task.FromResult(element);
+            if (!_isInitialized || _currentPage == null || element == null)
+                return element;
+
+            try
+            {
+                // Try to find element using Playwright selector
+                string selector = null;
+
+                // Priority 1: Use PlaywrightSelector if available
+                if (!string.IsNullOrEmpty(element.PlaywrightSelector))
+                {
+                    selector = element.PlaywrightSelector;
+                }
+                // Priority 2: Use ID
+                else if (!string.IsNullOrEmpty(element.HtmlId))
+                {
+                    selector = $"#{element.HtmlId}";
+                }
+                // Priority 3: Use tag name with class
+                else if (!string.IsNullOrEmpty(element.TagName))
+                {
+                    selector = element.TagName.ToLower();
+                    if (!string.IsNullOrEmpty(element.HtmlClassName))
+                    {
+                        var classes = element.HtmlClassName.Split(' ').Where(c => !string.IsNullOrWhiteSpace(c));
+                        selector += "." + string.Join(".", classes);
+                    }
+                }
+
+                if (string.IsNullOrEmpty(selector))
+                    return element;
+
+                // Execute script to get element data
+                var elementData = await _currentPage.EvaluateAsync<dynamic>($@"
+                    (() => {{
+                        const element = document.querySelector('{selector}');
+                        if (!element) return null;
+
+                        const rect = element.getBoundingClientRect();
+                        const computed = window.getComputedStyle(element);
+                        const attributes = {{}};
+
+                        for (let attr of element.attributes) {{
+                            attributes[attr.name] = attr.value;
+                        }}
+
+                        // Get full selector path
+                        const getFullSelector = (el) => {{
+                            const path = [];
+                            let current = el;
+                            while (current && current !== document.body) {{
+                                let selector = current.tagName.toLowerCase();
+                                if (current.id) {{
+                                    selector = '#' + current.id;
+                                    path.unshift(selector);
+                                    break;
+                                }}
+                                if (current.className) {{
+                                    const classes = current.className.split(' ').filter(c => c).join('.');
+                                    if (classes) selector += '.' + classes;
+                                }}
+                                path.unshift(selector);
+                                current = current.parentElement;
+                            }}
+                            return path.join(' > ');
+                        }};
+
+                        // Get table info
+                        const getTableInfo = (el) => {{
+                            let current = el;
+                            while (current) {{
+                                if (current.tagName === 'TD' || current.tagName === 'TH') {{
+                                    const row = current.closest('tr');
+                                    const table = current.closest('table');
+                                    if (row && table) {{
+                                        const rows = Array.from(table.querySelectorAll('tr'));
+                                        const cells = Array.from(row.children);
+                                        return {{
+                                            rowIndex: rows.indexOf(row),
+                                            columnIndex: cells.indexOf(current)
+                                        }};
+                                    }}
+                                }}
+                                current = current.parentElement;
+                            }}
+                            return {{ rowIndex: -1, columnIndex: -1 }};
+                        }};
+
+                        const tableInfo = getTableInfo(element);
+
+                        return {{
+                            tagName: element.tagName,
+                            id: element.id,
+                            className: element.className,
+                            name: element.name,
+                            value: element.value,
+                            innerText: element.innerText ? element.innerText.substring(0, 500) : '',
+                            innerHTML: element.innerHTML ? element.innerHTML.substring(0, 1000) : '',
+                            outerHTML: element.outerHTML ? element.outerHTML.substring(0, 1000) : '',
+                            href: element.href,
+                            src: element.src,
+                            alt: element.alt,
+                            title: element.title,
+                            type: element.type,
+                            role: element.getAttribute('role'),
+                            ariaLabel: element.getAttribute('aria-label'),
+                            playwrightSelector: getFullSelector(element),
+                            tableInfo: tableInfo,
+                            attributes: attributes,
+                            rect: {{
+                                x: rect.x,
+                                y: rect.y,
+                                width: rect.width,
+                                height: rect.height
+                            }},
+                            isVisible: computed.visibility !== 'hidden' && computed.display !== 'none' && element.offsetWidth > 0,
+                            isEnabled: !element.disabled,
+                            isChecked: element.checked || false,
+                            isEditable: !element.readOnly && !element.disabled,
+                            styles: {{
+                                display: computed.display,
+                                visibility: computed.visibility,
+                                position: computed.position,
+                                color: computed.color,
+                                backgroundColor: computed.backgroundColor,
+                                fontSize: computed.fontSize
+                            }}
+                        }};
+                    }})()
+                ");
+
+                if (elementData == null)
+                    return element;
+
+                // Create refreshed ElementInfo
+                var refreshedInfo = new ElementInfo
+                {
+                    DetectionMethod = Name,
+                    CollectionProfile = profile.ToString(),
+                    CaptureTime = DateTime.Now
+                };
+
+                PopulateElementInfo(refreshedInfo, elementData, profile);
+                return refreshedInfo;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Playwright RefreshElement error: {ex.Message}");
+                return element;
+            }
         }
 
         public void Dispose()

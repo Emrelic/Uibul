@@ -219,8 +219,88 @@ namespace UIElementInspector.Core.Detectors
 
         public Task<ElementInfo> RefreshElement(ElementInfo element, CollectionProfile profile)
         {
-            // TODO: Implement element refresh for MSHTML
-            return Task.FromResult(element);
+            return Task.Run(() =>
+            {
+                try
+                {
+                    if (element == null)
+                        return element;
+
+                    // Try to find element using various methods
+                    dynamic foundElement = null;
+                    dynamic doc = null;
+
+                    // Get the document from window handle if available
+                    if (element.WindowHandle != IntPtr.Zero)
+                    {
+                        doc = GetHTMLDocument(element.WindowHandle);
+                    }
+
+                    if (doc == null)
+                        return element;
+
+                    // Method 1: Try to find by ID if available
+                    if (!string.IsNullOrEmpty(element.HtmlId))
+                    {
+                        try
+                        {
+                            foundElement = doc.getElementById(element.HtmlId);
+                        }
+                        catch { }
+                    }
+
+                    // Method 2: Try to find by name
+                    if (foundElement == null && !string.IsNullOrEmpty(element.Name))
+                    {
+                        try
+                        {
+                            dynamic elements = doc.getElementsByName(element.Name);
+                            if (elements != null && elements.length > 0)
+                            {
+                                foundElement = elements[0];
+                            }
+                        }
+                        catch { }
+                    }
+
+                    // Method 3: Try to find by tag name and position (using XPath-like navigation)
+                    if (foundElement == null && !string.IsNullOrEmpty(element.TagName))
+                    {
+                        try
+                        {
+                            dynamic elements = doc.getElementsByTagName(element.TagName);
+                            if (elements != null && element.ChildIndex >= 0 && element.ChildIndex < elements.length)
+                            {
+                                foundElement = elements[element.ChildIndex];
+                            }
+                        }
+                        catch { }
+                    }
+
+                    // If element found, extract fresh info
+                    if (foundElement != null)
+                    {
+                        var refreshedInfo = new ElementInfo
+                        {
+                            DetectionMethod = Name,
+                            CollectionProfile = profile.ToString(),
+                            CaptureTime = DateTime.Now,
+                            WindowHandle = element.WindowHandle,
+                            WindowTitle = element.WindowTitle,
+                            WindowClassName = element.WindowClassName
+                        };
+
+                        ExtractElementInfo(foundElement, refreshedInfo, profile);
+                        return refreshedInfo;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"MSHTML RefreshElement error: {ex.Message}");
+                }
+
+                return element;
+            });
         }
 
         private object GetHTMLDocument(IntPtr hwnd)

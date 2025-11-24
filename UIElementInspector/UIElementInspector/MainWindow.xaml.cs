@@ -1285,12 +1285,63 @@ namespace UIElementInspector
             // TODO: Implement collapse all functionality
         }
 
-        private void Refresh_Click(object sender, RoutedEventArgs e)
+        private async void Refresh_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentElement != null)
+            if (_currentElement == null)
             {
-                LogToConsole("Refreshing current element...");
-                // TODO: Implement refresh functionality
+                LogToConsole("No element selected to refresh", Core.Utils.LogLevel.Warning);
+                return;
+            }
+
+            try
+            {
+                LogToConsole("Refreshing current element...", Core.Utils.LogLevel.Info);
+
+                // Get current collection profile
+                var profile = GetSelectedProfile();
+
+                // Refresh element from each detector that originally detected it
+                var refreshedElements = new List<ElementInfo>();
+
+                foreach (var detector in _detectors)
+                {
+                    try
+                    {
+                        var refreshed = await detector.RefreshElement(_currentElement, profile);
+                        if (refreshed != null && refreshed.Id != _currentElement.Id)
+                        {
+                            // Successfully refreshed with new data
+                            refreshedElements.Add(refreshed);
+                            LogToConsole($"Refreshed element using {detector.Name}", Core.Utils.LogLevel.Info);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogToConsole($"{detector.Name} refresh error: {ex.Message}", Core.Utils.LogLevel.Error);
+                    }
+                }
+
+                if (refreshedElements.Count > 0)
+                {
+                    // Merge all refreshed data
+                    var mergedElement = MergeElementInfo(refreshedElements);
+
+                    // Update the current element with refreshed data
+                    _currentElement = mergedElement;
+                    _currentElement.CaptureTime = DateTime.Now;
+
+                    // Update UI
+                    DisplayElementInfo(_currentElement);
+                    LogToConsole($"Element refreshed successfully with {refreshedElements.Count} detector(s)", Core.Utils.LogLevel.Info);
+                }
+                else
+                {
+                    LogToConsole("Could not refresh element - no detectors returned updated data", Core.Utils.LogLevel.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Refresh error: {ex.Message}", Core.Utils.LogLevel.Error);
             }
         }
 
