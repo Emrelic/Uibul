@@ -487,11 +487,32 @@ namespace UIElementInspector
                 merged.PlaywrightTableSelector = merged.PlaywrightTableSelector ?? element.PlaywrightTableSelector;
 
                 // Hierarchy
-                if (element.RowIndex >= 0) merged.RowIndex = element.RowIndex;
-                if (element.ColumnIndex >= 0) merged.ColumnIndex = element.ColumnIndex;
                 merged.ParentName = merged.ParentName ?? element.ParentName;
                 merged.ParentId = merged.ParentId ?? element.ParentId;
                 merged.ParentClassName = merged.ParentClassName ?? element.ParentClassName;
+
+                // Table/Grid properties - prefer non-negative values
+                if (element.RowIndex >= 0) merged.RowIndex = element.RowIndex;
+                if (element.ColumnIndex >= 0) merged.ColumnIndex = element.ColumnIndex;
+                if (element.RowCount >= 0) merged.RowCount = element.RowCount;
+                if (element.ColumnCount >= 0) merged.ColumnCount = element.ColumnCount;
+                if (element.RowSpan > 1) merged.RowSpan = element.RowSpan;
+                if (element.ColumnSpan > 1) merged.ColumnSpan = element.ColumnSpan;
+                merged.IsTableCell = merged.IsTableCell || element.IsTableCell;
+                merged.IsTableHeader = merged.IsTableHeader || element.IsTableHeader;
+                merged.TableName = merged.TableName ?? element.TableName;
+
+                // Merge header lists
+                foreach (var header in element.ColumnHeaders)
+                {
+                    if (!merged.ColumnHeaders.Contains(header))
+                        merged.ColumnHeaders.Add(header);
+                }
+                foreach (var header in element.RowHeaders)
+                {
+                    if (!merged.RowHeaders.Contains(header))
+                        merged.RowHeaders.Add(header);
+                }
 
                 // Window info
                 merged.WindowTitle = merged.WindowTitle ?? element.WindowTitle;
@@ -1446,8 +1467,10 @@ Supports multiple detection technologies:
             return await Task.Run(() =>
             {
                 var sb = new StringBuilder();
-                // CSV Header
-                sb.AppendLine("DetectionMethod,ElementType,Name,ClassName,AutomationId,ControlType,TagName,HtmlId,X,Y,Width,Height,TreePath,ElementPath,RowIndex,ColumnIndex,XPath,CssSelector,PlaywrightTableSelector,Value,InnerText,IsVisible,IsEnabled");
+                // CSV Header - Added table properties
+                sb.AppendLine("DetectionMethod,ElementType,Name,ClassName,AutomationId,ControlType,TagName,HtmlId,X,Y,Width,Height,TreePath,ElementPath," +
+                    "RowIndex,ColumnIndex,RowCount,ColumnCount,RowSpan,ColumnSpan,IsTableCell,IsTableHeader,TableName,ColumnHeaders,RowHeaders," +
+                    "XPath,CssSelector,PlaywrightTableSelector,Value,InnerText,IsVisible,IsEnabled");
 
                 foreach (var element in _collectedElements)
                 {
@@ -1462,7 +1485,12 @@ Supports multiple detection technologies:
                         $"{element.X},{element.Y},{element.Width},{element.Height}," +
                         $"\"{EscapeCsv(element.TreePath)}\"," +
                         $"\"{EscapeCsv(element.ElementPath)}\"," +
-                        $"{element.RowIndex},{element.ColumnIndex}," +
+                        $"{element.RowIndex},{element.ColumnIndex},{element.RowCount},{element.ColumnCount}," +
+                        $"{element.RowSpan},{element.ColumnSpan}," +
+                        $"{element.IsTableCell},{element.IsTableHeader}," +
+                        $"\"{EscapeCsv(element.TableName)}\"," +
+                        $"\"{EscapeCsv(string.Join(";", element.ColumnHeaders))}\"," +
+                        $"\"{EscapeCsv(string.Join(";", element.RowHeaders))}\"," +
                         $"\"{EscapeCsv(element.XPath)}\"," +
                         $"\"{EscapeCsv(element.CssSelector)}\"," +
                         $"\"{EscapeCsv(element.PlaywrightTableSelector)}\"," +
@@ -1506,6 +1534,27 @@ Supports multiple detection technologies:
                     sb.AppendLine($"      <ElementPath>{EscapeXml(element.ElementPath)}</ElementPath>");
                     sb.AppendLine($"      <RowIndex>{element.RowIndex}</RowIndex>");
                     sb.AppendLine($"      <ColumnIndex>{element.ColumnIndex}</ColumnIndex>");
+                    sb.AppendLine($"      <RowCount>{element.RowCount}</RowCount>");
+                    sb.AppendLine($"      <ColumnCount>{element.ColumnCount}</ColumnCount>");
+                    sb.AppendLine($"      <RowSpan>{element.RowSpan}</RowSpan>");
+                    sb.AppendLine($"      <ColumnSpan>{element.ColumnSpan}</ColumnSpan>");
+                    sb.AppendLine($"      <IsTableCell>{element.IsTableCell}</IsTableCell>");
+                    sb.AppendLine($"      <IsTableHeader>{element.IsTableHeader}</IsTableHeader>");
+                    sb.AppendLine($"      <TableName>{EscapeXml(element.TableName)}</TableName>");
+                    if (element.ColumnHeaders.Count > 0)
+                    {
+                        sb.AppendLine("      <ColumnHeaders>");
+                        foreach (var header in element.ColumnHeaders)
+                            sb.AppendLine($"        <Header>{EscapeXml(header)}</Header>");
+                        sb.AppendLine("      </ColumnHeaders>");
+                    }
+                    if (element.RowHeaders.Count > 0)
+                    {
+                        sb.AppendLine("      <RowHeaders>");
+                        foreach (var header in element.RowHeaders)
+                            sb.AppendLine($"        <Header>{EscapeXml(header)}</Header>");
+                        sb.AppendLine("      </RowHeaders>");
+                    }
                     sb.AppendLine($"      <XPath>{EscapeXml(element.XPath)}</XPath>");
                     sb.AppendLine($"      <CssSelector>{EscapeXml(element.CssSelector)}</CssSelector>");
                     sb.AppendLine($"      <PlaywrightTableSelector>{EscapeXml(element.PlaywrightTableSelector)}</PlaywrightTableSelector>");

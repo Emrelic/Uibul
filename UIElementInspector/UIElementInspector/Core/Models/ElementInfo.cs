@@ -87,8 +87,20 @@ namespace UIElementInspector.Core.Models
         public List<ElementInfo> Children { get; set; } = new List<ElementInfo>();
         public int ChildIndex { get; set; }
         public int TreeLevel { get; set; }
-        public int RowIndex { get; set; } // Table row index if element is in a table
-        public int ColumnIndex { get; set; } // Table column index if element is in a table
+
+        // === Table/Grid Properties ===
+        public int RowIndex { get; set; } = -1; // Table row index if element is in a table (-1 if not in table)
+        public int ColumnIndex { get; set; } = -1; // Table column index if element is in a table (-1 if not in table)
+        public int RowCount { get; set; } = -1; // Total row count in table (-1 if not a table)
+        public int ColumnCount { get; set; } = -1; // Total column count in table (-1 if not a table)
+        public int RowSpan { get; set; } = 1; // Number of rows this cell spans
+        public int ColumnSpan { get; set; } = 1; // Number of columns this cell spans
+        public bool IsTableCell { get; set; } // True if element is a table cell
+        public bool IsTableHeader { get; set; } // True if element is a table header
+        public string TableName { get; set; } // Name/ID of the table containing this element
+        public List<string> ColumnHeaders { get; set; } = new List<string>(); // Column header names
+        public List<string> RowHeaders { get; set; } = new List<string>(); // Row header names
+
         public string ParentName { get; set; }
         public string ParentId { get; set; }
         public string ParentClassName { get; set; }

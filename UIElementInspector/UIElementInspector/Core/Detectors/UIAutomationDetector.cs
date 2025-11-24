@@ -399,6 +399,148 @@ namespace UIElementInspector.Core.Detectors
                             info.CustomProperties["ExpandCollapseState"] = expandPattern.Current.ExpandCollapseState.ToString();
                         }
                     }
+                    else if (pattern == TablePattern.Pattern)
+                    {
+                        var tablePattern = element.GetCurrentPattern(TablePattern.Pattern) as TablePattern;
+                        if (tablePattern != null)
+                        {
+                            info.RowCount = tablePattern.Current.RowCount;
+                            info.ColumnCount = tablePattern.Current.ColumnCount;
+                            info.CustomProperties["TableRowOrColumnMajor"] = tablePattern.Current.RowOrColumnMajor.ToString();
+
+                            // Get column headers
+                            var columnHeaders = tablePattern.Current.GetColumnHeaders();
+                            if (columnHeaders != null)
+                            {
+                                foreach (var header in columnHeaders)
+                                {
+                                    try
+                                    {
+                                        string headerText = header.Current.Name;
+                                        if (!string.IsNullOrEmpty(headerText))
+                                            info.ColumnHeaders.Add(headerText);
+                                    }
+                                    catch { }
+                                }
+                            }
+
+                            // Get row headers
+                            var rowHeaders = tablePattern.Current.GetRowHeaders();
+                            if (rowHeaders != null)
+                            {
+                                foreach (var header in rowHeaders)
+                                {
+                                    try
+                                    {
+                                        string headerText = header.Current.Name;
+                                        if (!string.IsNullOrEmpty(headerText))
+                                            info.RowHeaders.Add(headerText);
+                                    }
+                                    catch { }
+                                }
+                            }
+                        }
+                    }
+                    else if (pattern == GridPattern.Pattern)
+                    {
+                        var gridPattern = element.GetCurrentPattern(GridPattern.Pattern) as GridPattern;
+                        if (gridPattern != null)
+                        {
+                            // Only set if not already set by TablePattern
+                            if (info.RowCount < 0)
+                                info.RowCount = gridPattern.Current.RowCount;
+                            if (info.ColumnCount < 0)
+                                info.ColumnCount = gridPattern.Current.ColumnCount;
+                        }
+                    }
+                    else if (pattern == TableItemPattern.Pattern)
+                    {
+                        var tableItemPattern = element.GetCurrentPattern(TableItemPattern.Pattern) as TableItemPattern;
+                        if (tableItemPattern != null)
+                        {
+                            info.IsTableCell = true;
+                            info.RowIndex = tableItemPattern.Current.Row;
+                            info.ColumnIndex = tableItemPattern.Current.Column;
+                            info.RowSpan = tableItemPattern.Current.RowSpan;
+                            info.ColumnSpan = tableItemPattern.Current.ColumnSpan;
+
+                            // Get the containing table
+                            try
+                            {
+                                var containingGrid = tableItemPattern.Current.ContainingGrid;
+                                if (containingGrid != null)
+                                {
+                                    info.TableName = containingGrid.Current.Name;
+                                    if (string.IsNullOrEmpty(info.TableName))
+                                        info.TableName = containingGrid.Current.AutomationId;
+                                }
+                            }
+                            catch { }
+
+                            // Get column headers for this cell
+                            try
+                            {
+                                var columnHeaders = tableItemPattern.Current.GetColumnHeaderItems();
+                                if (columnHeaders != null)
+                                {
+                                    foreach (var header in columnHeaders)
+                                    {
+                                        string headerText = header.Current.Name;
+                                        if (!string.IsNullOrEmpty(headerText))
+                                            info.ColumnHeaders.Add(headerText);
+                                    }
+                                }
+                            }
+                            catch { }
+
+                            // Get row headers for this cell
+                            try
+                            {
+                                var rowHeaders = tableItemPattern.Current.GetRowHeaderItems();
+                                if (rowHeaders != null)
+                                {
+                                    foreach (var header in rowHeaders)
+                                    {
+                                        string headerText = header.Current.Name;
+                                        if (!string.IsNullOrEmpty(headerText))
+                                            info.RowHeaders.Add(headerText);
+                                    }
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                    else if (pattern == GridItemPattern.Pattern)
+                    {
+                        var gridItemPattern = element.GetCurrentPattern(GridItemPattern.Pattern) as GridItemPattern;
+                        if (gridItemPattern != null)
+                        {
+                            // Only set if not already set by TableItemPattern
+                            if (info.RowIndex < 0)
+                                info.RowIndex = gridItemPattern.Current.Row;
+                            if (info.ColumnIndex < 0)
+                                info.ColumnIndex = gridItemPattern.Current.Column;
+                            if (info.RowSpan <= 1)
+                                info.RowSpan = gridItemPattern.Current.RowSpan;
+                            if (info.ColumnSpan <= 1)
+                                info.ColumnSpan = gridItemPattern.Current.ColumnSpan;
+
+                            info.IsTableCell = true;
+
+                            // Get the containing grid
+                            try
+                            {
+                                var containingGrid = gridItemPattern.Current.ContainingGrid;
+                                if (containingGrid != null && string.IsNullOrEmpty(info.TableName))
+                                {
+                                    info.TableName = containingGrid.Current.Name;
+                                    if (string.IsNullOrEmpty(info.TableName))
+                                        info.TableName = containingGrid.Current.AutomationId;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
                 }
             }
             catch (Exception ex)

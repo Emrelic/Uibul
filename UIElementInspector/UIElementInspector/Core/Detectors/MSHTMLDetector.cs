@@ -432,6 +432,9 @@ namespace UIElementInspector.Core.Detectors
                     }
                 }
                 catch { }
+
+                // Table detection
+                ExtractTableInfo(element, info);
             }
             catch (Exception ex)
             {
@@ -605,6 +608,215 @@ namespace UIElementInspector.Core.Detectors
             catch (Exception ex)
             {
                 Debug.WriteLine($"MSHTML CollectElementsInRegion error: {ex.Message}");
+            }
+        }
+
+        private void ExtractTableInfo(dynamic element, ElementInfo info)
+        {
+            try
+            {
+                dynamic current = element;
+                string tagName = element.tagName?.ToString()?.ToUpper();
+
+                // Check if element is a table cell (TD or TH)
+                if (tagName == "TD" || tagName == "TH")
+                {
+                    info.IsTableCell = true;
+                    if (tagName == "TH")
+                        info.IsTableHeader = true;
+
+                    // Get cell position
+                    try
+                    {
+                        info.ColumnIndex = (int)current.cellIndex;
+                        info.ColumnSpan = (int)(current.colSpan ?? 1);
+                    }
+                    catch { }
+
+                    // Get row info
+                    try
+                    {
+                        dynamic row = current.parentElement;
+                        if (row != null && row.tagName?.ToString()?.ToUpper() == "TR")
+                        {
+                            info.RowIndex = (int)row.rowIndex;
+                            info.RowSpan = (int)(current.rowSpan ?? 1);
+
+                            // Get table
+                            dynamic table = row.parentElement?.parentElement; // tbody or table
+                            if (table != null && table.tagName?.ToString()?.ToUpper() == "TABLE")
+                            {
+                                ExtractTableDetails(table, info);
+                            }
+                            else
+                            {
+                                // Try to find table by going up
+                                dynamic parent = row.parentElement;
+                                while (parent != null)
+                                {
+                                    if (parent.tagName?.ToString()?.ToUpper() == "TABLE")
+                                    {
+                                        ExtractTableDetails(parent, info);
+                                        break;
+                                    }
+                                    parent = parent.parentElement;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+                // Check if element is inside a table
+                else
+                {
+                    dynamic parent = element;
+                    while (parent != null)
+                    {
+                        try
+                        {
+                            string parentTag = parent.tagName?.ToString()?.ToUpper();
+                            if (parentTag == "TD" || parentTag == "TH")
+                            {
+                                // Element is inside a table cell
+                                info.IsTableCell = true;
+                                info.ColumnIndex = (int)parent.cellIndex;
+                                info.ColumnSpan = (int)(parent.colSpan ?? 1);
+
+                                dynamic row = parent.parentElement;
+                                if (row != null && row.tagName?.ToString()?.ToUpper() == "TR")
+                                {
+                                    info.RowIndex = (int)row.rowIndex;
+                                    info.RowSpan = (int)(parent.rowSpan ?? 1);
+                                }
+                                break;
+                            }
+                            else if (parentTag == "TABLE")
+                            {
+                                break;
+                            }
+                            parent = parent.parentElement;
+                        }
+                        catch
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Table extraction error: {ex.Message}");
+            }
+        }
+
+        private void ExtractTableDetails(dynamic table, ElementInfo info)
+        {
+            try
+            {
+                // Get table name/id
+                info.TableName = table.id?.ToString();
+                if (string.IsNullOrEmpty(info.TableName))
+                    info.TableName = table.getAttribute("name")?.ToString();
+                if (string.IsNullOrEmpty(info.TableName))
+                    info.TableName = table.className?.ToString();
+
+                // Get row and column counts
+                try
+                {
+                    dynamic rows = table.rows;
+                    if (rows != null)
+                        info.RowCount = rows.length;
+                }
+                catch { }
+
+                try
+                {
+                    dynamic firstRow = table.rows[0];
+                    if (firstRow != null && firstRow.cells != null)
+                        info.ColumnCount = firstRow.cells.length;
+                }
+                catch { }
+
+                // Get column headers from first row
+                try
+                {
+                    dynamic thead = table.tHead;
+                    if (thead != null && thead.rows != null && thead.rows.length > 0)
+                    {
+                        dynamic headerRow = thead.rows[0];
+                        if (headerRow != null && headerRow.cells != null)
+                        {
+                            for (int i = 0; i < headerRow.cells.length; i++)
+                            {
+                                try
+                                {
+                                    dynamic cell = headerRow.cells[i];
+                                    string headerText = cell.innerText?.ToString()?.Trim();
+                                    if (!string.IsNullOrEmpty(headerText))
+                                        info.ColumnHeaders.Add(headerText);
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                    // If no thead, check first row
+                    else if (table.rows != null && table.rows.length > 0)
+                    {
+                        dynamic firstRow = table.rows[0];
+                        if (firstRow != null && firstRow.cells != null)
+                        {
+                            bool hasHeaders = false;
+                            // Check if first row contains TH elements
+                            for (int i = 0; i < firstRow.cells.length; i++)
+                            {
+                                try
+                                {
+                                    dynamic cell = firstRow.cells[i];
+                                    if (cell.tagName?.ToString()?.ToUpper() == "TH")
+                                    {
+                                        hasHeaders = true;
+                                        string headerText = cell.innerText?.ToString()?.Trim();
+                                        if (!string.IsNullOrEmpty(headerText))
+                                            info.ColumnHeaders.Add(headerText);
+                                    }
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+                // Get row headers (if first column contains TH)
+                try
+                {
+                    if (table.rows != null)
+                    {
+                        for (int i = 0; i < table.rows.length && i < 100; i++) // Limit to 100 rows
+                        {
+                            try
+                            {
+                                dynamic row = table.rows[i];
+                                if (row != null && row.cells != null && row.cells.length > 0)
+                                {
+                                    dynamic firstCell = row.cells[0];
+                                    if (firstCell.tagName?.ToString()?.ToUpper() == "TH")
+                                    {
+                                        string headerText = firstCell.innerText?.ToString()?.Trim();
+                                        if (!string.IsNullOrEmpty(headerText))
+                                            info.RowHeaders.Add(headerText);
+                                    }
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                catch { }
+            }
+            catch (Exception ex)
+            {
+                info.CollectionErrors.Add($"Table details extraction error: {ex.Message}");
             }
         }
     }
