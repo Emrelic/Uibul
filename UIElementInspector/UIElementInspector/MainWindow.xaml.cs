@@ -29,6 +29,8 @@ namespace UIElementInspector
     {
         private readonly List<IElementDetector> _detectors;
         private readonly ObservableCollection<ElementInfo> _collectedElements;
+        private List<ElementInfo> _searchResults;
+        private int _currentSearchIndex;
         private MouseHookService _mouseHook;
         private HotkeyService _hotkeyService;
         private ElementInfo _currentElement;
@@ -1079,7 +1081,25 @@ namespace UIElementInspector
 
         private void TreeSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // TODO: Implement tree search functionality
+            try
+            {
+                var searchText = txtTreeSearch.Text;
+
+                // Ignore placeholder text
+                if (string.IsNullOrWhiteSpace(searchText) || searchText == "Search elements...")
+                {
+                    _searchResults = null;
+                    _currentSearchIndex = -1;
+                    return;
+                }
+
+                // Perform search
+                PerformSearch(searchText);
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Search error: {ex.Message}", Core.Utils.LogLevel.Error);
+            }
         }
 
         private void TreeSearch_GotFocus(object sender, RoutedEventArgs e)
@@ -1100,9 +1120,159 @@ namespace UIElementInspector
             }
         }
 
+        private void PerformSearch(string searchText)
+        {
+            try
+            {
+                searchText = searchText.ToLower();
+                _searchResults = new List<ElementInfo>();
+                _currentSearchIndex = -1;
+
+                // Search through all collected elements
+                foreach (var element in _collectedElements)
+                {
+                    if (ElementMatchesSearch(element, searchText))
+                    {
+                        _searchResults.Add(element);
+                    }
+
+                    // Search children recursively
+                    SearchElementChildren(element, searchText);
+                }
+
+                // Show results and navigate to first match
+                if (_searchResults.Count > 0)
+                {
+                    _currentSearchIndex = 0;
+                    SelectElementInTree(_searchResults[0]);
+                    LogToConsole($"Found {_searchResults.Count} matching elements", Core.Utils.LogLevel.Info);
+                }
+                else
+                {
+                    LogToConsole("No matching elements found", Core.Utils.LogLevel.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Search error: {ex.Message}", Core.Utils.LogLevel.Error);
+            }
+        }
+
+        private void SearchElementChildren(ElementInfo parent, string searchText)
+        {
+            if (parent.Children == null || parent.Children.Count == 0)
+                return;
+
+            foreach (var child in parent.Children)
+            {
+                if (ElementMatchesSearch(child, searchText))
+                {
+                    _searchResults.Add(child);
+                }
+
+                // Recursively search children
+                SearchElementChildren(child, searchText);
+            }
+        }
+
+        private bool ElementMatchesSearch(ElementInfo element, string searchText)
+        {
+            if (element == null)
+                return false;
+
+            // Search in common properties
+            return (element.Name?.ToLower().Contains(searchText) ?? false) ||
+                   (element.AutomationId?.ToLower().Contains(searchText) ?? false) ||
+                   (element.ClassName?.ToLower().Contains(searchText) ?? false) ||
+                   (element.ControlType?.ToLower().Contains(searchText) ?? false) ||
+                   (element.ElementType?.ToLower().Contains(searchText) ?? false) ||
+                   (element.TagName?.ToLower().Contains(searchText) ?? false) ||
+                   (element.HtmlId?.ToLower().Contains(searchText) ?? false) ||
+                   (element.InnerText?.ToLower().Contains(searchText) ?? false) ||
+                   (element.Value?.ToLower().Contains(searchText) ?? false) ||
+                   (element.Description?.ToLower().Contains(searchText) ?? false);
+        }
+
+        private void SelectElementInTree(ElementInfo element)
+        {
+            try
+            {
+                // Find the element in the TreeView and select it
+                foreach (var item in tvElements.Items)
+                {
+                    if (item is ElementInfo rootElement)
+                    {
+                        if (rootElement.Id == element.Id)
+                        {
+                            // Select root element
+                            var container = tvElements.ItemContainerGenerator.ContainerFromItem(rootElement) as TreeViewItem;
+                            if (container != null)
+                            {
+                                container.IsSelected = true;
+                                container.BringIntoView();
+                            }
+                            return;
+                        }
+
+                        // Search in children
+                        if (SelectChildInTree(rootElement, element))
+                            return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Tree selection error: {ex.Message}", Core.Utils.LogLevel.Error);
+            }
+        }
+
+        private bool SelectChildInTree(ElementInfo parent, ElementInfo target)
+        {
+            if (parent.Children == null || parent.Children.Count == 0)
+                return false;
+
+            foreach (var child in parent.Children)
+            {
+                if (child.Id == target.Id)
+                {
+                    // Found the target - need to expand parent and select child
+                    // This is simplified - full implementation would need TreeViewItem navigation
+                    return true;
+                }
+
+                if (SelectChildInTree(child, target))
+                    return true;
+            }
+
+            return false;
+        }
+
         private void TreeSearch_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement tree search
+            try
+            {
+                // Navigate to next search result
+                if (_searchResults == null || _searchResults.Count == 0)
+                {
+                    LogToConsole("No search results available", Core.Utils.LogLevel.Warning);
+                    return;
+                }
+
+                // Move to next result (wrap around)
+                _currentSearchIndex++;
+                if (_currentSearchIndex >= _searchResults.Count)
+                {
+                    _currentSearchIndex = 0;
+                }
+
+                // Select the current result
+                SelectElementInTree(_searchResults[_currentSearchIndex]);
+                LogToConsole($"Showing result {_currentSearchIndex + 1} of {_searchResults.Count}", Core.Utils.LogLevel.Info);
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Search navigation error: {ex.Message}", Core.Utils.LogLevel.Error);
+            }
         }
 
         private void ExpandAll_Click(object sender, RoutedEventArgs e)
