@@ -1447,9 +1447,153 @@ namespace UIElementInspector
             await ExportData("HTML");
         }
 
-        private void ImportSession_Click(object sender, RoutedEventArgs e)
+        private async void ImportSession_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement import functionality
+            try
+            {
+                // Create OpenFileDialog
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Title = "Import Session",
+                    Filter = "JSON Files (*.json)|*.json|XML Files (*.xml)|*.xml|All Files (*.*)|*.*",
+                    DefaultExt = ".json",
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    var filePath = openFileDialog.FileName;
+                    var extension = System.IO.Path.GetExtension(filePath).ToLower();
+
+                    LogToConsole($"Importing session from: {filePath}", Core.Utils.LogLevel.Info);
+
+                    List<ElementInfo> importedElements = null;
+
+                    // Import based on file extension
+                    switch (extension)
+                    {
+                        case ".json":
+                            importedElements = await ImportFromJson(filePath);
+                            break;
+                        case ".xml":
+                            importedElements = await ImportFromXml(filePath);
+                            break;
+                        default:
+                            LogToConsole($"Unsupported file format: {extension}", Core.Utils.LogLevel.Warning);
+                            System.Windows.MessageBox.Show($"Unsupported file format: {extension}\nPlease select a JSON or XML file.",
+                                "Import Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                    }
+
+                    if (importedElements != null && importedElements.Count > 0)
+                    {
+                        // Clear existing elements
+                        _collectedElements.Clear();
+
+                        // Add imported elements
+                        foreach (var element in importedElements)
+                        {
+                            _collectedElements.Add(element);
+                        }
+
+                        // Bind to TreeView
+                        tvElements.ItemsSource = null;
+                        tvElements.ItemsSource = _collectedElements;
+
+                        // Update element count
+                        txtElementCount.Text = _collectedElements.Count.ToString();
+
+                        LogToConsole($"Successfully imported {importedElements.Count} elements", Core.Utils.LogLevel.Info);
+                        _logger?.LogInfo($"Imported {importedElements.Count} elements from: {filePath}");
+
+                        System.Windows.MessageBox.Show($"Successfully imported {importedElements.Count} elements from:\n{filePath}",
+                            "Import Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        LogToConsole("No elements found in the imported file", Core.Utils.LogLevel.Warning);
+                        System.Windows.MessageBox.Show("No elements found in the imported file.",
+                            "Import Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Import error: {ex.Message}", Core.Utils.LogLevel.Error);
+                _logger?.LogError($"Import error: {ex.Message}\n{ex.StackTrace}");
+                System.Windows.MessageBox.Show($"Failed to import session:\n{ex.Message}",
+                    "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task<List<ElementInfo>> ImportFromJson(string filePath)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    var jsonContent = File.ReadAllText(filePath);
+                    var options = new System.Text.Json.JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    // Try to parse as export format first (with ExportDate, TotalElements, Elements)
+                    try
+                    {
+                        var exportData = System.Text.Json.JsonSerializer.Deserialize<JsonExportFormat>(jsonContent, options);
+                        if (exportData?.Elements != null)
+                        {
+                            return exportData.Elements;
+                        }
+                    }
+                    catch
+                    {
+                        // If that fails, try to parse as a direct list of ElementInfo
+                        var elements = System.Text.Json.JsonSerializer.Deserialize<List<ElementInfo>>(jsonContent, options);
+                        if (elements != null)
+                        {
+                            return elements;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"JSON parsing error: {ex.Message}", ex);
+                }
+
+                return new List<ElementInfo>();
+            });
+        }
+
+        private async Task<List<ElementInfo>> ImportFromXml(string filePath)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    var xmlContent = File.ReadAllText(filePath);
+                    var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<ElementInfo>));
+
+                    using (var reader = new System.IO.StringReader(xmlContent))
+                    {
+                        var elements = serializer.Deserialize(reader) as List<ElementInfo>;
+                        return elements ?? new List<ElementInfo>();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"XML parsing error: {ex.Message}", ex);
+                }
+            });
+        }
+
+        // Helper class for JSON deserialization
+        private class JsonExportFormat
+        {
+            public DateTime ExportDate { get; set; }
+            public int TotalElements { get; set; }
+            public List<ElementInfo> Elements { get; set; }
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
