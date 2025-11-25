@@ -299,8 +299,18 @@ namespace UIElementInspector.Core.Detectors
                 // Table info
                 if (data.tableInfo != null)
                 {
-                    info.RowIndex = data.tableInfo.rowIndex ?? -1;
-                    info.ColumnIndex = data.tableInfo.columnIndex ?? -1;
+                    try
+                    {
+                        var ri = data.tableInfo.rowIndex;
+                        info.RowIndex = ri != null ? (int)ri : -1;
+                    }
+                    catch { info.RowIndex = -1; }
+                    try
+                    {
+                        var ci = data.tableInfo.columnIndex;
+                        info.ColumnIndex = ci != null ? (int)ci : -1;
+                    }
+                    catch { info.ColumnIndex = -1; }
                     info.PlaywrightTableSelector = data.tableInfo.tableSelector?.ToString();
                 }
 

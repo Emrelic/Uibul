@@ -27,9 +27,13 @@ namespace UIElementInspector.Windows
 
         private void FloatingControlWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Position at top-right corner of screen with some margin
-            this.Left = SystemParameters.PrimaryScreenWidth - this.Width - 20;
-            this.Top = 20;
+            // Position at center-top of screen for better visibility
+            this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
+            this.Top = 100;
+
+            // Alternative: If you prefer top-right corner, uncomment below:
+            // this.Left = SystemParameters.PrimaryScreenWidth - this.Width - 20;
+            // this.Top = 20;
         }
 
         private void FloatingControlWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)

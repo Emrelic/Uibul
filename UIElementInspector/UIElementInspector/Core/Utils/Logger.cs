@@ -37,7 +37,12 @@ namespace UIElementInspector.Core.Utils
 
             // Write header
             WriteHeader();
+
+            // Output log file path to console/debug
+            System.Diagnostics.Debug.WriteLine($"Log file created: {_logFilePath}");
         }
+
+        public string LogFilePath => _logFilePath;
 
         private void WriteHeader()
         {

@@ -46,6 +46,11 @@ namespace UIElementInspector.Services
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int vKey);
+
+        private const int VK_CONTROL = 0x11; // CTRL key virtual key code
+
         private enum MouseMessages
         {
             WM_LBUTTONDOWN = 0x0201,
@@ -126,6 +131,9 @@ namespace UIElementInspector.Services
                             break;
 
                         case MouseMessages.WM_LBUTTONDOWN:
+                            // CHANGED: Accept any click (no CTRL required)
+                            // This makes capturing faster and more convenient
+                            Debug.WriteLine($"Mouse click detected at ({point.X}, {point.Y}) - invoking MouseClick event");
                             MouseClick?.Invoke(this, point);
                             break;
 

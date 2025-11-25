@@ -65,10 +65,16 @@
 
         <!-- Toolbar -->
         <ToolBar Grid.Row="1">
-            <Button Name="btnStartInspection" Click="StartInspection_Click" ToolTip="Start Inspection (F1)">
+            <Button Name="btnStartInspection" Click="StartInspection_Click" ToolTip="Start Inspection (Window will minimize)">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="🔍" FontSize="16" Margin="0,0,5,0"/>
                     <TextBlock Text="Start" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <Button Name="btnStartKeepVisible" Click="StartKeepVisible_Click" ToolTip="Start Inspection (Window stays visible)" Background="#228B22" Foreground="White">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="🔍" FontSize="16" Margin="0,0,5,0"/>
+                    <TextBlock Text="Start (Keep Visible)" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
             <Button Name="btnStopInspection" Click="StopInspection_Click" IsEnabled="False" ToolTip="Stop Inspection (F2)">
@@ -134,6 +140,15 @@
                     <TextBlock Text="Export" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
+
+            <Separator/>
+
+            <CheckBox Name="chkTopmost" Click="Topmost_Click" VerticalAlignment="Center" Margin="5,0" ToolTip="Keep window always on top">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="📌" FontSize="14" Margin="0,0,3,0"/>
+                    <TextBlock Text="Always On Top" VerticalAlignment="Center"/>
+                </StackPanel>
+            </CheckBox>
         </ToolBar>
 
         <!-- Main Content -->
@@ -229,52 +244,219 @@
                             </ScrollViewer>
                         </TabItem>
 
-                        <!-- Categorized Properties Tab -->
-                        <TabItem Header="Categorized">
+                        <!-- Categorized Properties Tab - ALL 5 TECHNOLOGIES -->
+                        <TabItem Header="All Properties (5 Tech)">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
-                                    <!-- Basic Properties -->
-                                    <Expander Header="Basic Properties" IsExpanded="True">
-                                        <DataGrid Name="dgBasicProperties" AutoGenerateColumns="False" CanUserAddRows="False">
+                                    <!-- 1. BASIC / UNIVERSAL PROPERTIES -->
+                                    <Expander Header="1. BASIC / UNIVERSAL PROPERTIES" IsExpanded="True" Background="#E3F2FD">
+                                        <DataGrid Name="dgBasicProperties" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="200">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="150"/>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
                                                 <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </Expander>
 
-                                    <!-- UI Automation Properties -->
-                                    <Expander Header="UI Automation Properties">
-                                        <DataGrid Name="dgUIAutomationProperties" AutoGenerateColumns="False" CanUserAddRows="False">
+                                    <!-- 2. UI AUTOMATION (UIA) PROPERTIES -->
+                                    <Expander Header="2. UI AUTOMATION (UIA) PROPERTIES" Background="#E8F5E9">
+                                        <StackPanel>
+                                            <!-- UIA Basic -->
+                                            <TextBlock Text="Basic UIA Properties" FontWeight="Bold" Margin="5,5,0,2"/>
+                                            <DataGrid Name="dgUIABasic" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+
+                                            <!-- UIA Control Patterns -->
+                                            <TextBlock Text="Control Patterns" FontWeight="Bold" Margin="5,10,0,2"/>
+                                            <DataGrid Name="dgUIAPatterns" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+
+                                            <!-- LegacyIAccessible -->
+                                            <TextBlock Text="LegacyIAccessible" FontWeight="Bold" Margin="5,10,0,2"/>
+                                            <DataGrid Name="dgUIALegacy" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </Expander>
+
+                                    <!-- 3. WEBVIEW2 / CDP PROPERTIES -->
+                                    <Expander Header="3. WEBVIEW2 / CDP (Chrome DevTools Protocol)" Background="#FFF3E0">
+                                        <StackPanel>
+                                            <!-- HTML DOM Attributes -->
+                                            <TextBlock Text="HTML DOM Attributes" FontWeight="Bold" Margin="5,5,0,2"/>
+                                            <DataGrid Name="dgWebDOM" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+
+                                            <!-- ARIA Attributes -->
+                                            <TextBlock Text="ARIA Accessibility Attributes" FontWeight="Bold" Margin="5,10,0,2"/>
+                                            <DataGrid Name="dgWebARIA" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+
+                                            <!-- Layout / Box Model -->
+                                            <TextBlock Text="Layout / Box Model" FontWeight="Bold" Margin="5,10,0,2"/>
+                                            <DataGrid Name="dgWebLayout" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+
+                                            <!-- CSS Computed Styles -->
+                                            <TextBlock Text="CSS Computed Styles" FontWeight="Bold" Margin="5,10,0,2"/>
+                                            <DataGrid Name="dgWebCSS" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </Expander>
+
+                                    <!-- 4. MSHTML / IHTMLDocument PROPERTIES -->
+                                    <Expander Header="4. MSHTML / IHTMLDocument (Trident/IE)" Background="#FCE4EC">
+                                        <StackPanel>
+                                            <!-- IHTMLElement -->
+                                            <TextBlock Text="IHTMLElement Properties" FontWeight="Bold" Margin="5,5,0,2"/>
+                                            <DataGrid Name="dgMSHTMLElement" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+
+                                            <!-- IHTMLDocument -->
+                                            <TextBlock Text="IHTMLDocument Properties" FontWeight="Bold" Margin="5,10,0,2"/>
+                                            <DataGrid Name="dgMSHTMLDocument" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </Expander>
+
+                                    <!-- 5. WIN32 API / SPY++ PROPERTIES -->
+                                    <Expander Header="5. WIN32 API / SPY++ PROPERTIES" Background="#F3E5F5">
+                                        <StackPanel>
+                                            <!-- Window Handle Info -->
+                                            <TextBlock Text="Window Handle Information" FontWeight="Bold" Margin="5,5,0,2"/>
+                                            <DataGrid Name="dgWin32Handle" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+
+                                            <!-- Window Styles -->
+                                            <TextBlock Text="Window Styles (WS_* / WS_EX_*)" FontWeight="Bold" Margin="5,10,0,2"/>
+                                            <DataGrid Name="dgWin32Styles" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+
+                                            <!-- Window Rectangles -->
+                                            <TextBlock Text="Window Rectangles" FontWeight="Bold" Margin="5,10,0,2"/>
+                                            <DataGrid Name="dgWin32Rect" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="100">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </Expander>
+
+                                    <!-- 6. POSITION & SIZE -->
+                                    <Expander Header="6. POSITION &amp; SIZE" Background="#ECEFF1">
+                                        <DataGrid Name="dgPosition" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="150"/>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
                                                 <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </Expander>
 
-                                    <!-- Web Properties -->
-                                    <Expander Header="Web/HTML Properties">
-                                        <DataGrid Name="dgWebProperties" AutoGenerateColumns="False" CanUserAddRows="False">
-                                            <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="150"/>
-                                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
-                                            </DataGrid.Columns>
-                                        </DataGrid>
-                                    </Expander>
-
-                                    <!-- Selectors -->
-                                    <Expander Header="Selectors">
+                                    <!-- 7. SELECTORS -->
+                                    <Expander Header="7. SELECTORS" Background="#E0F7FA">
                                         <StackPanel Margin="10">
                                             <TextBlock Text="XPath:" FontWeight="Bold"/>
                                             <TextBox Name="txtXPath" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                                            <TextBlock Text="Full XPath:" FontWeight="Bold"/>
+                                            <TextBox Name="txtFullXPath" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
 
                                             <TextBlock Text="CSS Selector:" FontWeight="Bold"/>
                                             <TextBox Name="txtCssSelector" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
 
                                             <TextBlock Text="Windows Path:" FontWeight="Bold"/>
-                                            <TextBox Name="txtWindowsPath" IsReadOnly="True" TextWrapping="Wrap"/>
+                                            <TextBox Name="txtWindowsPath" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                                            <TextBlock Text="Playwright Selector:" FontWeight="Bold"/>
+                                            <TextBox Name="txtPlaywrightSelector" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                                            <TextBlock Text="Tree Path:" FontWeight="Bold"/>
+                                            <TextBox Name="txtTreePath" IsReadOnly="True" TextWrapping="Wrap"/>
                                         </StackPanel>
+                                    </Expander>
+
+                                    <!-- 8. HIERARCHY -->
+                                    <Expander Header="8. HIERARCHY" Background="#FFF8E1">
+                                        <DataGrid Name="dgHierarchy" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+
+                                    <!-- 9. TABLE/GRID PROPERTIES -->
+                                    <Expander Header="9. TABLE/GRID PROPERTIES" Background="#E8EAF6">
+                                        <DataGrid Name="dgTable" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+
+                                    <!-- 10. STATE PROPERTIES -->
+                                    <Expander Header="10. STATE PROPERTIES" Background="#E0F2F1">
+                                        <DataGrid Name="dgState" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+
+                                    <!-- 11. CUSTOM PROPERTIES -->
+                                    <Expander Header="11. CUSTOM / EXTRA PROPERTIES" Background="#EFEBE9">
+                                        <DataGrid Name="dgCustom" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
                                     </Expander>
                                 </StackPanel>
                             </ScrollViewer>
@@ -354,6 +536,9 @@
                     <!-- Quick Actions -->
                     <GroupBox Grid.Row="3" Header="Quick Actions" Margin="5">
                         <StackPanel Margin="5">
+                            <Button Content="📋 Copy Full Report (5 Tech)" Click="CopyFullReport_Click" Margin="0,2"
+                                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                                    ToolTip="Copy comprehensive report with ALL properties from all 5 technologies to clipboard"/>
                             <Button Content="Copy Current Element" Click="CopyCurrentElement_Click" Margin="0,2"/>
                             <Button Content="Copy All Elements" Click="CopyAllElementsQuick_Click" Margin="0,2"/>
                             <Button Content="Save Screenshot" Click="SaveScreenshot_Click" Margin="0,2"/>
