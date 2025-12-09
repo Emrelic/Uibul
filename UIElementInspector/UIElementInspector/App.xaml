@@ -4,6 +4,36 @@
              xmlns:local="clr-namespace:UIElementInspector"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- Global ToolTip Style - Shows after 1 second, stays visible longer -->
+        <Style TargetType="ToolTip">
+            <Setter Property="Background" Value="#333"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="MaxWidth" Value="350"/>
+            <Setter Property="HasDropShadow" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="#555" BorderThickness="1"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Button Style with tooltip delay -->
+        <Style TargetType="Button">
+            <Setter Property="ToolTipService.InitialShowDelay" Value="800"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="15000"/>
+        </Style>
+
+        <Style TargetType="ToggleButton">
+            <Setter Property="ToolTipService.InitialShowDelay" Value="800"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="15000"/>
+        </Style>
     </Application.Resources>
 </Application>
