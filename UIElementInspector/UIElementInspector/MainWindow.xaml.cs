@@ -128,7 +128,10 @@ namespace UIElementInspector
                 // Ctrl+S = Quick Export
                 var ctrlS = _hotkeyService.RegisterHotkey(Key.S, ModifierKeys.Control, ExportQuick_Click);
 
-                _logger.LogInfo($"Hotkey service initialized - F1:{f1}, F2:{f2}, F3:{f3}, F4:Shutter, F5:{f5}, F6:{f6}, F7:{f7}, F8:{f8}, Ctrl+S:{ctrlS}");
+                // F9 = Screenshot Region - Bolge secip ekran goruntusu al
+                var f9 = _hotkeyService.RegisterHotkey(Key.F9, ModifierKeys.None, ScreenshotRegion_Click);
+
+                _logger.LogInfo($"Hotkey service initialized - F1:{f1}, F2:{f2}, F3:{f3}, F4:Shutter, F5:{f5}, F6:{f6}, F7:{f7}, F8:{f8}, F9:{f9}, Ctrl+S:{ctrlS}");
 
                 LogToConsole("===========================================");
                 LogToConsole("          KISAYOL TUSLARI (HOTKEYS)        ");
@@ -141,6 +144,7 @@ namespace UIElementInspector
                 LogToConsole("  F6  = Masaustu + Arsiv (TXT Rapor)");
                 LogToConsole("  F7  = TAM YAKALAMA (Masaustu + Arsiv)");
                 LogToConsole("  F8  = SADECE ARSIV (Tam Yakalama)");
+                LogToConsole("  F9  = EKRAN GORUNTUSU (Bolge Sec)");
                 LogToConsole("  Ctrl+S = Hizli Export");
                 LogToConsole("===========================================");
 
@@ -185,19 +189,34 @@ namespace UIElementInspector
             if (!_shutterActive) return;
             _shutterActive = false;
 
-            LogToConsole("[DEKLANSOR] Birakildi - Element yakalandi");
+            LogToConsole("[DEKLANSOR] Birakildi - Element yakalaniyor...");
+
+            // Show progress indicator with wait cursor
+            StartProgress("Element yakalanıyor...", "Lütfen bekleyiniz, UI element bilgileri toplanıyor...");
 
             // Capture current element
             try
             {
                 var point = System.Windows.Forms.Cursor.Position;
                 var wpfPoint = new System.Windows.Point(point.X, point.Y);
+
+                SetProgressValue(25, "Element bilgileri toplanıyor...", "Analiz ediliyor");
                 await CaptureElementAtPoint(wpfPoint);
+                SetProgressValue(75, "Element bilgileri alındı", "Tamamlanıyor");
+
+                await Task.Delay(200); // Brief pause to show progress
+                SetProgressValue(100, "Element yakalandı!", "Başarılı");
+                await Task.Delay(300); // Show completion
+
+                LogToConsole("[DEKLANSOR] Element basariyla yakalandi");
             }
             catch (Exception ex)
             {
                 LogToConsole($"[DEKLANSOR] Yakalama hatasi: {ex.Message}", Core.Utils.LogLevel.Error);
             }
+
+            // Stop progress and restore cursor
+            StopProgress();
 
             // Stop inspection
             _isInspecting = false;
@@ -414,7 +433,93 @@ namespace UIElementInspector
         }
 
         /// <summary>
-        /// Core full capture method - saves to specified locations
+        /// F9 - Screenshot Region: Opens region selector, captures screenshot,
+        /// saves to desktop, and copies both image and file path to clipboard
+        /// </summary>
+        private void ScreenshotRegion_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                LogToConsole("===========================================");
+                LogToConsole("       EKRAN GORUNTUSU - BOLGE SEC         ");
+                LogToConsole("===========================================");
+                LogToConsole("Mouse ile bir bolge secin...");
+                LogToConsole("ESC = Iptal");
+
+                // Hide main window temporarily for cleaner screenshot
+                var wasVisible = this.Visibility == Visibility.Visible;
+                if (wasVisible)
+                {
+                    this.Hide();
+                }
+
+                // Small delay to let window hide
+                System.Threading.Thread.Sleep(100);
+
+                // Show region selector
+                var selectedRegion = Windows.RegionSelectorWindow.SelectRegion();
+
+                if (selectedRegion.HasValue && selectedRegion.Value.Width > 0 && selectedRegion.Value.Height > 0)
+                {
+                    var region = selectedRegion.Value;
+
+                    // Convert WPF Rect to System.Drawing.Rectangle
+                    var drawingRegion = new System.Drawing.Rectangle(
+                        (int)region.X,
+                        (int)region.Y,
+                        (int)region.Width,
+                        (int)region.Height);
+
+                    // Capture, save to desktop, and copy to clipboard
+                    var savedPath = Core.Utils.ScreenshotHelper.CaptureRegionToDesktopAndClipboard(drawingRegion);
+
+                    // Show main window again
+                    if (wasVisible)
+                    {
+                        this.Show();
+                        this.Activate();
+                    }
+
+                    LogToConsole("-------------------------------------------");
+                    LogToConsole("EKRAN GORUNTUSU BASARIYLA ALINDI!");
+                    LogToConsole($"Konum: {savedPath}");
+                    LogToConsole($"Boyut: {(int)region.Width} x {(int)region.Height} piksel");
+                    LogToConsole("-------------------------------------------");
+                    LogToConsole("PANOYA KOPYALANDI:");
+                    LogToConsole("  - Resim (Paint, Word, vs. yapistir)");
+                    LogToConsole("  - Dosya yolu (Notepad, vs. yapistir)");
+                    LogToConsole("  - Dosya (Explorer'da yapistir)");
+                    LogToConsole("===========================================");
+
+                    SetOperationStatus("Screenshot alindi!", savedPath);
+                }
+                else
+                {
+                    // Show main window again if cancelled
+                    if (wasVisible)
+                    {
+                        this.Show();
+                        this.Activate();
+                    }
+
+                    LogToConsole("Ekran goruntusu iptal edildi.");
+                    SetOperationStatus("Iptal edildi", "");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Make sure window is shown even on error
+                this.Show();
+                this.Activate();
+
+                LogToConsole($"HATA: {ex.Message}");
+                _logger.LogException(ex, "Screenshot region capture failed");
+                SetOperationStatus("Hata!", ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Core full capture method - saves to specified locations with progress indicator
         /// </summary>
         private async Task PerformFullCapture(bool saveToDesktop, bool saveToArchive)
         {
@@ -423,31 +528,35 @@ namespace UIElementInspector
                 var targetDesc = saveToDesktop && saveToArchive ? "MASAUSTU + ARSIV" :
                                  saveToArchive ? "SADECE ARSIV" : "MASAUSTU";
 
-                SetOperationStatus("TAM YAKALAMA BASLIYOR...", "Lutfen bekleyin");
+                // Start progress with wait cursor
+                SetOperationStatus("TAM YAKALAMA BASLIYOR...", "Adim 0/8", "Lütfen bekleyiniz, UI element bilgileri toplanıyor...");
+                SetProgressValue(0, "TAM YAKALAMA BASLIYOR...", "Hazırlanıyor...");
 
                 LogToConsole("===========================================");
                 LogToConsole($"       TAM YAKALAMA ({targetDesc})      ");
                 LogToConsole("===========================================");
 
-                // First, capture element at point to populate UI (like F4 does)
-                SetOperationStatus("Element bilgileri aliniyor...", "[0/7]");
+                // Step 1: Capture element at point (0-10%)
+                SetProgressValue(5, "Element bilgileri alınıyor...", "Adım 1/8");
                 var mousePos = System.Windows.Forms.Cursor.Position;
                 var wpfPoint = new System.Windows.Point(mousePos.X, mousePos.Y);
                 await CaptureElementAtPoint(wpfPoint);
                 LogToConsole($"Element bilgileri UI'a yuklendi");
+                SetProgressValue(10, "Element bilgileri alındı", "Adım 1/8 tamamlandı");
 
-                // Create archive item
+                // Step 2: Create archive folder (10-15%)
                 ArchiveItem archiveItem = null;
                 string archiveFolderPath = null;
                 if (saveToArchive)
                 {
-                    SetOperationStatus("Arsiv klasoru olusturuluyor...", "[1/7]");
+                    SetProgressValue(12, "Arşiv klasörü oluşturuluyor...", "Adım 2/8");
                     archiveItem = _archiveManager.CreateArchiveItem(
                         $"Full Capture {DateTime.Now:yyyy-MM-dd HH:mm}",
                         "FullCapture");
                     archiveFolderPath = archiveItem.FolderPath;
                     LogToConsole($"Arsiv klasoru olusturuldu: {archiveFolderPath}");
                 }
+                SetProgressValue(15, "Klasörler hazırlandı", "Adım 2/8 tamamlandı");
 
                 // Create desktop folder if needed
                 string desktopFolderPath = null;
@@ -464,9 +573,9 @@ namespace UIElementInspector
                 var savedFilePaths = new List<string>();
                 int savedFiles = 0;
 
-                // 1. TUM 5 TEKNOLOJI ILE ELEMENT BILGILERI
-                SetOperationStatus("5 Teknoloji ile element bilgileri...", "[2/7]");
-                LogToConsole("[2/7] 5 Teknoloji ile element bilgileri toplanıyor...");
+                // Step 3: 5 Technologies report (15-35%)
+                SetProgressValue(20, "5 Teknoloji ile element bilgileri toplanıyor...", "Adım 3/8");
+                LogToConsole("[3/8] 5 Teknoloji ile element bilgileri toplanıyor...");
                 var allTechReport = await CaptureAllTechnologiesReport(wpfPoint);
                 if (!string.IsNullOrEmpty(allTechReport))
                 {
@@ -484,10 +593,11 @@ namespace UIElementInspector
                     LogToConsole($"  -> Element raporu kaydedildi");
                     savedFiles++;
                 }
+                SetProgressValue(35, "Element raporu tamamlandı", "Adım 3/8 tamamlandı");
 
-                // 2. SAYFA YAPISI - TUM ELEMENTLERIN LISTESI
-                SetOperationStatus("Sayfa yapisi ve element listesi...", "[3/7]");
-                LogToConsole("[3/7] Sayfa yapisi ve element listesi toplanıyor...");
+                // Step 4: Page structure (35-50%)
+                SetProgressValue(40, "Sayfa yapısı ve element listesi toplanıyor...", "Adım 4/8");
+                LogToConsole("[4/8] Sayfa yapisi ve element listesi toplanıyor...");
                 var pageStructureReport = await CapturePageStructureReport(wpfPoint);
                 if (!string.IsNullOrEmpty(pageStructureReport))
                 {
@@ -505,10 +615,11 @@ namespace UIElementInspector
                     LogToConsole($"  -> Sayfa yapisi raporu kaydedildi");
                     savedFiles++;
                 }
+                SetProgressValue(50, "Sayfa yapısı tamamlandı", "Adım 4/8 tamamlandı");
 
-                // 3. KAYNAK KOD (Sadece web sayfasi ise)
-                SetOperationStatus("Kaynak kod toplanıyor...", "[4/7]");
-                LogToConsole("[4/7] Kaynak kod toplanıyor (web sayfasi ise)...");
+                // Step 5: Source code (50-60%)
+                SetProgressValue(52, "Kaynak kod toplanıyor...", "Adım 5/8");
+                LogToConsole("[5/8] Kaynak kod toplanıyor (web sayfasi ise)...");
                 var sourceCode = await CaptureSourceCode(wpfPoint);
                 if (!string.IsNullOrEmpty(sourceCode))
                 {
@@ -530,10 +641,11 @@ namespace UIElementInspector
                 {
                     LogToConsole($"  -> Kaynak kod alinamadi (web sayfasi degil veya erisim yok)");
                 }
+                SetProgressValue(60, "Kaynak kod işlendi", "Adım 5/8 tamamlandı");
 
-                // 4. EKRAN GORUNTUSU - TUM EKRAN
-                SetOperationStatus("Tum ekran goruntusu aliniyor...", "[5/7]");
-                LogToConsole("[5/7] Tum ekran goruntusu aliniyor...");
+                // Step 6: Full screen screenshot (60-75%)
+                SetProgressValue(65, "Tam ekran görüntüsü alınıyor...", "Adım 6/8");
+                LogToConsole("[6/8] Tum ekran goruntusu aliniyor...");
                 if (saveToArchive)
                 {
                     var archiveScreenshotPath = System.IO.Path.Combine(archiveFolderPath, "04_Screenshot_FullScreen.png");
@@ -547,10 +659,11 @@ namespace UIElementInspector
                 }
                 LogToConsole($"  -> Tum ekran goruntusu kaydedildi");
                 savedFiles++;
+                SetProgressValue(75, "Tam ekran görüntüsü alındı", "Adım 6/8 tamamlandı");
 
-                // 5. PENCERE GORUNTUSU - ELEMENT ICEREN PENCERE
-                SetOperationStatus("Pencere goruntusu aliniyor...", "[6/7]");
-                LogToConsole("[6/7] Pencere goruntusu aliniyor...");
+                // Step 7: Window screenshot (75-85%)
+                SetProgressValue(78, "Pencere görüntüsü alınıyor...", "Adım 7/8");
+                LogToConsole("[7/8] Pencere goruntusu aliniyor...");
                 if (saveToArchive)
                 {
                     var archiveWindowPath = System.IO.Path.Combine(archiveFolderPath, "05_Screenshot_Window.png");
@@ -564,10 +677,11 @@ namespace UIElementInspector
                 }
                 LogToConsole($"  -> Pencere goruntusu kaydedildi");
                 savedFiles++;
+                SetProgressValue(85, "Pencere görüntüsü alındı", "Adım 7/8 tamamlandı");
 
-                // 6. ELEMENT GORUNTUSU - SECILEN ELEMENTIN BOLGESI
-                SetOperationStatus("Element goruntusu aliniyor...", "[7/7]");
-                LogToConsole("[7/7] Element goruntusu aliniyor...");
+                // Step 8: Element screenshot (85-95%)
+                SetProgressValue(88, "Element görüntüsü alınıyor...", "Adım 8/8");
+                LogToConsole("[8/8] Element goruntusu aliniyor...");
                 if (_currentElement != null && _currentElement.Width > 0 && _currentElement.Height > 0)
                 {
                     var elementRect = new System.Windows.Rect(_currentElement.X, _currentElement.Y, _currentElement.Width, _currentElement.Height);
@@ -589,9 +703,10 @@ namespace UIElementInspector
                 {
                     LogToConsole($"  -> Element goruntusu alinamadi (element bilgisi yok veya boyut gecersiz)");
                 }
+                SetProgressValue(95, "Element görüntüsü alındı", "Adım 8/8 tamamlandı");
 
-                // Ozet dosyasi olustur
-                SetOperationStatus("Ozet dosyasi olusturuluyor...", "Son adim");
+                // Final step: Summary file (95-100%)
+                SetProgressValue(97, "Özet dosyası oluşturuluyor...", "Son adım");
                 var summaryContent = GenerateSummaryContent(mousePos, savedFiles);
                 if (saveToArchive)
                 {
@@ -626,6 +741,8 @@ namespace UIElementInspector
                     Dispatcher.Invoke(() => RefreshArchiveList());
                 }
 
+                SetProgressValue(100, "TAM YAKALAMA TAMAMLANDI!", "Başarılı");
+                await Task.Delay(500); // Brief pause to show 100%
                 ClearOperationStatus();
 
                 LogToConsole("===========================================");
@@ -4530,9 +4647,9 @@ Supports multiple detection technologies:
         #region Operation Status
 
         /// <summary>
-        /// Set operation status in status bar and show progress panel
+        /// Set operation status in status bar and show progress panel with wait cursor
         /// </summary>
-        private void SetOperationStatus(string status, string progress = "")
+        private void SetOperationStatus(string status, string progress = "", string detail = null)
         {
             Dispatcher.Invoke(() =>
             {
@@ -4542,12 +4659,18 @@ Supports multiple detection technologies:
                 // Show progress indicator panel
                 pnlProgressIndicator.Visibility = Visibility.Visible;
                 txtProgressMessage.Text = status;
+                txtProgressDetail.Text = detail ?? "Lütfen bekleyiniz, UI element bilgileri toplanıyor...";
+                txtProgressStep.Text = progress;
+                txtProgressPercent.Text = "";
                 sbProgressBar.IsIndeterminate = true;
+
+                // Set wait cursor
+                Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
             });
         }
 
         /// <summary>
-        /// Clear operation status and hide progress panel
+        /// Clear operation status and hide progress panel, restore cursor
         /// </summary>
         private void ClearOperationStatus()
         {
@@ -4560,23 +4683,68 @@ Supports multiple detection technologies:
                 pnlProgressIndicator.Visibility = Visibility.Collapsed;
                 sbProgressBar.IsIndeterminate = false;
                 sbProgressBar.Value = 0;
+                sbMainProgressBar.Value = 0;
+                txtProgressPercent.Text = "";
+                txtProgressStep.Text = "";
+
+                // Restore cursor
+                Mouse.OverrideCursor = null;
             });
         }
 
         /// <summary>
-        /// Update progress bar value (0-100)
+        /// Update progress bar value (0-100) with detailed message
         /// </summary>
-        private void SetProgressValue(int value, string message = null)
+        private void SetProgressValue(int value, string message = null, string step = null)
         {
             Dispatcher.Invoke(() =>
             {
                 sbProgressBar.IsIndeterminate = false;
                 sbProgressBar.Value = value;
                 sbMainProgressBar.Value = value;
+                txtProgressPercent.Text = $"%{value}";
                 if (message != null)
                 {
                     txtProgressMessage.Text = message;
                 }
+                if (step != null)
+                {
+                    txtProgressStep.Text = step;
+                }
+            });
+        }
+
+        /// <summary>
+        /// Start progress with indeterminate mode and wait cursor
+        /// </summary>
+        private void StartProgress(string message, string detail = null)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                pnlProgressIndicator.Visibility = Visibility.Visible;
+                txtProgressMessage.Text = message;
+                txtProgressDetail.Text = detail ?? "Lütfen bekleyiniz, UI element bilgileri toplanıyor...";
+                txtProgressIcon.Text = "⏳";
+                sbProgressBar.IsIndeterminate = true;
+                sbOperationStatus.Text = message;
+                Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
+            });
+        }
+
+        /// <summary>
+        /// Stop progress and restore cursor
+        /// </summary>
+        private void StopProgress()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                pnlProgressIndicator.Visibility = Visibility.Collapsed;
+                sbProgressBar.IsIndeterminate = false;
+                sbProgressBar.Value = 0;
+                sbMainProgressBar.Value = 0;
+                sbOperationStatus.Text = "";
+                txtProgressPercent.Text = "";
+                Mouse.OverrideCursor = null;
             });
         }
 

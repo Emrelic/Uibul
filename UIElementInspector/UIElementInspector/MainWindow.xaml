@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:UIElementInspector"
         mc:Ignorable="d"
         Title="UI Element Inspector"
-        Height="620" Width="1100"
-        MinHeight="500" MinWidth="900"
+        Height="700" Width="1100"
+        MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen">
 
     <Grid>
@@ -16,7 +16,7 @@
             <RowDefinition Height="42"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Menu Bar -->
@@ -857,6 +857,18 @@
                             <TextBlock Text=" ARŞİV" Foreground="White" FontSize="12" FontWeight="Bold"/>
                         </StackPanel>
                     </Button>
+                    <Button Click="ScreenshotRegion_Click" Margin="2,1" Padding="10,5" Background="#00838F" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="📷 F9 - EKRAN GÖRÜNTÜSÜ" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Mouse ile bölge seçerek ekran görüntüsü alır.&#x0a;• Masaüstüne PNG olarak kaydeder&#x0a;• Panoya hem resim hem dosya yolu kopyalar&#x0a;• ESC ile iptal edilebilir"/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F9" FontWeight="Bold" Foreground="#80DEEA" FontSize="12"/>
+                            <TextBlock Text=" SCREENSHOT" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
                     <Button Click="ExportQuick_Click" Margin="2,1" Padding="10,5" Background="#455A64" Foreground="White" BorderThickness="0">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="280">
@@ -889,21 +901,35 @@
             </Grid.RowDefinitions>
 
             <!-- Progress Indicator Panel - Shows during operations -->
-            <Border Name="pnlProgressIndicator" Grid.Row="0" Background="#FFF3E0" Padding="10,5" Visibility="Collapsed">
+            <Border Name="pnlProgressIndicator" Grid.Row="0" Background="#E3F2FD" BorderBrush="#1976D2" BorderThickness="0,2,0,0" Padding="15,10" Visibility="Collapsed">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="⏳" FontSize="16" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <!-- Spinning/Waiting Icon -->
+                    <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#1976D2" Margin="0,0,15,0">
+                        <TextBlock Name="txtProgressIcon" Text="⏳" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"/>
+                    </Border>
+
+                    <!-- Progress Info -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Name="txtProgressMessage" Text="İşlem devam ediyor..." FontSize="11" FontWeight="Bold" Foreground="#E65100"/>
-                        <ProgressBar Name="sbProgressBar" Height="6" Minimum="0" Maximum="100" Value="0" Margin="0,3,0,0"
-                                     Background="#FFCC80" Foreground="#FF6D00" IsIndeterminate="True"/>
+                        <TextBlock Name="txtProgressMessage" Text="UI Element bilgileri toplanıyor..." FontSize="13" FontWeight="Bold" Foreground="#1565C0"/>
+                        <TextBlock Name="txtProgressDetail" Text="Lütfen bekleyiniz..." FontSize="11" Foreground="#1976D2" Margin="0,2,0,5"/>
+                        <Grid>
+                            <ProgressBar Name="sbProgressBar" Height="8" Minimum="0" Maximum="100" Value="0"
+                                         Background="#BBDEFB" Foreground="#1976D2" IsIndeterminate="True"/>
+                        </Grid>
+                        <TextBlock Name="txtProgressPercent" Text="" FontSize="10" Foreground="#1565C0" Margin="0,3,0,0" HorizontalAlignment="Right"/>
                     </StackPanel>
-                    <TextBlock Grid.Column="2" Name="txtProgressWait" Text="Lütfen bekleyin..." FontSize="10" Foreground="#F57C00"
-                               VerticalAlignment="Center" Margin="10,0,0,0" FontStyle="Italic"/>
+
+                    <!-- Wait Message -->
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="15,0,0,0">
+                        <TextBlock Name="txtProgressWait" Text="Lütfen bekleyin..." FontSize="11" Foreground="#1565C0" FontWeight="Bold"/>
+                        <TextBlock Name="txtProgressStep" Text="" FontSize="10" Foreground="#1976D2"/>
+                    </StackPanel>
                 </Grid>
             </Border>
 

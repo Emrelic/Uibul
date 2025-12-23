@@ -336,6 +336,128 @@ namespace UIElementInspector.Core.Utils
             return thumbnail;
         }
 
+        /// <summary>
+        /// Captures a region, saves to desktop, and copies both image and file path to clipboard
+        /// </summary>
+        /// <returns>The full path to the saved screenshot file</returns>
+        public static string CaptureRegionToDesktopAndClipboard(Rectangle region)
+        {
+            try
+            {
+                // Capture the region
+                using (var bitmap = CaptureRegion(region))
+                {
+                    // Generate unique filename with timestamp
+                    var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+                    var fileName = $"Screenshot_{timestamp}.png";
+                    var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    var filePath = Path.Combine(desktopPath, fileName);
+
+                    // Save to desktop
+                    bitmap.Save(filePath, ImageFormat.Png);
+
+                    // Copy both image and file path to clipboard
+                    CopyImageAndPathToClipboard(bitmap, filePath);
+
+                    return filePath;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to capture region and copy to clipboard: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Copies both image and file path to clipboard using DataObject
+        /// When pasting in image-supporting apps: pastes the image
+        /// When pasting in text editors: pastes the file path
+        /// </summary>
+        public static void CopyImageAndPathToClipboard(Bitmap bitmap, string filePath)
+        {
+            try
+            {
+                // Create DataObject to hold multiple formats
+                var dataObject = new System.Windows.DataObject();
+
+                // Add image in multiple formats for maximum compatibility
+                // 1. Add as BitmapSource (WPF format)
+                var bitmapSource = ConvertToBitmapSource(bitmap);
+                dataObject.SetImage(bitmapSource);
+
+                // 2. Add as DIB (Device Independent Bitmap) for better compatibility
+                using (var ms = new MemoryStream())
+                {
+                    bitmap.Save(ms, ImageFormat.Bmp);
+                    ms.Position = 0;
+                    dataObject.SetData(System.Windows.DataFormats.Dib, ms.ToArray());
+                }
+
+                // 3. Add file path as text
+                dataObject.SetText(filePath);
+
+                // 4. Add as file drop (so you can paste as file in Explorer)
+                var fileDropList = new System.Collections.Specialized.StringCollection();
+                fileDropList.Add(filePath);
+                dataObject.SetFileDropList(fileDropList);
+
+                // 5. Add as HTML format with embedded image reference
+                var htmlFormat = $@"<html><body><img src=""file:///{filePath.Replace("\\", "/")}"" /><br/>{filePath}</body></html>";
+                dataObject.SetData(System.Windows.DataFormats.Html, htmlFormat);
+
+                // Set to clipboard
+                System.Windows.Clipboard.SetDataObject(dataObject, true);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to copy to clipboard: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Converts GDI+ Bitmap to WPF BitmapSource
+        /// </summary>
+        public static System.Windows.Media.Imaging.BitmapSource ConvertToBitmapSource(Bitmap bitmap)
+        {
+            var bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly,
+                bitmap.PixelFormat);
+
+            var bitmapSource = BitmapSource.Create(
+                bitmapData.Width,
+                bitmapData.Height,
+                bitmap.HorizontalResolution,
+                bitmap.VerticalResolution,
+                ConvertPixelFormat(bitmap.PixelFormat),
+                null,
+                bitmapData.Scan0,
+                bitmapData.Stride * bitmapData.Height,
+                bitmapData.Stride);
+
+            bitmap.UnlockBits(bitmapData);
+
+            return bitmapSource;
+        }
+
+        /// <summary>
+        /// Converts GDI+ PixelFormat to WPF PixelFormat
+        /// </summary>
+        private static System.Windows.Media.PixelFormat ConvertPixelFormat(System.Drawing.Imaging.PixelFormat sourceFormat)
+        {
+            switch (sourceFormat)
+            {
+                case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
+                    return System.Windows.Media.PixelFormats.Bgr24;
+                case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
+                    return System.Windows.Media.PixelFormats.Bgra32;
+                case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
+                    return System.Windows.Media.PixelFormats.Bgr32;
+                default:
+                    return System.Windows.Media.PixelFormats.Bgra32;
+            }
+        }
+
         #region Native Structures
 
         [StructLayout(LayoutKind.Sequential)]
