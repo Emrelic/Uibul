@@ -69,7 +69,7 @@
 
         <!-- Toolbar - Compact Design -->
         <Border Grid.Row="1" Background="#F0F0F0" BorderBrush="#CCC" BorderThickness="0,0,0,1">
-            <Grid Margin="5,3">
+            <Grid Margin="3,2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
@@ -81,7 +81,7 @@
                 <!-- START / STOP BUTTONS -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <Button Name="btnStartInspection" Click="StartInspection_Click"
-                            Padding="12,6" Margin="2" Background="#1976D2" Foreground="White" FontSize="12" FontWeight="Bold">
+                            Padding="8,4" Margin="1" Background="#1976D2" Foreground="White" FontSize="11" FontWeight="Bold">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="🔍 BAŞLAT (F1)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
@@ -90,12 +90,12 @@
                             </StackPanel>
                         </Button.ToolTip>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔍" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="🔍" FontSize="13" VerticalAlignment="Center"/>
                             <TextBlock Text=" BAŞLAT" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Name="btnStartKeepVisible" Click="StartKeepVisible_Click"
-                            Background="#388E3C" Foreground="White" Padding="12,6" Margin="2" FontSize="12" FontWeight="Bold">
+                            Background="#388E3C" Foreground="White" Padding="8,4" Margin="1" FontSize="11" FontWeight="Bold">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="▶ GÖRÜNÜR BAŞLAT (F3)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
@@ -104,12 +104,12 @@
                             </StackPanel>
                         </Button.ToolTip>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="▶" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="▶" FontSize="13" VerticalAlignment="Center"/>
                             <TextBlock Text=" GÖRÜNÜR" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Name="btnStopInspection" Click="StopInspection_Click" IsEnabled="False"
-                            Background="#D32F2F" Foreground="Black" Padding="12,6" Margin="2" FontSize="12" FontWeight="Bold">
+                            Background="#D32F2F" Foreground="Black" Padding="8,4" Margin="1" FontSize="11" FontWeight="Bold">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="⏹ DURDUR (F2)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
@@ -118,27 +118,27 @@
                             </StackPanel>
                         </Button.ToolTip>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⏹" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="⏹" FontSize="13" VerticalAlignment="Center"/>
                             <TextBlock Text=" DURDUR" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
 
                 <!-- MODE SELECTION - Labels Above (negative margin), ComboBoxes Aligned with Buttons -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0" VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="6,0" VerticalAlignment="Center">
                     <!-- MODE -->
-                    <Grid Margin="2,0" MinWidth="95">
-                        <TextBlock Text="MODE" FontSize="9" Foreground="#1565C0" FontWeight="Bold" HorizontalAlignment="Center"
-                                   VerticalAlignment="Top" Margin="0,-12,0,0"/>
-                        <Border Background="#E3F2FD" CornerRadius="4" BorderBrush="#1976D2" BorderThickness="1" Padding="2" VerticalAlignment="Center">
+                    <Grid Margin="1,0" MinWidth="78">
+                        <TextBlock Text="MODE" FontSize="8" Foreground="#1565C0" FontWeight="Bold" HorizontalAlignment="Center"
+                                   VerticalAlignment="Top" Margin="0,-11,0,0"/>
+                        <Border Background="#E3F2FD" CornerRadius="4" BorderBrush="#1976D2" BorderThickness="1" Padding="1" VerticalAlignment="Center">
                             <Border.ToolTip>
                                 <StackPanel MaxWidth="300">
                                     <TextBlock Text="📋 İNCELEME MODU" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                     <TextBlock TextWrapping="Wrap" Text="• Hover: Mouse üzerine gelince yakalar&#x0a;• Click: Tıklama ile yakalar&#x0a;• Region: Bölge seçerek yakalar&#x0a;• Window: Tüm pencereyi analiz eder"/>
                                 </StackPanel>
                             </Border.ToolTip>
-                            <ComboBox Name="cmbInspectionMode" SelectedIndex="1" FontSize="12" FontWeight="Bold"
-                                      Padding="10,6" BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Center">
+                            <ComboBox Name="cmbInspectionMode" SelectedIndex="1" FontSize="11" FontWeight="Bold"
+                                      Padding="6,4" BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Center">
                                 <ComboBoxItem>Hover</ComboBoxItem>
                                 <ComboBoxItem>Click</ComboBoxItem>
                                 <ComboBoxItem>Region</ComboBoxItem>
@@ -147,18 +147,18 @@
                         </Border>
                     </Grid>
                     <!-- PROFILE -->
-                    <Grid Margin="2,0" MinWidth="95">
-                        <TextBlock Text="PROFİL" FontSize="9" Foreground="#2E7D32" FontWeight="Bold" HorizontalAlignment="Center"
-                                   VerticalAlignment="Top" Margin="0,-12,0,0"/>
-                        <Border Background="#E8F5E9" CornerRadius="4" BorderBrush="#388E3C" BorderThickness="1" Padding="2" VerticalAlignment="Center">
+                    <Grid Margin="1,0" MinWidth="78">
+                        <TextBlock Text="PROFİL" FontSize="8" Foreground="#2E7D32" FontWeight="Bold" HorizontalAlignment="Center"
+                                   VerticalAlignment="Top" Margin="0,-11,0,0"/>
+                        <Border Background="#E8F5E9" CornerRadius="4" BorderBrush="#388E3C" BorderThickness="1" Padding="1" VerticalAlignment="Center">
                             <Border.ToolTip>
                                 <StackPanel MaxWidth="300">
                                     <TextBlock Text="📊 VERİ PROFİLİ" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                     <TextBlock TextWrapping="Wrap" Text="• Quick: Temel bilgiler (hızlı)&#x0a;• Standard: Orta detay seviyesi&#x0a;• Full: Tüm özellikler (yavaş ama kapsamlı)"/>
                                 </StackPanel>
                             </Border.ToolTip>
-                            <ComboBox Name="cmbCollectionProfile" SelectedIndex="2" FontSize="12" FontWeight="Bold"
-                                      Padding="10,6" BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Center">
+                            <ComboBox Name="cmbCollectionProfile" SelectedIndex="2" FontSize="11" FontWeight="Bold"
+                                      Padding="6,4" BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Center">
                                 <ComboBoxItem>Quick</ComboBoxItem>
                                 <ComboBoxItem>Standard</ComboBoxItem>
                                 <ComboBoxItem>Full</ComboBoxItem>
@@ -166,18 +166,18 @@
                         </Border>
                     </Grid>
                     <!-- TECH -->
-                    <Grid Margin="2,0" MinWidth="95">
-                        <TextBlock Text="TECH" FontSize="9" Foreground="#E65100" FontWeight="Bold" HorizontalAlignment="Center"
-                                   VerticalAlignment="Top" Margin="0,-12,0,0"/>
-                        <Border Background="#FFF3E0" CornerRadius="4" BorderBrush="#E65100" BorderThickness="1" Padding="2" VerticalAlignment="Center">
+                    <Grid Margin="1,0" MinWidth="78">
+                        <TextBlock Text="TECH" FontSize="8" Foreground="#E65100" FontWeight="Bold" HorizontalAlignment="Center"
+                                   VerticalAlignment="Top" Margin="0,-11,0,0"/>
+                        <Border Background="#FFF3E0" CornerRadius="4" BorderBrush="#E65100" BorderThickness="1" Padding="1" VerticalAlignment="Center">
                             <Border.ToolTip>
                                 <StackPanel MaxWidth="300">
                                     <TextBlock Text="⚙ TEKNOLOJİ" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                     <TextBlock TextWrapping="Wrap" Text="• Auto: Otomatik seçim&#x0a;• UIA: UI Automation (Windows)&#x0a;• CDP: Chrome DevTools Protocol&#x0a;• MSHTML: Internet Explorer&#x0a;• All: Tüm teknolojiler (en kapsamlı)"/>
                                 </StackPanel>
                             </Border.ToolTip>
-                            <ComboBox Name="cmbDetectionTech" SelectedIndex="4" FontSize="12" FontWeight="Bold"
-                                      Padding="10,6" BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Center">
+                            <ComboBox Name="cmbDetectionTech" SelectedIndex="4" FontSize="11" FontWeight="Bold"
+                                      Padding="6,4" BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Center">
                                 <ComboBoxItem>Auto</ComboBoxItem>
                                 <ComboBoxItem>UIA</ComboBoxItem>
                                 <ComboBoxItem>CDP</ComboBoxItem>
@@ -188,10 +188,10 @@
                     </Grid>
                 </StackPanel>
 
-                <!-- ACTION BUTTONS - Same Size as Start/Stop -->
+                <!-- ACTION BUTTONS -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                     <Button Name="btnRefresh" Click="Refresh_Click"
-                            Padding="12,6" Margin="2" Background="#0288D1" Foreground="White" FontSize="12" FontWeight="Bold">
+                            Padding="10,4" Margin="1" Background="#0288D1" Foreground="White" FontSize="11" FontWeight="Bold">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="🔄 YENİLE (F5)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
@@ -199,20 +199,20 @@
                                 <TextBlock Text="Kısayol: F5" Margin="0,5,0,0" FontStyle="Italic" Foreground="#AAA"/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <TextBlock Text="🔄 YENİLE" FontSize="12"/>
+                        <TextBlock Text="🔄 YENİLE" FontSize="11"/>
                     </Button>
                     <Button Name="btnScreenshot" Click="Screenshot_Click"
-                            Padding="12,6" Margin="2" Background="#7B1FA2" Foreground="White" FontSize="12" FontWeight="Bold">
+                            Padding="10,4" Margin="1" Background="#7B1FA2" Foreground="White" FontSize="11" FontWeight="Bold">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="📷 EKRAN GÖRÜNTÜSü" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Seçili elementin ve tüm ekranın görüntüsünü yakalar. Masaüstüne kaydeder."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <TextBlock Text="📷 GÖRÜNTÜ" FontSize="12"/>
+                        <TextBlock Text="📷 GÖRÜNTÜ" FontSize="11"/>
                     </Button>
                     <Button Name="btnExportQuick" Click="ExportQuick_Click"
-                            Padding="12,6" Margin="2" Background="#455A64" Foreground="White" FontSize="12" FontWeight="Bold">
+                            Padding="10,4" Margin="1" Background="#455A64" Foreground="White" FontSize="11" FontWeight="Bold">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="💾 HIZLI KAYDET (Ctrl+S)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
@@ -220,30 +220,30 @@
                                 <TextBlock Text="Kısayol: Ctrl+S" Margin="0,5,0,0" FontStyle="Italic" Foreground="#AAA"/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <TextBlock Text="💾 KAYDET" FontSize="12"/>
+                        <TextBlock Text="💾 KAYDET" FontSize="11"/>
                     </Button>
                     <Button Name="btnGuide" Click="Guide_Click"
-                            Padding="12,6" Margin="2" Background="#00897B" Foreground="White" FontSize="12" FontWeight="Bold">
+                            Padding="10,4" Margin="1" Background="#00897B" Foreground="White" FontSize="11" FontWeight="Bold">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="📖 KULLANIM KILAVUZU" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Programın tüm özelliklerini, kısayol tuşlarını ve kullanım ipuçlarını içeren detaylı kılavuzu açar."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <TextBlock Text="📖 KILAVUZ" FontSize="12"/>
+                        <TextBlock Text="📖 KILAVUZ" FontSize="11"/>
                     </Button>
                 </StackPanel>
 
                 <!-- TOPMOST - Far Right -->
                 <ToggleButton Name="btnTopmost" Grid.Column="4" Click="Topmost_Click"
-                              Padding="12,6" Margin="2" Background="#FF5722" Foreground="White" HorizontalAlignment="Right" FontSize="12" FontWeight="Bold">
+                              Padding="10,4" Margin="1" Background="#FF5722" Foreground="White" HorizontalAlignment="Right" FontSize="11" FontWeight="Bold">
                     <ToggleButton.ToolTip>
                         <StackPanel MaxWidth="300">
                             <TextBlock Text="📌 HER ZAMAN ÜSTTE" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                             <TextBlock TextWrapping="Wrap" Text="Pencereyi her zaman diğer pencerelerin üstünde tutar. Aktifken yeşil, pasifken turuncu renk alır."/>
                         </StackPanel>
                     </ToggleButton.ToolTip>
-                    <TextBlock Text="📌 ÜSTTE" FontSize="12" FontWeight="Bold"/>
+                    <TextBlock Text="📌 ÜSTTE" FontSize="11" FontWeight="Bold"/>
                 </ToggleButton>
             </Grid>
         </Border>
