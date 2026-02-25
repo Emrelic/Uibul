@@ -1,0 +1,457 @@
+<Window x:Class="UIElementInspector.Windows.GuideWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="UIBUL - Kullanım Kılavuzu"
+        Width="850" Height="700"
+        WindowStartupLocation="CenterScreen"
+        Background="#FAFAFA"
+        Icon="{x:Null}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#1565C0" Padding="20,15">
+            <StackPanel>
+                <TextBlock Text="📖 UIBUL - Universal UI Element Inspector" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="Kullanım Kılavuzu v3.0" FontSize="13" Foreground="#BBDEFB" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Content with sidebar navigation -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Sidebar Navigation -->
+            <Border Grid.Column="0" Background="#263238" Padding="0,10">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Name="navPanel">
+                        <TextBlock Text="İÇİNDEKİLER" FontSize="11" FontWeight="Bold" Foreground="#78909C" Margin="15,5,0,10"/>
+
+                        <Button Name="nav1" Content="🏠 Genel Bakış" Tag="section1" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav2" Content="🔑 Kısayol Tuşları" Tag="section2" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav3" Content="📸 F4 - Deklanşör" Tag="section3" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav4" Content="📦 F7 - Tam Yakalama" Tag="section4" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav5" Content="🗄 F8 - Arşiv" Tag="section5" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav6" Content="✂ F9 - Bölge Seçimi" Tag="section6" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav7" Content="🔍 İnceleme Modları" Tag="section7" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav8" Content="⚙ 5 Teknoloji" Tag="section8" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav9" Content="📊 Profil Seçimi" Tag="section9" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav10" Content="💾 Dışa Aktarma" Tag="section10" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav11" Content="📂 Arşiv Yönetimi" Tag="section11" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav12" Content="🔄 İçe Aktarma" Tag="section12" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                        <Button Name="nav13" Content="💡 İpuçları" Tag="section13" Click="NavButton_Click" Style="{x:Null}"
+                                Background="Transparent" Foreground="#ECEFF1" FontSize="12" Padding="15,8"
+                                HorizontalContentAlignment="Left" BorderThickness="0" Cursor="Hand"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Main Content Area -->
+            <ScrollViewer Grid.Column="1" Name="contentScroller" VerticalScrollBarVisibility="Auto" Padding="25,15">
+                <StackPanel Name="contentPanel">
+
+                    <!-- Section 1: Genel Bakış -->
+                    <StackPanel Name="section1" Margin="0,0,0,30">
+                        <TextBlock Text="🏠 Genel Bakış" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <Border Background="#E3F2FD" CornerRadius="6" Padding="15" Margin="0,0,0,10">
+                            <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
+                                <Run FontWeight="Bold">UIBUL (Universal UI Element Inspector)</Run>, Windows üzerinde çalışan herhangi bir uygulamanın
+                                arayüz elemanlarını yakalayıp analiz eden kapsamlı bir araçtır.
+                                <LineBreak/><LineBreak/>
+                                Program 5 farklı algılama teknolojisi kullanarak, bir web sayfasındaki butondan masaüstü uygulamasındaki
+                                metin kutusuna kadar her türlü UI elemanının tüm özelliklerini toplayabilir.
+                            </TextBlock>
+                        </Border>
+                        <TextBlock Text="Temel Yetenekler:" FontWeight="Bold" FontSize="14" Margin="0,5,0,5"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="10,0,0,0">
+                            • Herhangi bir Windows uygulamasından element yakalama
+                            <LineBreak/>• 5 farklı teknoloji ile derinlemesine analiz (UIA, CDP, MSHTML, Win32, Playwright)
+                            <LineBreak/>• Otomatik ekran görüntüsü alma (tam ekran, pencere, element)
+                            <LineBreak/>• Kaynak kod çıkarma (HTML sayfaları için)
+                            <LineBreak/>• Arşivleme ve dışa aktarma (JSON, XML, TXT)
+                            <LineBreak/>• Global kısayol tuşları ile hızlı yakalama
+                            <LineBreak/>• Gerçek zamanlı element takibi
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Section 2: Kısayol Tuşları -->
+                    <StackPanel Name="section2" Margin="0,0,0,30">
+                        <TextBlock Text="🔑 Kısayol Tuşları" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="6" Padding="15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                    <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                    <RowDefinition/><RowDefinition/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="F1" FontWeight="Bold" FontSize="13" Foreground="#1565C0" Margin="0,4"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="İncelemeyi Başlat (pencereyi gizle, arkadan çalış)" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="F2" FontWeight="Bold" FontSize="13" Foreground="#D32F2F" Margin="0,4"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="İncelemeyi Durdur (pencereyi göster, sonuçları aç)" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="F4" FontWeight="Bold" FontSize="13" Foreground="#7B1FA2" Margin="0,4"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="Deklanşör Modu - basılı tut, bırakınca yakala" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="F5" FontWeight="Bold" FontSize="13" Foreground="#0288D1" Margin="0,4"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="Seçili elementi yeniden analiz et" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="F7" FontWeight="Bold" FontSize="13" Foreground="#388E3C" Margin="0,4"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text="TAM YAKALAMA - 8 adımda masaüstü + arşive kaydet" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="F8" FontWeight="Bold" FontSize="13" Foreground="#FF8F00" Margin="0,4"/>
+                                <TextBlock Grid.Row="5" Grid.Column="1" Text="TAM YAKALAMA - sadece arşive kaydet" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text="F9" FontWeight="Bold" FontSize="13" Foreground="#5D4037" Margin="0,4"/>
+                                <TextBlock Grid.Row="6" Grid.Column="1" Text="Ekran Bölge Seçimi - seçilen alanın görüntüsünü al" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="7" Grid.Column="0" Text="Ctrl+S" FontWeight="Bold" FontSize="13" Foreground="#455A64" Margin="0,4"/>
+                                <TextBlock Grid.Row="7" Grid.Column="1" Text="Hızlı kaydet - element bilgilerini TXT olarak masaüstüne" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="8" Grid.Column="0" Text="Ctrl+C" FontWeight="Bold" FontSize="13" Foreground="#455A64" Margin="0,4"/>
+                                <TextBlock Grid.Row="8" Grid.Column="1" Text="Element verilerini panoya kopyala" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="9" Grid.Column="0" Text="Ctrl+Shift+C" FontWeight="Bold" FontSize="13" Foreground="#455A64" Margin="0,4"/>
+                                <TextBlock Grid.Row="9" Grid.Column="1" Text="Tüm toplanan elementleri panoya kopyala" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Section 3: F4 Deklanşör -->
+                    <StackPanel Name="section3" Margin="0,0,0,30">
+                        <TextBlock Text="📸 F4 - Deklanşör Modu" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <Border Background="#F3E5F5" CornerRadius="6" Padding="15" Margin="0,0,0,10">
+                            <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
+                                Deklanşör modu, fotoğraf makinesi gibi çalışır. F4 tuşuna basılı tuttuğunuz sürece
+                                fare imlecinin altındaki element takip edilir. Tuşu bıraktığınızda o anki element yakalanır.
+                            </TextBlock>
+                        </Border>
+                        <TextBlock Text="Nasıl Kullanılır:" FontWeight="Bold" FontSize="14" Margin="0,5,0,5"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="24" Margin="10,0,0,0">
+                            1. Yakalamak istediğiniz uygulamayı açın
+                            <LineBreak/>2. F4 tuşuna BASILI TUTUN (ekranda "YAKALAMA AKTİF" yazar)
+                            <LineBreak/>3. Fareyi yakalamak istediğiniz elementin üzerine götürün
+                            <LineBreak/>4. F4 tuşunu BIRAKIN
+                            <LineBreak/>5. Element bilgileri otomatik olarak toplanır
+                            <LineBreak/>6. Yuvarlak ilerleme göstergesi süreci ekranda gösterir
+                        </TextBlock>
+                        <Border Background="#FFF9C4" CornerRadius="4" Padding="10" Margin="0,10,0,0">
+                            <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#F57F17">
+                                <Run FontWeight="Bold">İpucu:</Run> F4 ile yakalama hızlıdır ve yalnızca temel element bilgilerini toplar.
+                                Kapsamlı bilgi için F7 kullanın.
+                            </TextBlock>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Section 4: F7 Tam Yakalama -->
+                    <StackPanel Name="section4" Margin="0,0,0,30">
+                        <TextBlock Text="📦 F7 - Tam Yakalama (Full Capture)" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <Border Background="#E8F5E9" CornerRadius="6" Padding="15" Margin="0,0,0,10">
+                            <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
+                                F7 en kapsamlı yakalama modudur. 8 adımda element bilgilerini, sayfa yapısını, kaynak kodu ve
+                                ekran görüntülerini toplar. Hem masaüstüne hem arşive kaydeder.
+                            </TextBlock>
+                        </Border>
+                        <TextBlock Text="8 Adım:" FontWeight="Bold" FontSize="14" Margin="0,5,0,5"/>
+                        <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="6" Padding="15">
+                            <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="24">
+                                <Run FontWeight="Bold" Foreground="#1565C0">Adım 1:</Run> Element bilgileri alınır (temel özellikler)
+                                <LineBreak/><Run FontWeight="Bold" Foreground="#1565C0">Adım 2:</Run> Arşiv klasörü oluşturulur
+                                <LineBreak/><Run FontWeight="Bold" Foreground="#1565C0">Adım 3:</Run> 5 teknoloji ile detaylı rapor oluşturulur
+                                <LineBreak/><Run FontWeight="Bold" Foreground="#1565C0">Adım 4:</Run> Sayfa yapısı ve element listesi çıkarılır
+                                <LineBreak/><Run FontWeight="Bold" Foreground="#1565C0">Adım 5:</Run> Kaynak kod toplanır (web sayfalarında)
+                                <LineBreak/><Run FontWeight="Bold" Foreground="#1565C0">Adım 6:</Run> Tam ekran görüntüsü alınır
+                                <LineBreak/><Run FontWeight="Bold" Foreground="#1565C0">Adım 7:</Run> Pencere görüntüsü alınır
+                                <LineBreak/><Run FontWeight="Bold" Foreground="#1565C0">Adım 8:</Run> Element görüntüsü alınır
+                            </TextBlock>
+                        </Border>
+                        <TextBlock Text="Oluşturulan Dosyalar:" FontWeight="Bold" FontSize="14" Margin="0,10,0,5"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="10,0,0,0">
+                            • 00_SUMMARY.txt - Yakalama özeti
+                            <LineBreak/>• 01_Element_5Tech_Report.txt - 5 teknoloji raporu
+                            <LineBreak/>• 02_Page_Structure_ElementList.txt - Sayfa yapısı
+                            <LineBreak/>• 03_SourceCode.html - Kaynak kod (varsa)
+                            <LineBreak/>• 04_Screenshot_FullScreen.png - Tam ekran görüntüsü
+                            <LineBreak/>• 05_Screenshot_Window.png - Pencere görüntüsü
+                            <LineBreak/>• 06_Screenshot_Element.png - Element görüntüsü
+                        </TextBlock>
+                        <Border Background="#E8EAF6" CornerRadius="4" Padding="10" Margin="0,10,0,0">
+                            <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#283593">
+                                <Run FontWeight="Bold">Yuvarlak İlerleme:</Run> Yakalama sırasında ekranda pasta şeklinde dönen bir
+                                ilerleme göstergesi belirir. Mavi dilim saat yönünde 360° dolduğunda ve yeşil tik işareti
+                                göründüğünde işlem tamamlanmıştır.
+                            </TextBlock>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Section 5: F8 Arşiv -->
+                    <StackPanel Name="section5" Margin="0,0,0,30">
+                        <TextBlock Text="🗄 F8 - Sadece Arşive Kaydet" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22">
+                            F7 ile aynı 8 adımlık yakalama işlemini yapar, ancak sadece arşiv klasörüne kaydeder.
+                            Masaüstünde fazla dosya birikmesini istemiyorsanız F8 kullanın.
+                            <LineBreak/><LineBreak/>
+                            Arşiv konumu: Ayarlar sekmesinden değiştirilebilir. Varsayılan olarak uygulama klasörü
+                            altındaki "Archive" dizininde saklanır.
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Section 6: F9 Bölge Seçimi -->
+                    <StackPanel Name="section6" Margin="0,0,0,30">
+                        <TextBlock Text="✂ F9 - Ekran Bölge Seçimi" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22">
+                            F9 tuşuna bastığınızda ekran yarı saydam bir katmanla kaplanır.
+                            Fare ile dikdörtgen bir bölge seçebilirsiniz.
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Kullanım:</Run>
+                            <LineBreak/>1. F9 tuşuna basın
+                            <LineBreak/>2. Fare ile bir köşeden başlayıp çapraz köşeye sürükleyin
+                            <LineBreak/>3. Seçilen bölge otomatik olarak:
+                            <LineBreak/>   - PNG olarak masaüstüne kaydedilir
+                            <LineBreak/>   - Panoya kopyalanır (yapıştırmak için Ctrl+V)
+                            <LineBreak/>   - Dosya yolu da panoya eklenir
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">İptal:</Run> ESC tuşuna basın.
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Section 7: İnceleme Modları -->
+                    <StackPanel Name="section7" Margin="0,0,0,30">
+                        <TextBlock Text="🔍 İnceleme Modları" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="6" Padding="15">
+                            <StackPanel>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#E65100">Hover (Varsayılan):</Run>
+                                    <LineBreak/>Fare imlecini hareket ettirdikçe altındaki element gerçek zamanlı olarak analiz edilir.
+                                    F1 ile başlatıldığında sürekli çalışır.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="0,15,0,0">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#E65100">Click:</Run>
+                                    <LineBreak/>Sadece tıkladığınız element yakalanır. Menü veya açılır listeler gibi
+                                    hover ile kaybolan elemanlar için idealdir.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="0,15,0,0">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#E65100">Region:</Run>
+                                    <LineBreak/>Bir alan seçerek o alandaki tüm elementleri toplu olarak yakalar.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="0,15,0,0">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#E65100">Window:</Run>
+                                    <LineBreak/>Seçilen pencerenin tüm elementlerini otomatik olarak tarar ve listeler.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Section 8: 5 Teknoloji -->
+                    <StackPanel Name="section8" Margin="0,0,0,30">
+                        <TextBlock Text="⚙ 5 Algılama Teknolojisi" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <Border Background="#FFF3E0" CornerRadius="6" Padding="15" Margin="0,0,0,10">
+                            <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
+                                UIBUL, bir elementi 5 farklı teknoloji ile analiz edebilir. Her teknoloji farklı bilgiler sağlar.
+                                "All" seçeneği ile hepsi aynı anda çalıştırılır ve sonuçlar birleştirilir.
+                            </TextBlock>
+                        </Border>
+                        <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="6" Padding="15">
+                            <StackPanel>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#1565C0">1. UI Automation (UIA):</Run>
+                                    <LineBreak/>Windows'un yerleşik erişilebilirlik teknolojisi. Masaüstü uygulamaları (WPF, WinForms, Win32)
+                                    için en iyi sonuçları verir. AutomationId, ControlType, Pattern bilgileri sağlar.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="0,12,0,0">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#1565C0">2. Chrome DevTools Protocol (CDP):</Run>
+                                    <LineBreak/>Chrome ve Edge tarayıcılarıyla doğrudan iletişim kurar. DOM yapısı, CSS seçiciler,
+                                    JavaScript özellikleri gibi web'e özgü detaylı bilgiler sağlar.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="0,12,0,0">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#1565C0">3. MSHTML:</Run>
+                                    <LineBreak/>Internet Explorer ve WebBrowser kontrolü kullanan uygulamalar için.
+                                    HTML DOM erişimi, IAccessible bilgileri sağlar.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="0,12,0,0">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#1565C0">4. Win32 API:</Run>
+                                    <LineBreak/>SPY++ benzeri düşük seviye Windows API erişimi. Window handle, sınıf adı,
+                                    pencere stili gibi sistem düzeyinde bilgiler sağlar.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="0,12,0,0">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#1565C0">5. Playwright:</Run>
+                                    <LineBreak/>Web otomasyon kütüphanesi. Gelişmiş web element seçicileri ve
+                                    tarayıcı otomasyonu bilgileri sağlar. (Opsiyonel)
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Section 9: Profil Seçimi -->
+                    <StackPanel Name="section9" Margin="0,0,0,30">
+                        <TextBlock Text="📊 Profil Seçimi" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="6" Padding="15">
+                            <StackPanel>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#388E3C">Quick (Hızlı):</Run>
+                                    <LineBreak/>Sadece temel bilgileri toplar: Ad, Tür, Konum, Boyut.
+                                    En hızlı mod, anlık kontroller için ideal.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="0,12,0,0">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#388E3C">Standard (Standart):</Run>
+                                    <LineBreak/>Orta seviye detay: Temel bilgiler + durum bilgileri + erişilebilirlik özellikleri.
+                                    Çoğu kullanım senaryosu için yeterli.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22" Margin="0,12,0,0">
+                                    <Run FontWeight="Bold" FontSize="14" Foreground="#388E3C">Full (Tam):</Run>
+                                    <LineBreak/>Tüm özellikler: 100+ farklı bilgi alanı. Pattern bilgileri, HTML özellikleri,
+                                    CSS seçiciler, XPath, JavaScript değerleri dahil. En yavaş ama en kapsamlı mod.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Section 10: Dışa Aktarma -->
+                    <StackPanel Name="section10" Margin="0,0,0,30">
+                        <TextBlock Text="💾 Dışa Aktarma" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22">
+                            Toplanan element bilgilerini farklı formatlarda dışa aktarabilirsiniz:
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Ctrl+S - Hızlı Kaydet:</Run> Mevcut elementin özelliklerini TXT olarak masaüstüne kaydeder.
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Export Sekmesi:</Run>
+                            <LineBreak/>• JSON formatı - Yapılandırılmış veri, programatik erişim için
+                            <LineBreak/>• XML formatı - Kurumsal sistemlerle uyumluluk için
+                            <LineBreak/>• TXT formatı - Kolay okunabilir düz metin raporu
+                            <LineBreak/>• Panoya kopyala - Doğrudan yapıştırmak için
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Toplu dışa aktarma:</Run> "Tümünü Kaydet" ile toplanan tüm elementleri tek seferde aktarın.
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Section 11: Arşiv Yönetimi -->
+                    <StackPanel Name="section11" Margin="0,0,0,30">
+                        <TextBlock Text="📂 Arşiv Yönetimi" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22">
+                            F7/F8 ile yapılan tam yakalamalar otomatik olarak arşivlenir.
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Arşiv Sekmesi Özellikleri:</Run>
+                            <LineBreak/>• Tüm yakalama kayıtlarını tarih sırasıyla listeler
+                            <LineBreak/>• Her kaydın dosya sayısı ve boyutu gösterilir
+                            <LineBreak/>• Klasörü doğrudan Explorer'da açabilirsiniz
+                            <LineBreak/>• Arşiv konumu değiştirilebilir
+                            <LineBreak/>• Eski kayıtları silebilirsiniz
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Arşiv klasör yapısı:</Run>
+                            <LineBreak/>Archive/
+                            <LineBreak/>  └─ Full Capture 2024-01-15 14:30/
+                            <LineBreak/>      ├─ 00_SUMMARY.txt
+                            <LineBreak/>      ├─ 01_Element_5Tech_Report.txt
+                            <LineBreak/>      ├─ 02_Page_Structure_ElementList.txt
+                            <LineBreak/>      ├─ 03_SourceCode.html
+                            <LineBreak/>      ├─ 04_Screenshot_FullScreen.png
+                            <LineBreak/>      ├─ 05_Screenshot_Window.png
+                            <LineBreak/>      └─ 06_Screenshot_Element.png
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Section 12: İçe Aktarma -->
+                    <StackPanel Name="section12" Margin="0,0,0,30">
+                        <TextBlock Text="🔄 İçe Aktarma (Import)" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="22">
+                            Daha önce dışa aktarılmış element verilerini geri yükleyebilirsiniz.
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Desteklenen Formatlar:</Run>
+                            <LineBreak/>• JSON (.json) - Tam veri yapısı korunur
+                            <LineBreak/>• XML (.xml) - Kurumsal format desteği
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Kullanım:</Run> Dosya menüsünden "İçe Aktar" seçeneğini kullanın
+                            veya dosyayı doğrudan sürükleyip bırakın.
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Section 13: İpuçları -->
+                    <StackPanel Name="section13" Margin="0,0,0,30">
+                        <TextBlock Text="💡 İpuçları ve Püf Noktaları" FontSize="20" FontWeight="Bold" Foreground="#1565C0" Margin="0,0,0,10"/>
+                        <Border Background="#E8F5E9" CornerRadius="6" Padding="15">
+                            <StackPanel>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="24">
+                                    <Run FontWeight="Bold" Foreground="#2E7D32">1. Menü elemanlarını yakalamak için:</Run>
+                                    <LineBreak/>Click modunu kullanın. Hover modunda menüler kapanabilir.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="24" Margin="0,10,0,0">
+                                    <Run FontWeight="Bold" Foreground="#2E7D32">2. Web sayfalarında en iyi sonuç için:</Run>
+                                    <LineBreak/>Tech ayarını "All" yapın. CDP + MSHTML birlikte çalışarak hem DOM hem de
+                                    erişilebilirlik bilgilerini toplar.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="24" Margin="0,10,0,0">
+                                    <Run FontWeight="Bold" Foreground="#2E7D32">3. Yavaş yakalama sorunu:</Run>
+                                    <LineBreak/>Profili "Quick" yapın. "All" teknoloji + "Full" profil kombinasyonu en yavaştır.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="24" Margin="0,10,0,0">
+                                    <Run FontWeight="Bold" Foreground="#2E7D32">4. Üstte tut modu:</Run>
+                                    <LineBreak/>ÜSTTE butonuna tıklayarak pencereyi her zaman üstte tutabilirsiniz.
+                                    Böylece inceleme sonuçlarını diğer uygulamaların üzerinde görebilirsiniz.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="24" Margin="0,10,0,0">
+                                    <Run FontWeight="Bold" Foreground="#2E7D32">5. İlerleme göstergesi:</Run>
+                                    <LineBreak/>F7/F4 ile yakalama başladığında ekranda yuvarlak pasta şeklinde bir ilerleme
+                                    göstergesi belirir. Mavi dilim tamamlanınca yeşil tik gösterilir.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" LineHeight="24" Margin="0,10,0,0">
+                                    <Run FontWeight="Bold" Foreground="#2E7D32">6. Arşiv klasör linkini paylaşmak:</Run>
+                                    <LineBreak/>F7 yakalama tamamlandığında arşiv klasör yolu otomatik olarak panoya kopyalanır.
+                                    Ctrl+V ile doğrudan paylaşabilirsiniz.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Bottom spacer -->
+                    <Border Height="30"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#ECEFF1" Padding="15,8">
+            <Grid>
+                <TextBlock Text="UIBUL v3.0 - Universal UI Element Inspector" FontSize="11" Foreground="#78909C" VerticalAlignment="Center"/>
+                <Button Name="btnCloseGuide" Content="Kapat" Click="CloseGuide_Click" HorizontalAlignment="Right"
+                        Padding="20,5" Background="#1565C0" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

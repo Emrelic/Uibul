@@ -39,6 +39,7 @@ namespace UIElementInspector
         private DispatcherTimer _memoryTimer;
         private DispatcherTimer _mouseTimer;
         private FloatingControlWindow _floatingWindow;
+        private PieProgressWindow _pieProgress;
         private Core.Utils.Logger _logger;
         private ArchiveManager _archiveManager;
 
@@ -4143,6 +4144,13 @@ namespace UIElementInspector
             // TODO: Open settings window
         }
 
+        private void Guide_Click(object sender, RoutedEventArgs e)
+        {
+            var guide = new Windows.GuideWindow();
+            guide.Owner = this;
+            guide.Show();
+        }
+
         private void Documentation_Click(object sender, RoutedEventArgs e)
         {
             Process.Start(new ProcessStartInfo
@@ -4664,6 +4672,9 @@ Supports multiple detection technologies:
                 txtProgressPercent.Text = "";
                 sbProgressBar.IsIndeterminate = true;
 
+                // Show pie progress overlay on screen
+                ShowPieOverlay();
+
                 // Set wait cursor
                 Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
             });
@@ -4686,6 +4697,12 @@ Supports multiple detection technologies:
                 sbMainProgressBar.Value = 0;
                 txtProgressPercent.Text = "";
                 txtProgressStep.Text = "";
+
+                // Show completion on pie overlay then close
+                if (_pieProgress != null && _pieProgress.IsVisible)
+                {
+                    _pieProgress.ShowCompleted();
+                }
 
                 // Restore cursor
                 Mouse.OverrideCursor = null;
@@ -4711,6 +4728,9 @@ Supports multiple detection technologies:
                 {
                     txtProgressStep.Text = step;
                 }
+
+                // Update pie progress overlay
+                _pieProgress?.UpdateProgress(value, message, step);
             });
         }
 
@@ -4728,6 +4748,9 @@ Supports multiple detection technologies:
                 sbProgressBar.IsIndeterminate = true;
                 sbOperationStatus.Text = message;
                 Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
+
+                // Show pie progress overlay on screen
+                ShowPieOverlay();
             });
         }
 
@@ -4745,7 +4768,35 @@ Supports multiple detection technologies:
                 sbOperationStatus.Text = "";
                 txtProgressPercent.Text = "";
                 Mouse.OverrideCursor = null;
+
+                // Show completion on pie overlay then close
+                if (_pieProgress != null && _pieProgress.IsVisible)
+                {
+                    _pieProgress.ShowCompleted();
+                }
             });
+        }
+
+        /// <summary>
+        /// Show pie progress overlay at current mouse cursor position
+        /// </summary>
+        private void ShowPieOverlay()
+        {
+            try
+            {
+                var mousePos = System.Windows.Forms.Cursor.Position;
+
+                if (_pieProgress == null)
+                {
+                    _pieProgress = new PieProgressWindow();
+                }
+
+                _pieProgress.ShowAtPosition(mousePos.X, mousePos.Y);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Pie overlay error: {ex.Message}");
+            }
         }
 
         #endregion

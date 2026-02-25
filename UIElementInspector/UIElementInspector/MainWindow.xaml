@@ -58,6 +58,8 @@
                 <MenuItem Header="_Settings" Click="Settings_Click"/>
             </MenuItem>
             <MenuItem Header="_Help">
+                <MenuItem Header="📖 _Kullanım Kılavuzu" Click="Guide_Click" FontWeight="Bold"/>
+                <Separator/>
                 <MenuItem Header="_Documentation" Click="Documentation_Click"/>
                 <MenuItem Header="_Keyboard Shortcuts" Click="KeyboardShortcuts_Click"/>
                 <Separator/>
@@ -219,6 +221,16 @@
                             </StackPanel>
                         </Button.ToolTip>
                         <TextBlock Text="💾 KAYDET" FontSize="12"/>
+                    </Button>
+                    <Button Name="btnGuide" Click="Guide_Click"
+                            Padding="12,6" Margin="2" Background="#00897B" Foreground="White" FontSize="12" FontWeight="Bold">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="📖 KULLANIM KILAVUZU" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Programın tüm özelliklerini, kısayol tuşlarını ve kullanım ipuçlarını içeren detaylı kılavuzu açar."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <TextBlock Text="📖 KILAVUZ" FontSize="12"/>
                     </Button>
                 </StackPanel>
 
