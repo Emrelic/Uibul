@@ -118,7 +118,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
                                     <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
-                                    <RowDefinition/><RowDefinition/>
+                                    <RowDefinition/><RowDefinition/><RowDefinition/>
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="F1" FontWeight="Bold" FontSize="13" Foreground="#1565C0" Margin="0,4"/>
@@ -150,6 +150,9 @@
 
                                 <TextBlock Grid.Row="9" Grid.Column="0" Text="Ctrl+Shift+C" FontWeight="Bold" FontSize="13" Foreground="#455A64" Margin="0,4"/>
                                 <TextBlock Grid.Row="9" Grid.Column="1" Text="Tüm toplanan elementleri panoya kopyala" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="10" Grid.Column="0" Text="F10" FontWeight="Bold" FontSize="13" Foreground="#00695C" Margin="0,4"/>
+                                <TextBlock Grid.Row="10" Grid.Column="1" Text="Son yakalama dizin yolunu panoya kopyala ve yapıştır" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
                             </Grid>
                         </Border>
                     </StackPanel>

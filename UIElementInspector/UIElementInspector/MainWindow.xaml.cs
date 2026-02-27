@@ -40,6 +40,7 @@ namespace UIElementInspector
         private DispatcherTimer _mouseTimer;
         private FloatingControlWindow _floatingWindow;
         private PieProgressWindow _pieProgress;
+        private string _lastCapturePath = "";
         private Core.Utils.Logger _logger;
         private ArchiveManager _archiveManager;
 
@@ -132,7 +133,10 @@ namespace UIElementInspector
                 // F9 = Screenshot Region - Bolge secip ekran goruntusu al
                 var f9 = _hotkeyService.RegisterHotkey(Key.F9, ModifierKeys.None, ScreenshotRegion_Click);
 
-                _logger.LogInfo($"Hotkey service initialized - F1:{f1}, F2:{f2}, F3:{f3}, F4:Shutter, F5:{f5}, F6:{f6}, F7:{f7}, F8:{f8}, F9:{f9}, Ctrl+S:{ctrlS}");
+                // F10 = Son yakalama dizin yolunu yapistir
+                var f10 = _hotkeyService.RegisterHotkey(Key.F10, ModifierKeys.None, PasteLastCapturePath_Click);
+
+                _logger.LogInfo($"Hotkey service initialized - F1:{f1}, F2:{f2}, F3:{f3}, F4:Shutter, F5:{f5}, F6:{f6}, F7:{f7}, F8:{f8}, F9:{f9}, F10:{f10}, Ctrl+S:{ctrlS}");
 
                 LogToConsole("===========================================");
                 LogToConsole("          KISAYOL TUSLARI (HOTKEYS)        ");
@@ -146,6 +150,7 @@ namespace UIElementInspector
                 LogToConsole("  F7  = TAM YAKALAMA (Masaustu + Arsiv)");
                 LogToConsole("  F8  = SADECE ARSIV (Tam Yakalama)");
                 LogToConsole("  F9  = EKRAN GORUNTUSU (Bolge Sec)");
+                LogToConsole("  F10 = SON YAKALAMA YOLUNU YAPISTIR");
                 LogToConsole("  Ctrl+S = Hizli Export");
                 LogToConsole("===========================================");
 
@@ -431,6 +436,46 @@ namespace UIElementInspector
         private async void FullCaptureToArchiveOnly_Click(object sender, RoutedEventArgs e)
         {
             await PerformFullCapture(saveToDesktop: false, saveToArchive: true);
+        }
+
+        /// <summary>
+        /// F10 - Son yakalama dizin yolunu panoya kopyalar ve yapıştırır
+        /// </summary>
+        private void PasteLastCapturePath_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(_lastCapturePath))
+                {
+                    LogToConsole("[F10] Henuz yakalama yapilmadi, yapistir icin once F7/F8 ile yakalama yapin.");
+                    return;
+                }
+
+                // Copy path to clipboard
+                System.Windows.Clipboard.SetText(_lastCapturePath);
+                LogToConsole($"[F10] Dizin yolu panoya kopyalandi: {_lastCapturePath}");
+
+                // Simulate Ctrl+V paste after a brief delay
+                System.Threading.Tasks.Task.Delay(150).ContinueWith(_ =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        try
+                        {
+                            System.Windows.Forms.SendKeys.SendWait("^v");
+                            LogToConsole("[F10] Dizin yolu yapistirildı.");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogToConsole($"[F10] Yapistirma hatasi: {ex.Message}");
+                        }
+                    });
+                });
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"[F10] Hata: {ex.Message}", Core.Utils.LogLevel.Error);
+            }
         }
 
         /// <summary>
@@ -741,6 +786,12 @@ namespace UIElementInspector
 
                     Dispatcher.Invoke(() => RefreshArchiveList());
                 }
+
+                // Store last capture path for F10 shortcut
+                if (saveToArchive && archiveFolderPath != null)
+                    _lastCapturePath = archiveFolderPath;
+                else if (saveToDesktop && desktopFolderPath != null)
+                    _lastCapturePath = desktopFolderPath;
 
                 SetProgressValue(100, "TAM YAKALAMA TAMAMLANDI!", "Başarılı");
                 await Task.Delay(500); // Brief pause to show 100%

@@ -881,6 +881,18 @@
                             <TextBlock Text=" SCREENSHOT" Foreground="White" FontSize="12" FontWeight="Bold"/>
                         </StackPanel>
                     </Button>
+                    <Button Click="PasteLastCapturePath_Click" Margin="2,1" Padding="10,5" Background="#00695C" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="280">
+                                <TextBlock Text="📋 F10 - YAKALAMA YOLUNU YAPIŞTIR" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Son yakalama (F7/F8) dizin yolunu panoya kopyalar ve aktif pencereye yapıştırır. Dosya yolunu hızlıca paylaşmak için kullanın."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F10" FontWeight="Bold" Foreground="#80CBC4" FontSize="12"/>
+                            <TextBlock Text=" YAPISTIR" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
                     <Button Click="ExportQuick_Click" Margin="2,1" Padding="10,5" Background="#455A64" Foreground="White" BorderThickness="0">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="280">
