@@ -11,3 +11,7 @@ obj/
 # Application logs
 **/Logs/
 *.log
+
+# Build outputs
+UIElementInspector/Setup/Output/
+UIElementInspector/UIElementInspector/publish/
