@@ -109,7 +109,7 @@
                         </StackPanel>
                     </Button>
                     <Button Name="btnStopInspection" Click="StopInspection_Click" IsEnabled="False"
-                            Background="#D32F2F" Foreground="Black" Padding="8,4" Margin="1" FontSize="11" FontWeight="Bold">
+                            Background="#D32F2F" Foreground="White" Padding="8,4" Margin="1" FontSize="11" FontWeight="Bold">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="⏹ DURDUR (F2)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
@@ -344,7 +344,7 @@
                             <Button Content="📷 Screenshot" Click="SaveScreenshot_Click" Margin="2" Padding="8,4"
                                     Background="#9C27B0" Foreground="White" FontSize="10"
                                     ToolTip="Save Screenshot"/>
-                            <Button Content="💾 Export" Click="ExportToDesktop_Click" Margin="2" Padding="8,4"
+                            <Button Content="💾 Export" Click="ExportToDesktopAndArchive_Click" Margin="2" Padding="8,4"
                                     Background="#607D8B" Foreground="White" FontSize="10"
                                     ToolTip="Export to Desktop"/>
                             <Button Content="🗑 Clear" Click="ClearAllData_Click" Margin="2" Padding="8,4"
@@ -366,11 +366,15 @@
                                 <Style.Triggers>
                                     <Trigger Property="IsSelected" Value="True">
                                         <Setter Property="Background" Value="#1976D2"/>
-                                        <Setter Property="Foreground" Value="#FF0000"/>
+                                        <Setter Property="Foreground" Value="White"/>
                                     </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsMouseOver" Value="True"/>
+                                            <Condition Property="IsSelected" Value="False"/>
+                                        </MultiTrigger.Conditions>
                                         <Setter Property="Background" Value="#BBDEFB"/>
-                                    </Trigger>
+                                    </MultiTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TabControl.Resources>
@@ -764,152 +768,152 @@
         </Grid>
 
         <!-- Hotkey Info Panel - Clickable Buttons with Descriptions -->
-        <Border Grid.Row="3" Background="#1E1E1E" Margin="3,1" Padding="3">
+        <Border Grid.Row="3" Background="#1E1E1E" Margin="3,1" Padding="2">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Hotkey Buttons - Larger with Detailed Tooltips -->
-                <WrapPanel Grid.Column="0" VerticalAlignment="Center">
-                    <Button Click="StartInspection_Click" Margin="2,1" Padding="10,5" Background="#1976D2" Foreground="White" BorderThickness="0">
+                <!-- Hotkey Buttons - Uniform spread across full width -->
+                <UniformGrid Grid.Column="0" Rows="1" VerticalAlignment="Center">
+                    <Button Click="StartInspection_Click" Margin="1" Padding="2,4" Background="#1976D2" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="280">
                                 <TextBlock Text="🔍 F1 - BAŞLAT (GİZLE)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Element inceleme modunu başlatır ve bu pencereyi gizler. Mouse ile elementler üzerine gelerek bilgi toplayın."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F1" FontWeight="Bold" Foreground="#FFD700" FontSize="12"/>
-                            <TextBlock Text=" BAŞLAT" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F1" FontWeight="Bold" Foreground="#FFD700" FontSize="10"/>
+                            <TextBlock Text=" Başlat" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="StopInspection_Click" Margin="2,1" Padding="10,5" Background="#D32F2F" Foreground="White" BorderThickness="0">
+                    <Button Click="StopInspection_Click" Margin="1" Padding="2,4" Background="#D32F2F" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="280">
                                 <TextBlock Text="⏹ F2 - DURDUR" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Element inceleme modunu durdurur. Pencere tekrar görünür hale gelir, toplanan veriler korunur."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F2" FontWeight="Bold" Foreground="#FFCDD2" FontSize="12"/>
-                            <TextBlock Text=" DURDUR" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F2" FontWeight="Bold" Foreground="#FFCDD2" FontSize="10"/>
+                            <TextBlock Text=" Durdur" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="StartKeepVisible_Click" Margin="2,1" Padding="10,5" Background="#388E3C" Foreground="White" BorderThickness="0">
+                    <Button Click="StartKeepVisible_Click" Margin="1" Padding="2,4" Background="#388E3C" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="280">
                                 <TextBlock Text="▶ F3 - GÖRÜNÜR BAŞLAT" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Element inceleme modunu başlatır ama pencere görünür kalır. Anlık sonuçları görmek için idealdir."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F3" FontWeight="Bold" Foreground="#A5D6A7" FontSize="12"/>
-                            <TextBlock Text=" GÖRÜNÜR" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F3" FontWeight="Bold" Foreground="#A5D6A7" FontSize="10"/>
+                            <TextBlock Text=" Görünür" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="ShutterInfo_Click" Margin="2,1" Padding="10,5" Background="#B71C1C" Foreground="White" BorderThickness="0">
+                    <Button Click="ShutterInfo_Click" Margin="1" Padding="2,4" Background="#B71C1C" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="📸 F4 - DEKLANŞÖR MODU" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Fotoğraf makinesi gibi çalışır:&#x0a;1. F4'e BASILI TUTUN&#x0a;2. Mouse'u element üzerine götürün&#x0a;3. F4'ü BIRAKIN = Element yakalanır!&#x0a;&#x0a;Menüler ve dropdown'lar için mükemmel."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F4" FontWeight="Bold" Foreground="#FF5252" FontSize="12"/>
-                            <TextBlock Text=" DEKLANŞÖR" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F4" FontWeight="Bold" Foreground="#FF5252" FontSize="10"/>
+                            <TextBlock Text=" Deklanşör" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="Refresh_Click" Margin="2,1" Padding="10,5" Background="#0288D1" Foreground="White" BorderThickness="0">
+                    <Button Click="Refresh_Click" Margin="1" Padding="2,4" Background="#0288D1" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="280">
                                 <TextBlock Text="🔄 F5 - YENİLE" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Seçili elementi yeniden analiz eder. Dinamik içeriklerde (AJAX, JavaScript) değişiklikleri güncellemek için kullanın."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F5" FontWeight="Bold" Foreground="#81D4FA" FontSize="12"/>
-                            <TextBlock Text=" YENİLE" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F5" FontWeight="Bold" Foreground="#81D4FA" FontSize="10"/>
+                            <TextBlock Text=" Yenile" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="ExportToDesktopAndArchive_Click" Margin="2,1" Padding="10,5" Background="#2E7D32" Foreground="White" BorderThickness="0">
+                    <Button Click="ExportToDesktopAndArchive_Click" Margin="1" Padding="2,4" Background="#2E7D32" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="💾 F6 - EXPORT + ARŞİV" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Element bilgilerini TXT rapor olarak hem masaüstüne hem de arşive kaydeder. Hızlı kayıt için idealdir."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F6" FontWeight="Bold" Foreground="#A5D6A7" FontSize="12"/>
-                            <TextBlock Text=" EXPORT" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F6" FontWeight="Bold" Foreground="#A5D6A7" FontSize="10"/>
+                            <TextBlock Text=" Export" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="FullCaptureToDesktopAndArchive_Click" Margin="2,1" Padding="10,5" Background="#E65100" Foreground="White" BorderThickness="0">
+                    <Button Click="FullCaptureToDesktopAndArchive_Click" Margin="1" Padding="2,4" Background="#E65100" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="320">
                                 <TextBlock Text="🎯 F7 - TAM YAKALAMA" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="En kapsamlı yakalama modu:&#x0a;• 5 Teknoloji ile element analizi&#x0a;• Sayfa yapısı (DOM tree)&#x0a;• Kaynak kodları&#x0a;• 3 Screenshot (tam ekran, pencere, element)&#x0a;&#x0a;Masaüstü + Arşive kaydedilir."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F7" FontWeight="Bold" Foreground="#FFCC80" FontSize="12"/>
-                            <TextBlock Text=" TAM YAKALAMA" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F7" FontWeight="Bold" Foreground="#FFCC80" FontSize="10"/>
+                            <TextBlock Text=" Yakala" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="FullCaptureToArchiveOnly_Click" Margin="2,1" Padding="10,5" Background="#7B1FA2" Foreground="White" BorderThickness="0">
+                    <Button Click="FullCaptureToArchiveOnly_Click" Margin="1" Padding="2,4" Background="#7B1FA2" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="📦 F8 - SADECE ARŞİV" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="F7 ile aynı tam yakalama işlemini yapar, ancak sadece arşive kaydeder. Masaüstünü temiz tutmak isteyenler için."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F8" FontWeight="Bold" Foreground="#CE93D8" FontSize="12"/>
-                            <TextBlock Text=" ARŞİV" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F8" FontWeight="Bold" Foreground="#CE93D8" FontSize="10"/>
+                            <TextBlock Text=" Arşiv" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="ScreenshotRegion_Click" Margin="2,1" Padding="10,5" Background="#00838F" Foreground="White" BorderThickness="0">
+                    <Button Click="ScreenshotRegion_Click" Margin="1" Padding="2,4" Background="#00838F" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="300">
                                 <TextBlock Text="📷 F9 - EKRAN GÖRÜNTÜSÜ" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Mouse ile bölge seçerek ekran görüntüsü alır.&#x0a;• Masaüstüne PNG olarak kaydeder&#x0a;• Panoya hem resim hem dosya yolu kopyalar&#x0a;• ESC ile iptal edilebilir"/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F9" FontWeight="Bold" Foreground="#80DEEA" FontSize="12"/>
-                            <TextBlock Text=" SCREENSHOT" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F9" FontWeight="Bold" Foreground="#80DEEA" FontSize="10"/>
+                            <TextBlock Text=" SS" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="PasteLastCapturePath_Click" Margin="2,1" Padding="10,5" Background="#00695C" Foreground="White" BorderThickness="0">
+                    <Button Click="PasteLastCapturePath_Click" Margin="1" Padding="2,4" Background="#00695C" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="280">
                                 <TextBlock Text="📋 F10 - YAKALAMA YOLUNU YAPIŞTIR" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Son yakalama (F7/F8) dizin yolunu panoya kopyalar ve aktif pencereye yapıştırır. Dosya yolunu hızlıca paylaşmak için kullanın."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="F10" FontWeight="Bold" Foreground="#80CBC4" FontSize="12"/>
-                            <TextBlock Text=" YAPISTIR" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F10" FontWeight="Bold" Foreground="#80CBC4" FontSize="10"/>
+                            <TextBlock Text=" Yapıştır" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                    <Button Click="ExportQuick_Click" Margin="2,1" Padding="10,5" Background="#455A64" Foreground="White" BorderThickness="0">
+                    <Button Click="ExportQuick_Click" Margin="1" Padding="2,4" Background="#455A64" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="280">
                                 <TextBlock Text="⚡ Ctrl+S - HIZLI KAYDET" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" Text="Mevcut element bilgilerini anında masaüstüne TXT olarak kaydeder. En hızlı kayıt yöntemi."/>
                             </StackPanel>
                         </Button.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Ctrl+S" FontWeight="Bold" Foreground="#90A4AE" FontSize="11"/>
-                            <TextBlock Text=" HIZLI" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Ctrl+S" FontWeight="Bold" Foreground="#90A4AE" FontSize="10"/>
+                            <TextBlock Text=" Kaydet" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
-                </WrapPanel>
+                </UniformGrid>
 
                 <!-- Status Indicator -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,5,0">
-                    <Border Name="brdShutterStatus" Background="Transparent" CornerRadius="3" Padding="8,2">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,3,0">
+                    <Border Name="brdShutterStatus" Background="Transparent" CornerRadius="3" Padding="4,2">
                         <TextBlock Name="txtShutterStatus" Text="" FontWeight="Bold" Foreground="#FF5252" FontSize="10"/>
                     </Border>
                 </StackPanel>

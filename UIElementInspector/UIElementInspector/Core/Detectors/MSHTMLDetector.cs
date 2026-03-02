@@ -119,9 +119,6 @@ namespace UIElementInspector.Core.Detectors
                        classNameStr.Contains("Shell Embedding") ||
                        classNameStr.Contains("WebBrowser") ||
                        classNameStr.Contains("HTML") ||
-                       classNameStr.Contains("Browser") ||
-                       classNameStr.Contains("Mozilla") ||
-                       classNameStr.Contains("Chrome") ||
                        classNameStr.Contains("Trident");
 
                 Debug.WriteLine($"MSHTML CanDetect - Class='{classNameStr}', Result={canDetect}");
@@ -1062,8 +1059,9 @@ namespace UIElementInspector.Core.Detectors
 
                         info.OuterHTML = element.outerHTML?.ToString();
 
-                        // Copy full OuterHTML to SourceCode (no truncation for source code view)
-                        info.SourceCode = info.OuterHTML;
+                        // Only set SourceCode from element HTML if page source wasn't already captured
+                        if (string.IsNullOrEmpty(info.SourceCode))
+                            info.SourceCode = info.OuterHTML;
 
                         // Truncate display version only
                         if (info.OuterHTML?.Length > 1000)

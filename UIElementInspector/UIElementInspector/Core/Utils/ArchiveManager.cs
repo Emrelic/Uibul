@@ -66,21 +66,33 @@ namespace UIElementInspector.Core.Utils
                 if (File.Exists(_indexFilePath))
                 {
                     var json = File.ReadAllText(_indexFilePath);
-                    _index = JsonConvert.DeserializeObject<ArchiveIndex>(json) ?? new ArchiveIndex();
+                    var loaded = JsonConvert.DeserializeObject<ArchiveIndex>(json) ?? new ArchiveIndex();
 
                     // Validate and clean up missing folders
-                    _index.Items.RemoveAll(item => !Directory.Exists(item.FolderPath));
+                    loaded.Items.RemoveAll(item => !Directory.Exists(item.FolderPath));
+
+                    lock (_lockObject)
+                    {
+                        _index = loaded;
+                    }
                 }
                 else
                 {
-                    _index = new ArchiveIndex();
+                    lock (_lockObject)
+                    {
+                        _index = new ArchiveIndex();
+                    }
                 }
 
                 IndexLoaded?.Invoke(this, EventArgs.Empty);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _index = new ArchiveIndex();
+                System.Diagnostics.Debug.WriteLine($"Failed to load archive index: {ex.Message}");
+                lock (_lockObject)
+                {
+                    _index = new ArchiveIndex();
+                }
             }
         }
 
@@ -104,11 +116,19 @@ namespace UIElementInspector.Core.Utils
         /// <summary>
         /// Create a new archive item and return its folder path
         /// </summary>
-        public ArchiveItem CreateArchiveItem(string name = null, string captureType = "FullCapture")
+        public ArchiveItem CreateArchiveItem(string name = null, string captureType = "FullCapture", string customFolderName = null)
         {
-            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            var folderName = $"Capture_{timestamp}";
+            var folderName = customFolderName ?? $"Capture_{DateTime.Now:yyyyMMdd_HHmmss}";
             var folderPath = Path.Combine(_archiveBasePath, folderName);
+
+            // Handle duplicate folder names
+            if (Directory.Exists(folderPath))
+            {
+                int counter = 1;
+                while (Directory.Exists($"{folderPath}_{counter}"))
+                    counter++;
+                folderPath = $"{folderPath}_{counter}";
+            }
 
             Directory.CreateDirectory(folderPath);
 
@@ -137,8 +157,11 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public void AddFilesToItem(ArchiveItem item, List<string> filePaths)
         {
-            item.FilePaths.AddRange(filePaths);
-            item.FileCount = item.FilePaths.Count;
+            lock (_lockObject)
+            {
+                item.FilePaths.AddRange(filePaths);
+                item.FileCount = item.FilePaths.Count;
+            }
             SaveIndex();
             ItemUpdated?.Invoke(this, item);
         }
@@ -148,10 +171,15 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public void UpdateItemName(string itemId, string newName)
         {
-            var item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+            ArchiveItem item;
+            lock (_lockObject)
+            {
+                item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+                if (item != null)
+                    item.Name = newName;
+            }
             if (item != null)
             {
-                item.Name = newName;
                 SaveIndex();
                 ItemUpdated?.Invoke(this, item);
             }
@@ -162,10 +190,15 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public void UpdateItemNotes(string itemId, string notes)
         {
-            var item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+            ArchiveItem item;
+            lock (_lockObject)
+            {
+                item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+                if (item != null)
+                    item.Notes = notes;
+            }
             if (item != null)
             {
-                item.Notes = notes;
                 SaveIndex();
                 ItemUpdated?.Invoke(this, item);
             }
@@ -176,7 +209,11 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public bool DeleteItem(string itemId)
         {
-            var item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+            ArchiveItem item;
+            lock (_lockObject)
+            {
+                item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+            }
             if (item == null) return false;
 
             try
@@ -208,7 +245,8 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public string GetFileLinksForClipboard(string itemId)
         {
-            var item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+            ArchiveItem item;
+            lock (_lockObject) { item = _index.Items.FirstOrDefault(i => i.Id == itemId); }
             if (item == null) return string.Empty;
 
             var lines = new List<string>
@@ -233,7 +271,8 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public async Task<string> GetAllFileContentsForClipboard(string itemId)
         {
-            var item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+            ArchiveItem item;
+            lock (_lockObject) { item = _index.Items.FirstOrDefault(i => i.Id == itemId); }
             if (item == null) return string.Empty;
 
             var sb = new System.Text.StringBuilder();
@@ -285,7 +324,8 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public string CopyToDesktop(string itemId)
         {
-            var item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+            ArchiveItem item;
+            lock (_lockObject) { item = _index.Items.FirstOrDefault(i => i.Id == itemId); }
             if (item == null || !Directory.Exists(item.FolderPath)) return null;
 
             var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -326,7 +366,10 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public ArchiveItem GetItem(string itemId)
         {
-            return _index.Items.FirstOrDefault(i => i.Id == itemId);
+            lock (_lockObject)
+            {
+                return _index.Items.FirstOrDefault(i => i.Id == itemId);
+            }
         }
 
         /// <summary>
@@ -342,7 +385,8 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public void OpenInExplorer(string itemId)
         {
-            var item = _index.Items.FirstOrDefault(i => i.Id == itemId);
+            ArchiveItem item;
+            lock (_lockObject) { item = _index.Items.FirstOrDefault(i => i.Id == itemId); }
             if (item != null && Directory.Exists(item.FolderPath))
             {
                 System.Diagnostics.Process.Start("explorer.exe", item.FolderPath);

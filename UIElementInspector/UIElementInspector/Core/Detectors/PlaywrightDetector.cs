@@ -19,8 +19,7 @@ namespace UIElementInspector.Core.Detectors
         private IBrowser _browser;
         private IPage _currentPage;
         private bool _isInitialized;
-        private bool _isInitializing;
-        private readonly object _lockObject = new object();
+        private readonly System.Threading.SemaphoreSlim _initSemaphore = new System.Threading.SemaphoreSlim(1, 1);
         private static PlaywrightDetector _instance;
         private static readonly object _instanceLock = new object();
 
@@ -50,24 +49,13 @@ namespace UIElementInspector.Core.Detectors
             if (_isInitialized && _browser != null && _browser.IsConnected)
                 return;
 
-            lock (_lockObject)
+            await _initSemaphore.WaitAsync();
+            try
             {
-                // Double-check pattern
+                // Double-check after acquiring semaphore
                 if (_isInitialized && _browser != null && _browser.IsConnected)
                     return;
 
-                // Prevent concurrent initialization attempts
-                if (_isInitializing)
-                {
-                    Debug.WriteLine("Playwright initialization already in progress, skipping...");
-                    return;
-                }
-
-                _isInitializing = true;
-            }
-
-            try
-            {
                 Debug.WriteLine("Starting Playwright browser initialization...");
 
                 // Clean up any existing resources first
@@ -76,8 +64,8 @@ namespace UIElementInspector.Core.Detectors
                 _playwright = await Microsoft.Playwright.Playwright.CreateAsync();
                 _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
                 {
-                    Headless = false, // Visible browser for inspection
-                    Args = new[] { "--start-maximized" }
+                    Headless = true, // Headless mode - no visible browser window
+                    Args = new[] { "--disable-gpu" }
                 });
 
                 // Create a single context and page
@@ -94,10 +82,7 @@ namespace UIElementInspector.Core.Detectors
             }
             finally
             {
-                lock (_lockObject)
-                {
-                    _isInitializing = false;
-                }
+                _initSemaphore.Release();
             }
         }
 

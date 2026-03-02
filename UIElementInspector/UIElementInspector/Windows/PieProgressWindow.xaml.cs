@@ -17,12 +17,20 @@ namespace UIElementInspector.Windows
     /// </summary>
     public partial class PieProgressWindow : Window
     {
-        private const double CircleRadius = 40.0;
-        private readonly WpfPoint _center = new WpfPoint(40, 40);
+        private const double CircleRadius = 25.0;
+        private readonly WpfPoint _center = new WpfPoint(25, 25);
+        private System.Windows.Threading.DispatcherTimer _timeoutTimer;
 
         public PieProgressWindow()
         {
             InitializeComponent();
+            _timeoutTimer = new System.Windows.Threading.DispatcherTimer();
+            _timeoutTimer.Interval = TimeSpan.FromSeconds(60);
+            _timeoutTimer.Tick += (s, e) =>
+            {
+                _timeoutTimer.Stop();
+                this.Hide();
+            };
         }
 
         /// <summary>
@@ -30,26 +38,12 @@ namespace UIElementInspector.Windows
         /// </summary>
         public void ShowAtPosition(double screenX, double screenY)
         {
-            // Position the overlay near the cursor but offset so it doesn't block
-            double offsetX = 20;
-            double offsetY = -80;
-
-            double targetLeft = screenX + offsetX;
-            double targetTop = screenY + offsetY;
-
-            // Keep within screen bounds
+            // Pin to bottom-right corner of screen
             var screenWidth = SystemParameters.PrimaryScreenWidth;
             var screenHeight = SystemParameters.PrimaryScreenHeight;
 
-            if (targetLeft + this.Width > screenWidth)
-                targetLeft = screenX - this.Width - 10;
-            if (targetTop < 0)
-                targetTop = screenY + 20;
-            if (targetTop + this.Height > screenHeight)
-                targetTop = screenHeight - this.Height - 10;
-
-            this.Left = targetLeft;
-            this.Top = targetTop;
+            this.Left = screenWidth - this.Width - 16;
+            this.Top = screenHeight - this.Height - 50; // above taskbar
 
             // Reset state
             txtPercent.Visibility = Visibility.Visible;
@@ -64,6 +58,8 @@ namespace UIElementInspector.Windows
 
             UpdatePieGeometry(0);
 
+            _timeoutTimer.Stop();
+            _timeoutTimer.Start();
             this.Show();
         }
 
@@ -75,7 +71,7 @@ namespace UIElementInspector.Windows
             Dispatcher.Invoke(() =>
             {
                 int clamped = Math.Max(0, Math.Min(100, percentage));
-                txtPercent.Text = $"%{clamped}";
+                txtPercent.Text = $"{clamped}%";
 
                 if (message != null)
                     txtMessage.Text = message;
@@ -91,6 +87,7 @@ namespace UIElementInspector.Windows
         /// </summary>
         public async void ShowCompleted()
         {
+            _timeoutTimer.Stop();
             Dispatcher.Invoke(() =>
             {
                 UpdatePieGeometry(100);
@@ -121,6 +118,7 @@ namespace UIElementInspector.Windows
         /// </summary>
         public async void ShowError()
         {
+            _timeoutTimer.Stop();
             Dispatcher.Invoke(() =>
             {
                 pieArc.Fill = new SolidColorBrush(WpfColor.FromRgb(211, 47, 47)); // #D32F2F red
