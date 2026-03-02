@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:UIElementInspector"
         mc:Ignorable="d"
         Title="UI Element Inspector"
+        Icon="Resources/app.ico"
         Height="700" Width="1100"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen">
