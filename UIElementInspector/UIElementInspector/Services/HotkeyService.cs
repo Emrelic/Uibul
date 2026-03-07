@@ -78,6 +78,7 @@ namespace UIElementInspector.Services
         private IntPtr _keyboardHookHandle = IntPtr.Zero;
         private LowLevelKeyboardProc _keyboardProc;
         private readonly Dictionary<uint, ShutterKeyBinding> _shutterBindings;
+        private readonly Dictionary<uint, Action> _hookFallbackBindings;
         private readonly HashSet<uint> _pressedKeys;
 
         #endregion
@@ -101,6 +102,7 @@ namespace UIElementInspector.Services
             _hotkeyActions = new Dictionary<int, Action>();
             _pendingHotkeys = new List<PendingHotkey>();
             _shutterBindings = new Dictionary<uint, ShutterKeyBinding>();
+            _hookFallbackBindings = new Dictionary<uint, Action>();
             _pressedKeys = new HashSet<uint>();
             _currentHotkeyId = HOTKEY_ID_START;
 
@@ -130,7 +132,14 @@ namespace UIElementInspector.Services
             // Register all pending hotkeys
             foreach (var pending in _pendingHotkeys)
             {
-                RegisterHotkeyInternal(pending.Key, pending.Modifiers, pending.Callback);
+                var success = RegisterHotkeyInternal(pending.Key, pending.Modifiers, pending.Callback);
+                if (!success && pending.Modifiers == System.Windows.Input.ModifierKeys.None)
+                {
+                    // Fallback: use low-level keyboard hook instead
+                    var vk = (uint)KeyInterop.VirtualKeyFromKey(pending.Key);
+                    _hookFallbackBindings[vk] = pending.Callback;
+                    Debug.WriteLine($"Hotkey {pending.Key} registered via keyboard hook fallback (RegisterHotKey failed)");
+                }
             }
             _pendingHotkeys.Clear();
 
@@ -206,6 +215,32 @@ namespace UIElementInspector.Services
                         }));
                     }
                 }
+                else if (_hookFallbackBindings.TryGetValue(vkCode, out var fallbackAction))
+                {
+                    if (msgType == WM_KEYDOWN || msgType == WM_SYSKEYDOWN)
+                    {
+                        // Only trigger on initial press, not on repeat
+                        if (!_pressedKeys.Contains(vkCode))
+                        {
+                            _pressedKeys.Add(vkCode);
+                            _window.Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                try
+                                {
+                                    fallbackAction.Invoke();
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Hotkey fallback error: {ex.Message}");
+                                }
+                            }));
+                        }
+                    }
+                    else if (msgType == WM_KEYUP || msgType == WM_SYSKEYUP)
+                    {
+                        _pressedKeys.Remove(vkCode);
+                    }
+                }
             }
 
             return CallNextHookEx(_keyboardHookHandle, nCode, wParam, lParam);
@@ -274,7 +309,13 @@ namespace UIElementInspector.Services
             if (!result)
             {
                 _hotkeyActions.Remove(id);
-                System.Diagnostics.Debug.WriteLine($"Failed to register hotkey: {key} with modifiers {modifiers}");
+                System.Diagnostics.Debug.WriteLine($"Failed to register hotkey: {key} with modifiers {modifiers}, will use keyboard hook fallback");
+                // Fallback: use low-level keyboard hook for modifier-less keys
+                if (modifiers == System.Windows.Input.ModifierKeys.None && callback != null)
+                {
+                    _hookFallbackBindings[vk] = callback;
+                    return true; // registered via fallback
+                }
                 return false;
             }
 
@@ -331,6 +372,7 @@ namespace UIElementInspector.Services
 
             _hotkeyActions.Clear();
             _shutterBindings.Clear();
+            _hookFallbackBindings.Clear();
             _pressedKeys.Clear();
         }
 
