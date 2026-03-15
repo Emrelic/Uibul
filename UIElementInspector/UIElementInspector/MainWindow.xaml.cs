@@ -329,7 +329,10 @@ namespace UIElementInspector
                         System.IO.File.Move(desktopFilePath, newDesktopFilePath);
                         desktopFilePath = newDesktopFilePath;
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogToConsole($"Dosya yeniden adlandirilamadi: {ex.Message}", Core.Utils.LogLevel.Warning);
+                    }
 
                     // Rename archive folder
                     var archiveBasePath = System.IO.Path.GetDirectoryName(archiveItem.FolderPath);
@@ -351,7 +354,10 @@ namespace UIElementInspector
                         archiveItem.FilePaths.Add(archiveFilePath);
                         _archiveManager.SaveIndex();
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogToConsole($"Arsiv klasoru yeniden adlandirilamadi: {ex.Message}", Core.Utils.LogLevel.Warning);
+                    }
                 }
 
                 // Copy archive file path to clipboard
@@ -636,16 +642,15 @@ namespace UIElementInspector
         /// <summary>
         /// Core full capture method - saves to specified locations with progress indicator
         /// </summary>
-        private bool _isCaptureInProgress = false;
+        private int _isCaptureInProgress = 0;
 
         private async Task PerformFullCapture(bool saveToDesktop, bool saveToArchive)
         {
-            if (_isCaptureInProgress)
+            if (System.Threading.Interlocked.CompareExchange(ref _isCaptureInProgress, 1, 0) != 0)
             {
                 LogToConsole("Yakalama zaten devam ediyor, lütfen bekleyin...");
                 return;
             }
-            _isCaptureInProgress = true;
 
             // CRITICAL: Lock mouse position immediately when F7/F8 is pressed
             // This prevents the target from changing if the user moves the mouse
@@ -935,11 +940,11 @@ namespace UIElementInspector
                 {
                     var captureName = dialog.CaptureName;
 
-                    // Rename desktop folder
+                    // Rename desktop folder (use parent of current path, not hardcoded Desktop)
                     if (saveToDesktop && desktopFolderPath != null)
                     {
-                        var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                        var newDesktopPath = System.IO.Path.Combine(desktopPath, captureName);
+                        var parentPath = System.IO.Path.GetDirectoryName(desktopFolderPath);
+                        var newDesktopPath = System.IO.Path.Combine(parentPath, captureName);
                         if (System.IO.Directory.Exists(newDesktopPath))
                         {
                             int counter = 1;
@@ -1047,7 +1052,7 @@ namespace UIElementInspector
                 fullScreenBitmap?.Dispose();
                 windowBitmap?.Dispose();
                 elementBitmap?.Dispose();
-                _isCaptureInProgress = false;
+                System.Threading.Interlocked.Exchange(ref _isCaptureInProgress, 0);
 
                 // Restore inspection state if it was active before capture
                 if (wasInspecting)
@@ -1902,6 +1907,12 @@ namespace UIElementInspector
                         LogToConsole("No detector available for the current target.");
                         UpdateFloatingWindow("No detector available", 0);
                         return;
+                    }
+
+                    // Initialize Playwright asynchronously if needed
+                    if (detector is PlaywrightDetector pw)
+                    {
+                        await pw.EnsureInitializedAsync();
                     }
 
                     element = await detector.GetElementAtPoint(point, profile);
@@ -3764,14 +3775,8 @@ namespace UIElementInspector
             }
             else if (techIndex == 4) // Playwright
             {
-                // Playwright selected - initialize browser if needed
-                var playwrightDetector = _detectors.FirstOrDefault(d => d.Name == "Playwright") as PlaywrightDetector;
-                if (playwrightDetector != null)
-                {
-                    // Initialize browser synchronously when user explicitly selects Playwright
-                    Task.Run(async () => await playwrightDetector.EnsureInitializedAsync()).GetAwaiter().GetResult();
-                }
-                return playwrightDetector;
+                // Playwright selected - return detector, initialization will happen in async caller
+                return _detectors.FirstOrDefault(d => d.Name == "Playwright");
             }
             else if (techIndex == 5) // All Technologies
             {
@@ -3844,7 +3849,19 @@ namespace UIElementInspector
 
         private void TreeView_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-            // TODO: Implement context menu for tree view
+            if (_currentElement == null) return;
+            var menu = new System.Windows.Controls.ContextMenu();
+            var copyItem = new System.Windows.Controls.MenuItem { Header = "Kopyala" };
+            copyItem.Click += (s, args) => CopyCurrentElement_Click(s, new RoutedEventArgs());
+            var deleteItem = new System.Windows.Controls.MenuItem { Header = "Sil" };
+            deleteItem.Click += (s, args) =>
+            {
+                _collectedElements.Remove(_currentElement);
+                _currentElement = null;
+            };
+            menu.Items.Add(copyItem);
+            menu.Items.Add(deleteItem);
+            menu.IsOpen = true;
         }
 
         private void TreeSearch_TextChanged(object sender, TextChangedEventArgs e)
@@ -4049,12 +4066,20 @@ namespace UIElementInspector
 
         private void ExpandAll_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement expand all functionality
+            foreach (var item in _collectedElements)
+            {
+                var tvi = tvElements.ItemContainerGenerator.ContainerFromItem(item) as System.Windows.Controls.TreeViewItem;
+                if (tvi != null) tvi.IsExpanded = true;
+            }
         }
 
         private void CollapseAll_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement collapse all functionality
+            foreach (var item in _collectedElements)
+            {
+                var tvi = tvElements.ItemContainerGenerator.ContainerFromItem(item) as System.Windows.Controls.TreeViewItem;
+                if (tvi != null) tvi.IsExpanded = false;
+            }
         }
 
         private async void Refresh_Click(object sender, RoutedEventArgs e)
@@ -4390,7 +4415,26 @@ namespace UIElementInspector
 
         private void CopyScreenshot_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement screenshot copy
+            if (_currentElement?.Screenshot != null && _currentElement.Screenshot.Length > 0)
+            {
+                try
+                {
+                    using (var ms = new System.IO.MemoryStream(_currentElement.Screenshot))
+                    using (var bitmap = new System.Drawing.Bitmap(ms))
+                    {
+                        System.Windows.Forms.Clipboard.SetImage(bitmap);
+                        LogToConsole("Screenshot panoya kopyalandi.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogToConsole($"Screenshot kopyalanamadi: {ex.Message}", Core.Utils.LogLevel.Error);
+                }
+            }
+            else
+            {
+                LogToConsole("Kopyalanacak screenshot yok.", Core.Utils.LogLevel.Warning);
+            }
         }
 
         private void CopySourceCode_Click(object sender, RoutedEventArgs e)
@@ -4409,27 +4453,33 @@ namespace UIElementInspector
 
         private void RawView_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Switch to raw view
+            // Switch to RAW PROPERTIES tab (index 0)
+            var tabControl = FindName("tabControl") as System.Windows.Controls.TabControl;
+            if (tabControl != null) tabControl.SelectedIndex = 0;
         }
 
         private void TreeView_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Switch to tree view
+            // Switch to ALL PROPERTIES tab (index 1)
+            var tabControl = FindName("tabControl") as System.Windows.Controls.TabControl;
+            if (tabControl != null) tabControl.SelectedIndex = 1;
         }
 
         private void ScreenshotTool_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Open screenshot tool
+            // Redirect to F9 screenshot region
+            ScreenshotRegion_Click(sender, e);
         }
 
         private void RegionSelector_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Open region selector
+            // Redirect to F9 screenshot region
+            ScreenshotRegion_Click(sender, e);
         }
 
         private void ColorPicker_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Open color picker
+            LogToConsole("Renk secici henuz desteklenmiyor.", Core.Utils.LogLevel.Warning);
         }
 
         private void Settings_Click(object sender, RoutedEventArgs e)
@@ -4453,11 +4503,18 @@ namespace UIElementInspector
 
         private void Documentation_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start(new ProcessStartInfo
+            try
             {
-                FileName = "https://github.com/ikizler1/UIElementInspector",
-                UseShellExecute = true
-            });
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://github.com/ikizler1/UIElementInspector",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Tarayici acilamadi: {ex.Message}", Core.Utils.LogLevel.Error);
+            }
         }
 
         private void KeyboardShortcuts_Click(object sender, RoutedEventArgs e)
@@ -4747,8 +4804,8 @@ Desteklenen tespit teknolojileri:
                         $"{element.RowSpan},{element.ColumnSpan}," +
                         $"{element.IsTableCell},{element.IsTableHeader}," +
                         $"\"{EscapeCsv(element.TableName)}\"," +
-                        $"\"{EscapeCsv(string.Join(";", element.ColumnHeaders))}\"," +
-                        $"\"{EscapeCsv(string.Join(";", element.RowHeaders))}\"," +
+                        $"\"{EscapeCsv(string.Join(";", element.ColumnHeaders ?? new List<string>()))}\"," +
+                        $"\"{EscapeCsv(string.Join(";", element.RowHeaders ?? new List<string>()))}\"," +
                         $"\"{EscapeCsv(element.XPath)}\"," +
                         $"\"{EscapeCsv(element.CssSelector)}\"," +
                         $"\"{EscapeCsv(element.PlaywrightTableSelector)}\"," +
@@ -4799,14 +4856,14 @@ Desteklenen tespit teknolojileri:
                     sb.AppendLine($"      <IsTableCell>{element.IsTableCell}</IsTableCell>");
                     sb.AppendLine($"      <IsTableHeader>{element.IsTableHeader}</IsTableHeader>");
                     sb.AppendLine($"      <TableName>{EscapeXml(element.TableName)}</TableName>");
-                    if (element.ColumnHeaders.Count > 0)
+                    if (element.ColumnHeaders != null && element.ColumnHeaders.Count > 0)
                     {
                         sb.AppendLine("      <ColumnHeaders>");
                         foreach (var header in element.ColumnHeaders)
                             sb.AppendLine($"        <Header>{EscapeXml(header)}</Header>");
                         sb.AppendLine("      </ColumnHeaders>");
                     }
-                    if (element.RowHeaders.Count > 0)
+                    if (element.RowHeaders != null && element.RowHeaders.Count > 0)
                     {
                         sb.AppendLine("      <RowHeaders>");
                         foreach (var header in element.RowHeaders)

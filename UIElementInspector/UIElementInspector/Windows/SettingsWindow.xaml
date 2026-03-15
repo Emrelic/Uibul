@@ -112,45 +112,10 @@
                     </StackPanel>
                 </GroupBox>
 
-                <!-- Hotkey Settings -->
-                <GroupBox Header="Hotkey Settings">
-                    <StackPanel>
-                        <TextBlock Text="Keyboard shortcuts:" FontWeight="Bold"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Start/Stop Inspection:"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Ctrl+Shift+I" FontWeight="Bold"/>
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Capture Element:"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Ctrl+Click" FontWeight="Bold"/>
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Region Selection:"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Ctrl+Shift+R" FontWeight="Bold"/>
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Export All:"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Ctrl+Shift+E" FontWeight="Bold"/>
-                        </Grid>
-
-                        <TextBlock Text="Note: Hotkey customization will be available in a future update."
-                                   FontStyle="Italic" Foreground="Gray" Margin="5,10,5,5"/>
-                    </StackPanel>
-                </GroupBox>
-
                 <!-- UI Settings -->
                 <GroupBox Header="User Interface">
                     <StackPanel>
                         <CheckBox x:Name="chkAlwaysOnTop" Content="Keep window always on top" IsChecked="False"/>
-                        <CheckBox x:Name="chkMinimizeToTray" Content="Minimize to system tray" IsChecked="False"/>
                         <CheckBox x:Name="chkShowNotifications" Content="Show notification messages" IsChecked="True"/>
                         <CheckBox x:Name="chkShowTooltips" Content="Show tooltips" IsChecked="True"/>
                     </StackPanel>

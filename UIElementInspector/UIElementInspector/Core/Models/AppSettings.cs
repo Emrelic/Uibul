@@ -39,15 +39,8 @@ namespace UIElementInspector.Core.Models
         public bool EnableDetectionThrottling { get; set; } = true;
         public bool CacheElements { get; set; } = true;
 
-        // Hotkey Settings (for future implementation)
-        public string HotkeyStartStop { get; set; } = "Ctrl+Shift+I";
-        public string HotkeyCaptureElement { get; set; } = "Ctrl+Click";
-        public string HotkeyRegionSelection { get; set; } = "Ctrl+Shift+R";
-        public string HotkeyExportAll { get; set; } = "Ctrl+Shift+E";
-
         // UI Settings
         public bool AlwaysOnTop { get; set; } = false;
-        public bool MinimizeToTray { get; set; } = false;
         public bool ShowNotifications { get; set; } = true;
         public bool ShowTooltips { get; set; } = true;
 

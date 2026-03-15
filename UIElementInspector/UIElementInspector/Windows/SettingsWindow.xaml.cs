@@ -80,7 +80,7 @@ namespace UIElementInspector.Windows
 
             // UI Settings
             chkAlwaysOnTop.IsChecked = _settings.AlwaysOnTop;
-            chkMinimizeToTray.IsChecked = _settings.MinimizeToTray;
+            // chkMinimizeToTray removed - feature not implemented
             chkShowNotifications.IsChecked = _settings.ShowNotifications;
             chkShowTooltips.IsChecked = _settings.ShowTooltips;
         }
@@ -129,7 +129,7 @@ namespace UIElementInspector.Windows
 
             // UI Settings
             _settings.AlwaysOnTop = chkAlwaysOnTop.IsChecked == true;
-            _settings.MinimizeToTray = chkMinimizeToTray.IsChecked == true;
+            // chkMinimizeToTray removed - feature not implemented
             _settings.ShowNotifications = chkShowNotifications.IsChecked == true;
             _settings.ShowTooltips = chkShowTooltips.IsChecked == true;
 

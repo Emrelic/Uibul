@@ -206,8 +206,11 @@ namespace UIElementInspector.Core.Utils
                 timer.Tick += (s, e) =>
                 {
                     timer.Stop();
-                    borderForm.Close();
                     timer.Dispose();
+                    highlight.Close();
+                    highlight.Dispose();
+                    borderForm.Close();
+                    borderForm.Dispose();
                 };
                 timer.Start();
             }
@@ -229,9 +232,10 @@ namespace UIElementInspector.Core.Utils
 
                 var bitmapImage = new BitmapImage();
                 bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
                 bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = memory;
                 bitmapImage.EndInit();
+                bitmapImage.Freeze();
 
                 return bitmapImage;
             }
