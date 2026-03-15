@@ -342,6 +342,14 @@ namespace UIElementInspector.Core.Utils
         /// <returns>The full path to the saved screenshot file</returns>
         public static string CaptureRegionToDesktopAndClipboard(Rectangle region)
         {
+            return CaptureRegionToFolderAndClipboard(region, null);
+        }
+
+        /// <summary>
+        /// Captures a region, saves to specified folder (or desktop if null), and copies to clipboard
+        /// </summary>
+        public static string CaptureRegionToFolderAndClipboard(Rectangle region, string targetFolder)
+        {
             try
             {
                 // Capture the region
@@ -350,10 +358,17 @@ namespace UIElementInspector.Core.Utils
                     // Generate unique filename with timestamp
                     var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
                     var fileName = $"Screenshot_{timestamp}.png";
-                    var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    var filePath = Path.Combine(desktopPath, fileName);
+                    var savePath = string.IsNullOrWhiteSpace(targetFolder)
+                        ? Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                        : targetFolder;
 
-                    // Save to desktop
+                    // Ensure directory exists
+                    if (!Directory.Exists(savePath))
+                        Directory.CreateDirectory(savePath);
+
+                    var filePath = Path.Combine(savePath, fileName);
+
+                    // Save to target folder
                     bitmap.Save(filePath, ImageFormat.Png);
 
                     // Copy both image and file path to clipboard

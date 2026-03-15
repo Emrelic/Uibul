@@ -43,6 +43,7 @@ namespace UIElementInspector
         private string _lastCapturePath = "";
         private Core.Utils.Logger _logger;
         private ArchiveManager _archiveManager;
+        private Core.Models.AppSettings _appSettings;
 
         public MainWindow()
         {
@@ -89,6 +90,11 @@ namespace UIElementInspector
             try
             {
                 _logger.LogSection("SERVICE INITIALIZATION");
+
+                // Load application settings
+                _appSettings = Core.Models.AppSettings.Load();
+                _appSettings.Apply();
+                _logger.LogInfo($"Settings loaded - Export directory: {_appSettings.ExportDirectory}");
 
                 // Initialize archive manager
                 _archiveManager = new ArchiveManager();
@@ -294,8 +300,12 @@ namespace UIElementInspector
                 }
                 _archiveManager.SaveIndex();
 
-                // Save to Desktop with temp name
-                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                // Save to output folder (ExportDirectory from settings, fallback to Desktop)
+                var desktopPath = _appSettings.ExportDirectory;
+                if (string.IsNullOrWhiteSpace(desktopPath))
+                    desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                if (!System.IO.Directory.Exists(desktopPath))
+                    System.IO.Directory.CreateDirectory(desktopPath);
                 var desktopFilePath = System.IO.Path.Combine(desktopPath, $"UIElementInspector_Report_{timestamp}.txt");
                 System.IO.File.WriteAllText(desktopFilePath, reportContent, System.Text.Encoding.UTF8);
 
@@ -561,8 +571,8 @@ namespace UIElementInspector
                         (int)region.Width,
                         (int)region.Height);
 
-                    // Capture, save to desktop, and copy to clipboard
-                    var savedPath = Core.Utils.ScreenshotHelper.CaptureRegionToDesktopAndClipboard(drawingRegion);
+                    // Capture, save to configured folder (or desktop), and copy to clipboard
+                    var savedPath = Core.Utils.ScreenshotHelper.CaptureRegionToFolderAndClipboard(drawingRegion, _appSettings.ExportDirectory);
 
                     // Show main window again
                     if (wasVisible)
@@ -582,7 +592,13 @@ namespace UIElementInspector
                     LogToConsole("  - Dosya (Explorer'da yapistir)");
                     LogToConsole("===========================================");
 
-                    SetOperationStatus("Screenshot alindi!", savedPath);
+                    // Update status bar text only - do NOT call SetOperationStatus
+                    // as it shows progress indicators that never get cleared
+                    Dispatcher.Invoke(() =>
+                    {
+                        sbOperationStatus.Text = "Screenshot alindi!";
+                        sbOperationProgress.Text = savedPath;
+                    });
                 }
                 else
                 {
@@ -594,7 +610,11 @@ namespace UIElementInspector
                     }
 
                     LogToConsole("Ekran goruntusu iptal edildi.");
-                    SetOperationStatus("Iptal edildi", "");
+                    Dispatcher.Invoke(() =>
+                    {
+                        sbOperationStatus.Text = "Iptal edildi";
+                        sbOperationProgress.Text = "";
+                    });
                 }
             }
             catch (Exception ex)
@@ -605,7 +625,11 @@ namespace UIElementInspector
 
                 LogToConsole($"HATA: {ex.Message}");
                 _logger.LogException(ex, "Screenshot region capture failed");
-                SetOperationStatus("Hata!", ex.Message);
+                Dispatcher.Invoke(() =>
+                {
+                    sbOperationStatus.Text = "Hata!";
+                    sbOperationProgress.Text = ex.Message;
+                });
             }
         }
 
@@ -622,6 +646,17 @@ namespace UIElementInspector
                 return;
             }
             _isCaptureInProgress = true;
+
+            // CRITICAL: Lock mouse position immediately when F7/F8 is pressed
+            // This prevents the target from changing if the user moves the mouse
+            // during the capture process (e.g. when the naming dialog appears)
+            var mousePos = System.Windows.Forms.Cursor.Position;
+            var wpfPoint = new System.Windows.Point(mousePos.X, mousePos.Y);
+
+            // Pause inspection so mouse movement doesn't change the target
+            var wasInspecting = _isInspecting;
+            _isInspecting = false;
+
             System.Drawing.Bitmap fullScreenBitmap = null;
             System.Drawing.Bitmap windowBitmap = null;
             System.Drawing.Bitmap elementBitmap = null;
@@ -637,10 +672,7 @@ namespace UIElementInspector
                 LogToConsole("===========================================");
                 LogToConsole($"       TAM YAKALAMA ({targetDesc})      ");
                 LogToConsole("===========================================");
-
-                // Step 1: SCREENSHOTS FIRST - before CaptureElementAtPoint which may trigger Playwright
-                var mousePos = System.Windows.Forms.Cursor.Position;
-                var wpfPoint = new System.Windows.Point(mousePos.X, mousePos.Y);
+                LogToConsole($"  -> Koordinat kilitlendi: ({mousePos.X}, {mousePos.Y})");
 
                 LogToConsole("[1/8] Ekran goruntuleri aliniyor (temiz ekran)...");
 
@@ -740,15 +772,19 @@ namespace UIElementInspector
                     LogToConsole($"Arsiv klasoru olusturuldu: {archiveFolderPath}");
                 }
 
-                // Create desktop folder with temp name
+                // Create output folder with temp name (uses ExportDirectory from settings)
                 string desktopFolderPath = null;
                 if (saveToDesktop)
                 {
-                    var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    var outputPath = _appSettings.ExportDirectory;
+                    if (string.IsNullOrWhiteSpace(outputPath))
+                        outputPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    if (!System.IO.Directory.Exists(outputPath))
+                        System.IO.Directory.CreateDirectory(outputPath);
                     var folderName = $"UICapture_{timestamp}";
-                    desktopFolderPath = System.IO.Path.Combine(desktopPath, folderName);
+                    desktopFolderPath = System.IO.Path.Combine(outputPath, folderName);
                     System.IO.Directory.CreateDirectory(desktopFolderPath);
-                    LogToConsole($"Masaustu klasoru olusturuldu: {folderName}");
+                    LogToConsole($"Cikti klasoru olusturuldu: {desktopFolderPath}");
                 }
                 SetProgressValue(30, "Klasörler hazırlandı", "Klasörler oluşturuldu");
 
@@ -1012,6 +1048,10 @@ namespace UIElementInspector
                 windowBitmap?.Dispose();
                 elementBitmap?.Dispose();
                 _isCaptureInProgress = false;
+
+                // Restore inspection state if it was active before capture
+                if (wasInspecting)
+                    _isInspecting = true;
             }
         }
 
@@ -3763,7 +3803,7 @@ namespace UIElementInspector
         {
             try
             {
-                SafeSetClipboard(text);
+                System.Windows.Clipboard.SetText(text);
                 return true;
             }
             catch (System.Runtime.InteropServices.ExternalException)
@@ -4394,7 +4434,14 @@ namespace UIElementInspector
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Open settings window
+            var settingsWindow = new Windows.SettingsWindow(_appSettings);
+            settingsWindow.Owner = this;
+            if (settingsWindow.ShowDialog() == true && settingsWindow.SettingsChanged)
+            {
+                _appSettings = settingsWindow.Settings;
+                _appSettings.Apply();
+                LogToConsole($"Ayarlar kaydedildi. Cikti klasoru: {_appSettings.ExportDirectory}");
+            }
         }
 
         private void Guide_Click(object sender, RoutedEventArgs e)

@@ -56,14 +56,14 @@
 
                         <Separator Margin="0,10"/>
 
-                        <TextBlock Text="Export directory:" FontWeight="Bold"/>
+                        <TextBlock Text="Cikti klasoru (F6, F7, F9 dosyalari buraya kaydedilir):" FontWeight="Bold"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="txtExportPath" Grid.Column="0" Margin="5" Padding="5"/>
-                            <Button x:Name="btnBrowse" Content="Browse..." Grid.Column="1" Width="80" Margin="5" Click="BrowseExportPath_Click"/>
+                            <Button x:Name="btnBrowse" Content="Gozat..." Grid.Column="1" Width="80" Margin="5" Click="BrowseExportPath_Click"/>
                         </Grid>
 
                         <CheckBox x:Name="chkAutoExport" Content="Auto-export on capture" IsChecked="False"/>
