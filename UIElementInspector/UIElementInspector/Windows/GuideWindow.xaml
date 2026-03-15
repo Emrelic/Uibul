@@ -134,7 +134,7 @@
                                 <TextBlock Grid.Row="3" Grid.Column="1" Text="Seçili elementi yeniden analiz et" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
 
                                 <TextBlock Grid.Row="4" Grid.Column="0" Text="F7" FontWeight="Bold" FontSize="13" Foreground="#388E3C" Margin="0,4"/>
-                                <TextBlock Grid.Row="4" Grid.Column="1" Text="TAM YAKALAMA - 8 adımda masaüstü + arşive kaydet" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text="TAM YAKALAMA - 8 adımda çıktı klasörü + arşive kaydet" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
 
                                 <TextBlock Grid.Row="5" Grid.Column="0" Text="F8" FontWeight="Bold" FontSize="13" Foreground="#FF8F00" Margin="0,4"/>
                                 <TextBlock Grid.Row="5" Grid.Column="1" Text="TAM YAKALAMA - sadece arşive kaydet" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
@@ -143,7 +143,7 @@
                                 <TextBlock Grid.Row="6" Grid.Column="1" Text="Ekran Bölge Seçimi - seçilen alanın görüntüsünü al" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
 
                                 <TextBlock Grid.Row="7" Grid.Column="0" Text="Ctrl+S" FontWeight="Bold" FontSize="13" Foreground="#455A64" Margin="0,4"/>
-                                <TextBlock Grid.Row="7" Grid.Column="1" Text="Hızlı kaydet - element bilgilerini TXT olarak masaüstüne" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+                                <TextBlock Grid.Row="7" Grid.Column="1" Text="Hızlı kaydet - element bilgilerini TXT olarak çıktı klasörüne" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
 
                                 <TextBlock Grid.Row="8" Grid.Column="0" Text="Ctrl+C" FontWeight="Bold" FontSize="13" Foreground="#455A64" Margin="0,4"/>
                                 <TextBlock Grid.Row="8" Grid.Column="1" Text="Element verilerini panoya kopyala" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
@@ -217,9 +217,14 @@
                         </TextBlock>
                         <Border Background="#E8EAF6" CornerRadius="4" Padding="10" Margin="0,10,0,0">
                             <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#283593">
-                                <Run FontWeight="Bold">Yuvarlak İlerleme:</Run> Yakalama sırasında ekranda pasta şeklinde dönen bir
-                                ilerleme göstergesi belirir. Mavi dilim saat yönünde 360° dolduğunda ve yeşil tik işareti
-                                göründüğünde işlem tamamlanmıştır.
+                                <Run FontWeight="Bold">Koordinat Kilitleme:</Run> F7'ye bastığınız anda fare koordinatı kilitlenir.
+                                İsim girme penceresi açıldığında fareyi hareket ettirebilirsiniz - hedef element değişmez.
+                            </TextBlock>
+                        </Border>
+                        <Border Background="#FFF9C4" CornerRadius="4" Padding="10" Margin="0,10,0,0">
+                            <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#F57F17">
+                                <Run FontWeight="Bold">Çıktı Klasörü:</Run> Dosyalar Ayarlar'da belirlenen çıktı klasörüne kaydedilir.
+                                Değiştirmek için: Araçlar > Ayarlar > Çıktı klasörü. Varsayılan: Masaüstü\UI Inspector Exports
                             </TextBlock>
                         </Border>
                     </StackPanel>
@@ -247,7 +252,7 @@
                             <LineBreak/>1. F9 tuşuna basın
                             <LineBreak/>2. Fare ile bir köşeden başlayıp çapraz köşeye sürükleyin
                             <LineBreak/>3. Seçilen bölge otomatik olarak:
-                            <LineBreak/>   - PNG olarak masaüstüne kaydedilir
+                            <LineBreak/>   - PNG olarak çıktı klasörüne kaydedilir (Ayarlar'dan değiştirilebilir)
                             <LineBreak/>   - Panoya kopyalanır (yapıştırmak için Ctrl+V)
                             <LineBreak/>   - Dosya yolu da panoya eklenir
                             <LineBreak/><LineBreak/>
