@@ -508,36 +508,107 @@ namespace UIElementInspector
             {
                 if (string.IsNullOrEmpty(_lastCapturePath))
                 {
-                    LogToConsole("[F10] Henuz yakalama yapilmadi, yapistir icin once F7/F8 ile yakalama yapin.");
+                    LogToConsole("[F10] Henuz yakalama yapilmadi, yapistir icin once F7/F8/F9 ile yakalama yapin.");
                     return;
                 }
 
-                // Copy path to clipboard
-                SafeSetClipboard(_lastCapturePath);
-                LogToConsole($"[F10] Dizin yolu panoya kopyalandi: {_lastCapturePath}");
-
-                // Simulate Ctrl+V paste after a brief delay
-                System.Threading.Tasks.Task.Delay(150).ContinueWith(_ =>
+                // Replace clipboard with TEXT ONLY (overwrites any image+path DataObject from F9).
+                // Clear() first to drop the multi-format DataObject, then SetDataObject with a
+                // fresh single-format object — SetText alone can leave other formats lingering
+                // in some Windows clipboard states.
+                bool ok = false;
+                Exception lastErr = null;
+                for (int attempt = 0; attempt < 5 && !ok; attempt++)
                 {
+                    try
+                    {
+                        System.Windows.Clipboard.Clear();
+                        var textOnly = new System.Windows.DataObject();
+                        textOnly.SetText(_lastCapturePath);
+                        System.Windows.Clipboard.SetDataObject(textOnly, true);
+                        ok = true;
+                    }
+                    catch (Exception cex)
+                    {
+                        lastErr = cex;
+                        System.Threading.Thread.Sleep(80);
+                    }
+                }
+
+                if (!ok)
+                {
+                    LogToConsole($"[F10] Pano kopyalanamadi: {lastErr?.Message}", Core.Utils.LogLevel.Error);
                     Dispatcher.Invoke(() =>
                     {
-                        try
-                        {
-                            System.Windows.Forms.SendKeys.SendWait("^v");
-                            LogToConsole("[F10] Dizin yolu yapistirildı.");
-                        }
-                        catch (Exception ex)
-                        {
-                            LogToConsole($"[F10] Yapistirma hatasi: {ex.Message}");
-                        }
+                        sbOperationStatus.Text = "F10: Pano hatasi!";
+                        sbOperationProgress.Text = lastErr?.Message ?? "";
                     });
-                });
+                    return;
+                }
+
+                LogToConsole($"[F10] Yol panoya kopyalandi (text-only). Hedef pencerede Ctrl+V ile yapistirin:");
+                LogToConsole($"       {_lastCapturePath}");
+
+                // Diagnostic: read back clipboard formats so we can see if image lingered
+                try
+                {
+                    var formats = System.Windows.Clipboard.GetDataObject()?.GetFormats() ?? new string[0];
+                    LogToConsole($"[F10] Pano formatlari: {(formats.Length == 0 ? "(bos)" : string.Join(", ", formats))}");
+                }
+                catch (Exception diagEx)
+                {
+                    LogToConsole($"[F10] Format okunamadi: {diagEx.Message}");
+                }
+
+                // Auto-paste: send Ctrl+V to whichever window is foreground —
+                // BUT skip if Inspector itself is foreground (would paste into our own console)
+                var inspectorHwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                var fgHwnd = GetForegroundWindow();
+                bool inspectorIsForeground = (fgHwnd == inspectorHwnd);
+
+                if (inspectorIsForeground)
+                {
+                    LogToConsole("[F10] Inspector aktif - otomatik yapistirma atlandi. Hedef pencereye gecip Ctrl+V yapin.");
+                    Dispatcher.Invoke(() =>
+                    {
+                        sbOperationStatus.Text = "F10: Yol panoda (hedefe gecip Ctrl+V)";
+                        sbOperationProgress.Text = _lastCapturePath;
+                    });
+                }
+                else
+                {
+                    // Brief delay so the Clipboard write fully propagates before SendKeys reads it
+                    System.Threading.Tasks.Task.Delay(100).ContinueWith(_ =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            try
+                            {
+                                System.Windows.Forms.SendKeys.SendWait("^v");
+                                LogToConsole("[F10] Yol otomatik yapistirildi.");
+                            }
+                            catch (Exception ex)
+                            {
+                                LogToConsole($"[F10] Yapistirma hatasi: {ex.Message}");
+                            }
+                        });
+                    });
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        sbOperationStatus.Text = "F10: Yol yapistirildi";
+                        sbOperationProgress.Text = _lastCapturePath;
+                    });
+                }
             }
             catch (Exception ex)
             {
                 LogToConsole($"[F10] Hata: {ex.Message}", Core.Utils.LogLevel.Error);
             }
         }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
 
         /// <summary>
         /// F9 - Screenshot Region: Opens region selector, captures screenshot,
@@ -579,6 +650,25 @@ namespace UIElementInspector
 
                     // Capture, save to configured folder (or desktop), and copy to clipboard
                     var savedPath = Core.Utils.ScreenshotHelper.CaptureRegionToFolderAndClipboard(drawingRegion, _appSettings.ExportDirectory);
+
+                    // Remember path for F10 (paste path shortcut)
+                    _lastCapturePath = savedPath;
+
+                    // Show captured image in the Screenshot tab
+                    try
+                    {
+                        var preview = new System.Windows.Media.Imaging.BitmapImage();
+                        preview.BeginInit();
+                        preview.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                        preview.UriSource = new Uri(savedPath, UriKind.Absolute);
+                        preview.EndInit();
+                        preview.Freeze();
+                        imgScreenshot.Source = preview;
+                    }
+                    catch (Exception previewEx)
+                    {
+                        LogToConsole($"[F9] Onizleme yuklenemedi: {previewEx.Message}", Core.Utils.LogLevel.Warning);
+                    }
 
                     // Show main window again
                     if (wasVisible)

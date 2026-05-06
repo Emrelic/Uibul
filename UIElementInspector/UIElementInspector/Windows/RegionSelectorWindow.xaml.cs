@@ -217,12 +217,25 @@ namespace UIElementInspector.Windows
         {
             var selector = new RegionSelectorWindow();
 
-            if (selector.ShowDialog() == true && !selector.SelectionCancelled)
+            try
             {
-                return selector.SelectedRegion;
+                if (selector.ShowDialog() == true && !selector.SelectionCancelled)
+                {
+                    return selector.SelectedRegion;
+                }
+                return null;
             }
-
-            return null;
+            finally
+            {
+                // Guarantee window is closed and mouse capture released
+                // even if ShowDialog throws or caller's finally is skipped
+                try { Mouse.Capture(null); } catch { }
+                try
+                {
+                    if (selector.IsVisible) selector.Close();
+                }
+                catch { }
+            }
         }
     }
 }

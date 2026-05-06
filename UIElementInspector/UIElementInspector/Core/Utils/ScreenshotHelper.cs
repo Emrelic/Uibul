@@ -399,10 +399,9 @@ namespace UIElementInspector.Core.Utils
                 // Create DataObject to hold multiple formats
                 var dataObject = new System.Windows.DataObject();
 
-                // Add image in multiple formats for maximum compatibility
-                // 1. Add as BitmapSource (WPF format)
-                var bitmapSource = ConvertToBitmapSource(bitmap);
-                dataObject.SetImage(bitmapSource);
+                // 1. Self-contained, frozen BitmapImage (PNG-encoded, fully cached on EndInit)
+                //    avoids the unsafe Scan0-referencing BitmapSource that fails silently in WPF Clipboard
+                dataObject.SetImage(ConvertToBitmapImage(bitmap));
 
                 // 2. Add as DIB (Device Independent Bitmap) for better compatibility
                 using (var ms = new MemoryStream())
@@ -424,8 +423,23 @@ namespace UIElementInspector.Core.Utils
                 var htmlFormat = $@"<html><body><img src=""file:///{filePath.Replace("\\", "/")}"" /><br/>{filePath}</body></html>";
                 dataObject.SetData(System.Windows.DataFormats.Html, htmlFormat);
 
-                // Set to clipboard
-                System.Windows.Clipboard.SetDataObject(dataObject, true);
+                // Set to clipboard with retry — another process may briefly hold the clipboard
+                // (CLIPBRD_E_CANT_OPEN 0x800401D0). Retry a few times before giving up.
+                Exception lastError = null;
+                for (int attempt = 0; attempt < 5; attempt++)
+                {
+                    try
+                    {
+                        System.Windows.Clipboard.SetDataObject(dataObject, true);
+                        return;
+                    }
+                    catch (System.Runtime.InteropServices.COMException comEx)
+                    {
+                        lastError = comEx;
+                        System.Threading.Thread.Sleep(80);
+                    }
+                }
+                throw new Exception($"Pano mesgul, 5 deneme sonrasinda kopyalanamadi: {lastError?.Message}", lastError);
             }
             catch (Exception ex)
             {
