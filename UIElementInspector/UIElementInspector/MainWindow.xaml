@@ -14,6 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
 
@@ -550,8 +551,92 @@
             </Border>
         </Grid>
 
+        <!-- Hotkey Info Panel -->
+        <Border Grid.Row="3" Background="#2D2D30" Margin="5,2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="KISAYOLLAR:" FontWeight="Bold" Foreground="#00FF00"
+                          VerticalAlignment="Center" Margin="10,5"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,5">
+                    <!-- F1 -->
+                    <Border Background="#4A4A4A" CornerRadius="3" Margin="3,0" Padding="5,3">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F1" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,5,0"/>
+                            <TextBlock Text="Start" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- F2 -->
+                    <Border Background="#4A4A4A" CornerRadius="3" Margin="3,0" Padding="5,3">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F2" FontWeight="Bold" Foreground="#FF6347" Margin="0,0,5,0"/>
+                            <TextBlock Text="Stop" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- F3 -->
+                    <Border Background="#4A4A4A" CornerRadius="3" Margin="3,0" Padding="5,3">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F3" FontWeight="Bold" Foreground="#32CD32" Margin="0,0,5,0"/>
+                            <TextBlock Text="Start (Gorunur)" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- F4 - Deklansor -->
+                    <Border Background="#8B0000" CornerRadius="3" Margin="3,0" Padding="5,3">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F4" FontWeight="Bold" Foreground="#FF0000" Margin="0,0,5,0"/>
+                            <TextBlock Text="DEKLANSOR" Foreground="White" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- F5 -->
+                    <Border Background="#4A4A4A" CornerRadius="3" Margin="3,0" Padding="5,3">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F5" FontWeight="Bold" Foreground="#1E90FF" Margin="0,0,5,0"/>
+                            <TextBlock Text="Refresh" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- F6 -->
+                    <Border Background="#006400" CornerRadius="3" Margin="3,0" Padding="5,3">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F6" FontWeight="Bold" Foreground="#00FF00" Margin="0,0,5,0"/>
+                            <TextBlock Text="Desktop TXT" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- F7 - TAM YAKALAMA -->
+                    <Border Background="#FF4500" CornerRadius="3" Margin="3,0" Padding="5,3">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F7" FontWeight="Bold" Foreground="#FFFF00" Margin="0,0,5,0"/>
+                            <TextBlock Text="TAM YAKALAMA" Foreground="White" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Ctrl+S -->
+                    <Border Background="#4A4A4A" CornerRadius="3" Margin="3,0" Padding="5,3">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Ctrl+S" FontWeight="Bold" Foreground="#DA70D6" Margin="0,0,5,0"/>
+                            <TextBlock Text="Export" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Status Indicator -->
+                    <Border Name="brdShutterStatus" Background="Transparent" CornerRadius="3" Margin="20,0,3,0" Padding="10,3">
+                        <TextBlock Name="txtShutterStatus" Text="" FontWeight="Bold" Foreground="#FF0000"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- Status Bar -->
-        <StatusBar Grid.Row="3">
+        <StatusBar Grid.Row="4">
             <StatusBarItem>
                 <TextBlock Name="sbStatus" Text="Ready"/>
             </StatusBarItem>

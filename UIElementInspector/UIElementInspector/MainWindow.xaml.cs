@@ -95,15 +95,45 @@ namespace UIElementInspector
 
                 // Initialize hotkey service
                 _hotkeyService = new HotkeyService(this);
+
+                // F1 = Start Inspection (pencere minimize edilir)
                 var f1 = _hotkeyService.RegisterHotkey(Key.F1, ModifierKeys.None, StartInspection_Click);
+
+                // F2 = Stop Inspection
                 var f2 = _hotkeyService.RegisterHotkey(Key.F2, ModifierKeys.None, StopInspection_Click);
+
+                // F3 = Start Inspection (pencere minimize edilmez - Keep Visible)
+                var f3 = _hotkeyService.RegisterHotkey(Key.F3, ModifierKeys.None, StartKeepVisible_Click);
+
+                // F4 = Shutter Mode - Deklansor (basili tutunca aktif, birakinca durur)
+                _hotkeyService.RegisterShutterKey(Key.F4, ShutterDown, ShutterUp);
+
+                // F5 = Refresh current element
                 var f5 = _hotkeyService.RegisterHotkey(Key.F5, ModifierKeys.None, Refresh_Click);
+
+                // F6 = Export all reports to Desktop as TXT
+                var f6 = _hotkeyService.RegisterHotkey(Key.F6, ModifierKeys.None, ExportToDesktop_Click);
+
+                // F7 = FULL CAPTURE - 5 teknoloji + element listesi + kaynak kod + screenshot
+                var f7 = _hotkeyService.RegisterHotkey(Key.F7, ModifierKeys.None, FullCaptureToDesktop_Click);
+
+                // Ctrl+S = Quick Export
                 var ctrlS = _hotkeyService.RegisterHotkey(Key.S, ModifierKeys.Control, ExportQuick_Click);
 
-                _logger.LogInfo($"Hotkey service initialized - F1: {f1}, F2: {f2}, F5: {f5}, Ctrl+S: {ctrlS}");
+                _logger.LogInfo($"Hotkey service initialized - F1:{f1}, F2:{f2}, F3:{f3}, F4:Shutter, F5:{f5}, F6:{f6}, F7:{f7}, Ctrl+S:{ctrlS}");
 
-                LogToConsole("Services initialized successfully.");
-                LogToConsole($"Global hotkeys registered: F1={f1}, F2={f2}, F5={f5}, Ctrl+S={ctrlS}");
+                LogToConsole("===========================================");
+                LogToConsole("          KISAYOL TUSLARI (HOTKEYS)        ");
+                LogToConsole("===========================================");
+                LogToConsole("  F1  = Start Inspection (Pencere Gizlenir)");
+                LogToConsole("  F2  = Stop Inspection");
+                LogToConsole("  F3  = Start Inspection (Pencere Gorunur)");
+                LogToConsole("  F4  = DEKLANSOR (Basili Tut = Aktif)");
+                LogToConsole("  F5  = Refresh Element");
+                LogToConsole("  F6  = Masaustune TXT Rapor Cikart");
+                LogToConsole("  F7  = TAM YAKALAMA (5Tech+Liste+Kod+SS)");
+                LogToConsole("  Ctrl+S = Hizli Export");
+                LogToConsole("===========================================");
             }
             catch (Exception ex)
             {
@@ -111,6 +141,681 @@ namespace UIElementInspector
                 LogToConsole($"Error initializing services: {ex.Message}", Core.Utils.LogLevel.Error);
             }
         }
+
+        #region Shutter Mode (Deklansor)
+
+        private bool _shutterActive = false;
+
+        private void ShutterDown()
+        {
+            if (_shutterActive) return;
+            _shutterActive = true;
+
+            LogToConsole("[DEKLANSOR] Basili - Element yakalama AKTIF");
+            txtStatus.Text = "DEKLANSOR AKTIF";
+            txtStatus.Foreground = System.Windows.Media.Brushes.Red;
+
+            // Update shutter status indicator
+            txtShutterStatus.Text = ">>> F4 BASILI - YAKALAMA AKTIF <<<";
+            brdShutterStatus.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(139, 0, 0));
+
+            // Start capturing without minimizing window
+            if (!_isInspecting)
+            {
+                _isInspecting = true;
+                _inspectionCts = new CancellationTokenSource();
+                _mouseHook.StartHook();
+            }
+        }
+
+        private async void ShutterUp()
+        {
+            if (!_shutterActive) return;
+            _shutterActive = false;
+
+            LogToConsole("[DEKLANSOR] Birakildi - Element yakalandi");
+
+            // Capture current element
+            try
+            {
+                var point = System.Windows.Forms.Cursor.Position;
+                var wpfPoint = new System.Windows.Point(point.X, point.Y);
+                await CaptureElementAtPoint(wpfPoint);
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"[DEKLANSOR] Yakalama hatasi: {ex.Message}", Core.Utils.LogLevel.Error);
+            }
+
+            // Stop inspection
+            _isInspecting = false;
+            _mouseHook.StopHook();
+            _inspectionCts?.Cancel();
+
+            txtStatus.Text = "Ready";
+            txtStatus.Foreground = System.Windows.Media.Brushes.Green;
+
+            // Clear shutter status indicator
+            txtShutterStatus.Text = "";
+            brdShutterStatus.Background = System.Windows.Media.Brushes.Transparent;
+        }
+
+        #endregion
+
+        #region Desktop Export
+
+        private void ExportToDesktop_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_collectedElements.Count == 0)
+                {
+                    LogToConsole("Masaustune aktarilacak element yok!", Core.Utils.LogLevel.Warning);
+                    System.Windows.MessageBox.Show("Aktarilacak element bulunamadi.\nOnce element yakalayin.", "Uyari", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var fileName = $"UIElementInspector_Report_{timestamp}.txt";
+                var filePath = System.IO.Path.Combine(desktopPath, fileName);
+
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("================================================================================");
+                sb.AppendLine("                    UI ELEMENT INSPECTOR - RAPOR");
+                sb.AppendLine($"                    Tarih: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                sb.AppendLine($"                    Toplam Element: {_collectedElements.Count}");
+                sb.AppendLine("================================================================================");
+                sb.AppendLine();
+
+                // Kisayol listesi
+                sb.AppendLine("KISAYOL TUSLARI:");
+                sb.AppendLine("  F1  = Start Inspection (Pencere Gizlenir)");
+                sb.AppendLine("  F2  = Stop Inspection");
+                sb.AppendLine("  F3  = Start Inspection (Pencere Gorunur)");
+                sb.AppendLine("  F4  = DEKLANSOR (Basili Tut = Aktif)");
+                sb.AppendLine("  F5  = Refresh Element");
+                sb.AppendLine("  F6  = Masaustune TXT Rapor Cikart");
+                sb.AppendLine("  Ctrl+S = Hizli Export");
+                sb.AppendLine();
+                sb.AppendLine("================================================================================");
+                sb.AppendLine();
+
+                int index = 1;
+                foreach (var element in _collectedElements)
+                {
+                    sb.AppendLine($"--- ELEMENT {index} ---");
+                    sb.AppendLine($"Yakalama Zamani: {element.CaptureTime:yyyy-MM-dd HH:mm:ss}");
+                    sb.AppendLine($"Detection Method: {element.DetectionMethod}");
+                    sb.AppendLine($"Collection Profile: {element.CollectionProfile}");
+                    sb.AppendLine();
+
+                    // Temel Bilgiler
+                    sb.AppendLine("[TEMEL BILGILER]");
+                    if (!string.IsNullOrEmpty(element.Name)) sb.AppendLine($"  Name: {element.Name}");
+                    if (!string.IsNullOrEmpty(element.AutomationId)) sb.AppendLine($"  AutomationId: {element.AutomationId}");
+                    if (!string.IsNullOrEmpty(element.ClassName)) sb.AppendLine($"  ClassName: {element.ClassName}");
+                    if (!string.IsNullOrEmpty(element.ControlType)) sb.AppendLine($"  ControlType: {element.ControlType}");
+                    if (!string.IsNullOrEmpty(element.LocalizedControlType)) sb.AppendLine($"  LocalizedControlType: {element.LocalizedControlType}");
+                    sb.AppendLine();
+
+                    // Konum Bilgileri
+                    sb.AppendLine("[KONUM]");
+                    sb.AppendLine($"  X: {element.X}, Y: {element.Y}");
+                    sb.AppendLine($"  Width: {element.Width}, Height: {element.Height}");
+                    sb.AppendLine($"  BoundingRect: {element.BoundingRectangle}");
+                    sb.AppendLine();
+
+                    // Handle Bilgileri
+                    if (element.WindowHandle != IntPtr.Zero)
+                    {
+                        sb.AppendLine("[HANDLE BILGILERI]");
+                        sb.AppendLine($"  WindowHandle: 0x{element.WindowHandle.ToInt64():X}");
+                        if (!string.IsNullOrEmpty(element.WindowTitle)) sb.AppendLine($"  WindowTitle: {element.WindowTitle}");
+                        if (!string.IsNullOrEmpty(element.WindowClassName)) sb.AppendLine($"  WindowClassName: {element.WindowClassName}");
+                        if (element.ProcessId > 0) sb.AppendLine($"  ProcessId: {element.ProcessId}");
+                        sb.AppendLine();
+                    }
+
+                    // Web Bilgileri
+                    if (!string.IsNullOrEmpty(element.TagName) || !string.IsNullOrEmpty(element.HtmlId))
+                    {
+                        sb.AppendLine("[WEB/HTML BILGILERI]");
+                        if (!string.IsNullOrEmpty(element.TagName)) sb.AppendLine($"  TagName: {element.TagName}");
+                        if (!string.IsNullOrEmpty(element.HtmlId)) sb.AppendLine($"  HTML Id: {element.HtmlId}");
+                        if (!string.IsNullOrEmpty(element.HtmlClassName)) sb.AppendLine($"  HTML Class: {element.HtmlClassName}");
+                        if (!string.IsNullOrEmpty(element.Href)) sb.AppendLine($"  Href: {element.Href}");
+                        if (!string.IsNullOrEmpty(element.InnerText)) sb.AppendLine($"  InnerText: {element.InnerText.Substring(0, Math.Min(200, element.InnerText.Length))}...");
+                        sb.AppendLine();
+                    }
+
+                    // XPath ve Selectors
+                    sb.AppendLine("[SELECTORS]");
+                    if (!string.IsNullOrEmpty(element.XPath)) sb.AppendLine($"  XPath: {element.XPath}");
+                    if (!string.IsNullOrEmpty(element.CssSelector)) sb.AppendLine($"  CSS Selector: {element.CssSelector}");
+                    if (!string.IsNullOrEmpty(element.PlaywrightSelector)) sb.AppendLine($"  Playwright: {element.PlaywrightSelector}");
+                    sb.AppendLine();
+
+                    // Durum Bilgileri
+                    sb.AppendLine("[DURUM]");
+                    sb.AppendLine($"  IsVisible: {element.IsVisible}");
+                    sb.AppendLine($"  IsEnabled: {element.IsEnabled}");
+                    sb.AppendLine($"  IsOffscreen: {element.IsOffscreen}");
+                    sb.AppendLine($"  HasKeyboardFocus: {element.HasKeyboardFocus}");
+                    sb.AppendLine();
+
+                    sb.AppendLine("--------------------------------------------------------------------------------");
+                    sb.AppendLine();
+                    index++;
+                }
+
+                System.IO.File.WriteAllText(filePath, sb.ToString(), System.Text.Encoding.UTF8);
+
+                LogToConsole($"RAPOR MASAUSTUNE KAYDEDILDI: {fileName}");
+                System.Windows.MessageBox.Show($"Rapor masaustune kaydedildi:\n\n{filePath}", "Basarili", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Masaustune kaydetme hatasi: {ex.Message}", Core.Utils.LogLevel.Error);
+                System.Windows.MessageBox.Show($"Kaydetme hatasi:\n{ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// F7 - TAM YAKALAMA: 5 Teknoloji ile element + Sayfa yapisi + Kaynak kod + Screenshot
+        /// </summary>
+        private async void FullCaptureToDesktop_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                LogToConsole("===========================================");
+                LogToConsole("       F7 - TAM YAKALAMA BASLATILIYOR      ");
+                LogToConsole("===========================================");
+
+                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var folderName = $"UICapture_{timestamp}";
+                var folderPath = System.IO.Path.Combine(desktopPath, folderName);
+
+                // Klasor olustur
+                System.IO.Directory.CreateDirectory(folderPath);
+                LogToConsole($"Klasor olusturuldu: {folderName}");
+
+                // Mouse pozisyonunu al
+                var mousePos = System.Windows.Forms.Cursor.Position;
+                var wpfPoint = new System.Windows.Point(mousePos.X, mousePos.Y);
+
+                int savedFiles = 0;
+
+                // 1. TUM 5 TEKNOLOJI ILE ELEMENT BILGILERI
+                LogToConsole("[1/4] 5 Teknoloji ile element bilgileri toplanıyor...");
+                var allTechReport = await CaptureAllTechnologiesReport(wpfPoint);
+                if (!string.IsNullOrEmpty(allTechReport))
+                {
+                    var elementReportPath = System.IO.Path.Combine(folderPath, "01_Element_5Tech_Report.txt");
+                    await System.IO.File.WriteAllTextAsync(elementReportPath, allTechReport, System.Text.Encoding.UTF8);
+                    LogToConsole($"  -> Element raporu kaydedildi");
+                    savedFiles++;
+                }
+
+                // 2. SAYFA YAPISI - TUM ELEMENTLERIN LISTESI
+                LogToConsole("[2/4] Sayfa yapisi ve element listesi toplanıyor...");
+                var pageStructureReport = await CapturePageStructureReport(wpfPoint);
+                if (!string.IsNullOrEmpty(pageStructureReport))
+                {
+                    var structureReportPath = System.IO.Path.Combine(folderPath, "02_Page_Structure_ElementList.txt");
+                    await System.IO.File.WriteAllTextAsync(structureReportPath, pageStructureReport, System.Text.Encoding.UTF8);
+                    LogToConsole($"  -> Sayfa yapisi raporu kaydedildi");
+                    savedFiles++;
+                }
+
+                // 3. KAYNAK KOD (Sadece web sayfasi ise)
+                LogToConsole("[3/4] Kaynak kod toplanıyor (web sayfasi ise)...");
+                var sourceCode = await CaptureSourceCode(wpfPoint);
+                if (!string.IsNullOrEmpty(sourceCode))
+                {
+                    var sourceCodePath = System.IO.Path.Combine(folderPath, "03_SourceCode.html");
+                    await System.IO.File.WriteAllTextAsync(sourceCodePath, sourceCode, System.Text.Encoding.UTF8);
+                    LogToConsole($"  -> Kaynak kod kaydedildi");
+                    savedFiles++;
+                }
+                else
+                {
+                    LogToConsole($"  -> Kaynak kod alinamadi (web sayfasi degil veya erisim yok)");
+                }
+
+                // 4. EKRAN GORUNTUSU
+                LogToConsole("[4/4] Ekran goruntusu aliniyor...");
+                var screenshotPath = System.IO.Path.Combine(folderPath, "04_Screenshot.png");
+                await CaptureScreenshotToFile(screenshotPath);
+                LogToConsole($"  -> Ekran goruntusu kaydedildi");
+                savedFiles++;
+
+                // Ozet dosyasi olustur
+                var summaryPath = System.IO.Path.Combine(folderPath, "00_SUMMARY.txt");
+                var summarySb = new System.Text.StringBuilder();
+                summarySb.AppendLine("================================================================================");
+                summarySb.AppendLine("              UI ELEMENT INSPECTOR - TAM YAKALAMA OZETI");
+                summarySb.AppendLine($"              Tarih: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                summarySb.AppendLine("================================================================================");
+                summarySb.AppendLine();
+                summarySb.AppendLine($"Mouse Pozisyonu: X={mousePos.X}, Y={mousePos.Y}");
+                summarySb.AppendLine($"Kaydedilen Dosya Sayisi: {savedFiles}");
+                summarySb.AppendLine();
+                summarySb.AppendLine("DOSYALAR:");
+                summarySb.AppendLine("  01_Element_5Tech_Report.txt  - 5 Teknoloji ile element ozellikleri");
+                summarySb.AppendLine("  02_Page_Structure_ElementList.txt - Sayfa yapisi ve element listesi");
+                summarySb.AppendLine("  03_SourceCode.html           - Web sayfasi kaynak kodu (varsa)");
+                summarySb.AppendLine("  04_Screenshot.png            - Ekran goruntusu");
+                summarySb.AppendLine();
+                summarySb.AppendLine("KISAYOL TUSLARI:");
+                summarySb.AppendLine("  F1  = Start Inspection (Pencere Gizlenir)");
+                summarySb.AppendLine("  F2  = Stop Inspection");
+                summarySb.AppendLine("  F3  = Start Inspection (Pencere Gorunur)");
+                summarySb.AppendLine("  F4  = DEKLANSOR (Basili Tut = Aktif)");
+                summarySb.AppendLine("  F5  = Refresh Element");
+                summarySb.AppendLine("  F6  = Masaustune TXT Rapor Cikart");
+                summarySb.AppendLine("  F7  = TAM YAKALAMA (Bu rapor)");
+                summarySb.AppendLine("  Ctrl+S = Hizli Export");
+                await System.IO.File.WriteAllTextAsync(summaryPath, summarySb.ToString(), System.Text.Encoding.UTF8);
+
+                LogToConsole("===========================================");
+                LogToConsole($"TAM YAKALAMA TAMAMLANDI: {savedFiles} dosya");
+                LogToConsole($"Klasor: {folderPath}");
+                LogToConsole("===========================================");
+
+                System.Windows.MessageBox.Show(
+                    $"Tam yakalama tamamlandi!\n\n" +
+                    $"Klasor: {folderName}\n" +
+                    $"Konum: Masaustu\n" +
+                    $"Dosya sayisi: {savedFiles}",
+                    "Tam Yakalama Basarili",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Tam yakalama hatasi: {ex.Message}", Core.Utils.LogLevel.Error);
+                System.Windows.MessageBox.Show($"Tam yakalama hatasi:\n{ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 5 Teknoloji ile element bilgilerini topla
+        /// </summary>
+        private async Task<string> CaptureAllTechnologiesReport(System.Windows.Point point)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("================================================================================");
+            sb.AppendLine("           ELEMENT RAPORU - 5 TEKNOLOJI ILE TAM ANALIZ");
+            sb.AppendLine($"           Tarih: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            sb.AppendLine($"           Pozisyon: X={point.X}, Y={point.Y}");
+            sb.AppendLine("================================================================================");
+            sb.AppendLine();
+
+            var profile = GetSelectedProfile();
+            var allResults = new List<ElementInfo>();
+
+            // Her detector ile dene
+            foreach (var detector in _detectors)
+            {
+                try
+                {
+                    sb.AppendLine($"### {detector.Name.ToUpper()} ###");
+                    sb.AppendLine(new string('-', 60));
+
+                    // Playwright icin ozel kontrol - Auto mode'da baslatma
+                    if (detector.Name == "Playwright")
+                    {
+                        sb.AppendLine("  [Playwright atlandi - manuel mod gerektirir]");
+                        sb.AppendLine();
+                        continue;
+                    }
+
+                    if (!detector.CanDetect(point))
+                    {
+                        sb.AppendLine("  [Bu noktada tespit yapilamadi]");
+                        sb.AppendLine();
+                        continue;
+                    }
+
+                    var element = await detector.GetElementAtPoint(point, profile);
+                    if (element == null)
+                    {
+                        sb.AppendLine("  [Element alinamadi]");
+                        sb.AppendLine();
+                        continue;
+                    }
+
+                    allResults.Add(element);
+
+                    // Temel Bilgiler
+                    sb.AppendLine($"  Name: {element.Name}");
+                    sb.AppendLine($"  AutomationId: {element.AutomationId}");
+                    sb.AppendLine($"  ClassName: {element.ClassName}");
+                    sb.AppendLine($"  ControlType: {element.ControlType}");
+                    sb.AppendLine($"  LocalizedControlType: {element.LocalizedControlType}");
+                    sb.AppendLine($"  ElementType: {element.ElementType}");
+                    sb.AppendLine();
+
+                    // Konum
+                    sb.AppendLine($"  Konum: X={element.X}, Y={element.Y}");
+                    sb.AppendLine($"  Boyut: {element.Width}x{element.Height}");
+                    sb.AppendLine($"  BoundingRect: {element.BoundingRectangle}");
+                    sb.AppendLine();
+
+                    // Durum
+                    sb.AppendLine($"  IsVisible: {element.IsVisible}");
+                    sb.AppendLine($"  IsEnabled: {element.IsEnabled}");
+                    sb.AppendLine($"  IsOffscreen: {element.IsOffscreen}");
+                    sb.AppendLine($"  HasKeyboardFocus: {element.HasKeyboardFocus}");
+                    sb.AppendLine();
+
+                    // Handle
+                    if (element.WindowHandle != IntPtr.Zero)
+                    {
+                        sb.AppendLine($"  WindowHandle: 0x{element.WindowHandle.ToInt64():X}");
+                        sb.AppendLine($"  WindowTitle: {element.WindowTitle}");
+                        sb.AppendLine($"  WindowClassName: {element.WindowClassName}");
+                        sb.AppendLine($"  ProcessId: {element.ProcessId}");
+                        sb.AppendLine();
+                    }
+
+                    // Web/HTML
+                    if (!string.IsNullOrEmpty(element.TagName))
+                    {
+                        sb.AppendLine("  [WEB/HTML]");
+                        sb.AppendLine($"    TagName: {element.TagName}");
+                        sb.AppendLine($"    HTML Id: {element.HtmlId}");
+                        sb.AppendLine($"    HTML Class: {element.HtmlClassName}");
+                        sb.AppendLine($"    Href: {element.Href}");
+                        sb.AppendLine($"    DocumentUrl: {element.DocumentUrl}");
+                        if (!string.IsNullOrEmpty(element.InnerText))
+                        {
+                            var text = element.InnerText.Length > 200 ? element.InnerText.Substring(0, 200) + "..." : element.InnerText;
+                            sb.AppendLine($"    InnerText: {text}");
+                        }
+                        sb.AppendLine();
+                    }
+
+                    // Selectors
+                    sb.AppendLine("  [SELECTORS]");
+                    if (!string.IsNullOrEmpty(element.XPath)) sb.AppendLine($"    XPath: {element.XPath}");
+                    if (!string.IsNullOrEmpty(element.CssSelector)) sb.AppendLine($"    CSS: {element.CssSelector}");
+                    if (!string.IsNullOrEmpty(element.PlaywrightSelector)) sb.AppendLine($"    Playwright: {element.PlaywrightSelector}");
+                    sb.AppendLine();
+
+                    // Tablo bilgileri
+                    if (element.RowIndex >= 0 || element.ColumnIndex >= 0)
+                    {
+                        sb.AppendLine("  [TABLO BILGILERI]");
+                        sb.AppendLine($"    RowIndex: {element.RowIndex}");
+                        sb.AppendLine($"    ColumnIndex: {element.ColumnIndex}");
+                        sb.AppendLine($"    RowCount: {element.RowCount}");
+                        sb.AppendLine($"    ColumnCount: {element.ColumnCount}");
+                        sb.AppendLine();
+                    }
+
+                    sb.AppendLine();
+                }
+                catch (Exception ex)
+                {
+                    sb.AppendLine($"  [HATA: {ex.Message}]");
+                    sb.AppendLine();
+                }
+            }
+
+            // Ozet
+            sb.AppendLine("================================================================================");
+            sb.AppendLine($"OZET: {allResults.Count} teknolojiden veri toplandi");
+            sb.AppendLine("================================================================================");
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Sayfa yapisi ve tum elementlerin listesini topla
+        /// </summary>
+        private async Task<string> CapturePageStructureReport(System.Windows.Point point)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("================================================================================");
+            sb.AppendLine("           SAYFA YAPISI VE ELEMENT LISTESI");
+            sb.AppendLine($"           Tarih: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            sb.AppendLine("================================================================================");
+            sb.AppendLine();
+
+            try
+            {
+                // Oncelikle hangi pencerenin uzerinde oldugunu bul
+                var windowHandle = GetWindowAtPoint(point);
+                if (windowHandle == IntPtr.Zero)
+                {
+                    sb.AppendLine("[Pencere bulunamadi]");
+                    return sb.ToString();
+                }
+
+                sb.AppendLine($"Pencere Handle: 0x{windowHandle.ToInt64():X}");
+
+                // Pencere bilgilerini al
+                var windowTitle = GetWindowTitle(windowHandle);
+                var windowClass = GetWindowClassName(windowHandle);
+                sb.AppendLine($"Pencere Basligi: {windowTitle}");
+                sb.AppendLine($"Pencere Sinifi: {windowClass}");
+                sb.AppendLine();
+
+                // UI Automation ile tum elementleri listele
+                sb.AppendLine("ELEMENT LISTESI (UI Automation)");
+                sb.AppendLine(new string('=', 80));
+                sb.AppendLine();
+                sb.AppendLine(String.Format("{0,-5} {1,-25} {2,-20} {3,-15} {4}",
+                    "No", "ControlType", "Name", "AutomationId", "ClassName"));
+                sb.AppendLine(new string('-', 100));
+
+                var uiaDetector = _detectors.FirstOrDefault(d => d.Name == "UI Automation");
+                if (uiaDetector != null)
+                {
+                    var profile = CollectionProfile.Quick;
+                    var elements = await uiaDetector.GetAllElements(windowHandle, profile);
+
+                    int index = 1;
+                    foreach (var elem in elements.Take(500)) // Max 500 element
+                    {
+                        var name = elem.Name ?? "";
+                        if (name.Length > 22) name = name.Substring(0, 22) + "...";
+
+                        var autoId = elem.AutomationId ?? "";
+                        if (autoId.Length > 12) autoId = autoId.Substring(0, 12) + "...";
+
+                        var className = elem.ClassName ?? "";
+                        if (className.Length > 20) className = className.Substring(0, 20) + "...";
+
+                        sb.AppendLine(String.Format("{0,-5} {1,-25} {2,-20} {3,-15} {4}",
+                            index++,
+                            elem.ControlType ?? elem.ElementType ?? "Unknown",
+                            name,
+                            autoId,
+                            className));
+                    }
+
+                    sb.AppendLine();
+                    sb.AppendLine($"Toplam Element: {elements.Count}");
+                    if (elements.Count > 500)
+                        sb.AppendLine($"(Ilk 500 element gosterildi)");
+                }
+                else
+                {
+                    sb.AppendLine("[UI Automation detector bulunamadi]");
+                }
+
+                // Element hiyerarsisi (agac yapisi)
+                sb.AppendLine();
+                sb.AppendLine("ELEMENT HIYERARSISI");
+                sb.AppendLine(new string('=', 80));
+                await AppendElementHierarchy(sb, windowHandle, 0);
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"[Sayfa yapisi alinirken hata: {ex.Message}]");
+            }
+
+            return sb.ToString();
+        }
+
+        private async Task AppendElementHierarchy(System.Text.StringBuilder sb, IntPtr windowHandle, int depth)
+        {
+            if (depth > 10) return; // Max derinlik
+
+            try
+            {
+                var root = System.Windows.Automation.AutomationElement.FromHandle(windowHandle);
+                await AppendElementNode(sb, root, depth, 100); // Max 100 element per level
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"{"".PadLeft(depth * 2)}[Hiyerarsi alinamadi: {ex.Message}]");
+            }
+        }
+
+        private async Task AppendElementNode(System.Text.StringBuilder sb, System.Windows.Automation.AutomationElement element, int depth, int maxChildren)
+        {
+            if (element == null || depth > 10) return;
+
+            var indent = "".PadLeft(depth * 2);
+            try
+            {
+                var name = element.Current.Name ?? "";
+                if (name.Length > 30) name = name.Substring(0, 30) + "...";
+
+                var controlType = element.Current.ControlType?.ProgrammaticName?.Replace("ControlType.", "") ?? "Unknown";
+                var autoId = element.Current.AutomationId ?? "";
+
+                sb.AppendLine($"{indent}[{controlType}] {name} ({autoId})");
+
+                // Alt elementleri al
+                var children = element.FindAll(System.Windows.Automation.TreeScope.Children,
+                    System.Windows.Automation.Condition.TrueCondition);
+
+                int count = 0;
+                foreach (System.Windows.Automation.AutomationElement child in children)
+                {
+                    if (count++ >= maxChildren)
+                    {
+                        sb.AppendLine($"{indent}  ... ve {children.Count - maxChildren} element daha");
+                        break;
+                    }
+                    await AppendElementNode(sb, child, depth + 1, maxChildren / 2);
+                }
+            }
+            catch
+            {
+                sb.AppendLine($"{indent}[Element alinamadi]");
+            }
+        }
+
+        /// <summary>
+        /// Kaynak kodu al (web sayfasi ise)
+        /// </summary>
+        private async Task<string> CaptureSourceCode(System.Windows.Point point)
+        {
+            try
+            {
+                // Oncelikle current element'ten dene
+                if (_currentElement != null && !string.IsNullOrEmpty(_currentElement.SourceCode))
+                {
+                    return _currentElement.SourceCode;
+                }
+
+                // Full profile ile element al ve kaynak kodu kontrol et
+                var profile = CollectionProfile.Full;
+
+                // MSHTML detector ile dene
+                var mshtmlDetector = _detectors.FirstOrDefault(d => d.Name == "MSHTML");
+                if (mshtmlDetector != null && mshtmlDetector.CanDetect(point))
+                {
+                    var element = await mshtmlDetector.GetElementAtPoint(point, profile);
+                    if (element != null && !string.IsNullOrEmpty(element.SourceCode))
+                    {
+                        return element.SourceCode;
+                    }
+                }
+
+                // WebView2 detector ile dene
+                var webviewDetector = _detectors.FirstOrDefault(d => d.Name == "WebView2/CDP");
+                if (webviewDetector != null && webviewDetector.CanDetect(point))
+                {
+                    var element = await webviewDetector.GetElementAtPoint(point, profile);
+                    if (element != null && !string.IsNullOrEmpty(element.SourceCode))
+                    {
+                        return element.SourceCode;
+                    }
+                }
+
+                return null; // Web sayfasi degil veya kaynak kod alinamadi
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"Kaynak kod alinirken hata: {ex.Message}", Core.Utils.LogLevel.Warning);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Ekran goruntusunu dosyaya kaydet
+        /// </summary>
+        private async Task CaptureScreenshotToFile(string filePath)
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    var screenBounds = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
+                    using (var bitmap = new System.Drawing.Bitmap(screenBounds.Width, screenBounds.Height))
+                    {
+                        using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
+                        {
+                            graphics.CopyFromScreen(0, 0, 0, 0, screenBounds.Size);
+                        }
+                        bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogToConsole($"Screenshot hatasi: {ex.Message}", Core.Utils.LogLevel.Error);
+                }
+            });
+        }
+
+        // Win32 helper methods
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr WindowFromPoint(System.Drawing.Point point);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        private static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
+
+        private IntPtr GetWindowAtPoint(System.Windows.Point point)
+        {
+            return WindowFromPoint(new System.Drawing.Point((int)point.X, (int)point.Y));
+        }
+
+        private string GetWindowTitle(IntPtr hwnd)
+        {
+            var sb = new System.Text.StringBuilder(256);
+            GetWindowText(hwnd, sb, sb.Capacity);
+            return sb.ToString();
+        }
+
+        private string GetWindowClassName(IntPtr hwnd)
+        {
+            var sb = new System.Text.StringBuilder(256);
+            GetClassName(hwnd, sb, sb.Capacity);
+            return sb.ToString();
+        }
+
+        #endregion
 
         private void InitializeDetectors()
         {
@@ -2186,9 +2891,10 @@ namespace UIElementInspector
             if (techIndex == 0) // Auto Detect
             {
                 // Return first detector that can detect current point
+                // NOTE: Playwright is excluded from Auto Detect to prevent automatic browser launching
                 var point = System.Windows.Forms.Cursor.Position;
                 var wpfPoint = new System.Windows.Point(point.X, point.Y);
-                return _detectors.FirstOrDefault(d => d.CanDetect(wpfPoint));
+                return _detectors.FirstOrDefault(d => d.Name != "Playwright" && d.CanDetect(wpfPoint));
             }
             else if (techIndex == 1) // UI Automation
             {
@@ -2204,14 +2910,22 @@ namespace UIElementInspector
             }
             else if (techIndex == 4) // Playwright
             {
-                return _detectors.FirstOrDefault(d => d.Name == "Playwright");
+                // Playwright selected - initialize browser if needed
+                var playwrightDetector = _detectors.FirstOrDefault(d => d.Name == "Playwright") as PlaywrightDetector;
+                if (playwrightDetector != null)
+                {
+                    // Initialize browser synchronously when user explicitly selects Playwright
+                    Task.Run(async () => await playwrightDetector.EnsureInitializedAsync()).GetAwaiter().GetResult();
+                }
+                return playwrightDetector;
             }
             else if (techIndex == 5) // All Technologies
             {
                 // Return the first detector that can detect
+                // NOTE: Playwright is excluded from All Technologies to prevent automatic browser launching
                 var point = System.Windows.Forms.Cursor.Position;
                 var wpfPoint = new System.Windows.Point(point.X, point.Y);
-                return _detectors.FirstOrDefault(d => d.CanDetect(wpfPoint)) ?? _detectors.FirstOrDefault();
+                return _detectors.FirstOrDefault(d => d.Name != "Playwright" && d.CanDetect(wpfPoint)) ?? _detectors.FirstOrDefault(d => d.Name != "Playwright");
             }
 
             return _detectors.FirstOrDefault();
@@ -3017,7 +3731,7 @@ Supports multiple detection technologies:
             Screenshot_Click(sender, e); // Reuse the screenshot functionality
         }
 
-        private async void ExportToDesktop_Click(object sender, RoutedEventArgs e)
+        private async void ExportWithDialog_Click(object sender, RoutedEventArgs e)
         {
             try
             {
