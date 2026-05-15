@@ -19,77 +19,144 @@ namespace UIElementInspector.Core.Detectors
         private IBrowser _browser;
         private IPage _currentPage;
         private bool _isInitialized;
+        private bool _isInitializing;
         private readonly object _lockObject = new object();
+        private static PlaywrightDetector _instance;
+        private static readonly object _instanceLock = new object();
 
         public string Name => "Playwright";
 
         public PlaywrightDetector()
         {
             // Lazy initialization - browser will be started when first needed
+            // Ensure singleton behavior to prevent multiple browsers
+            lock (_instanceLock)
+            {
+                if (_instance != null && _instance != this)
+                {
+                    // Copy state from existing instance
+                    _playwright = _instance._playwright;
+                    _browser = _instance._browser;
+                    _currentPage = _instance._currentPage;
+                    _isInitialized = _instance._isInitialized;
+                }
+                _instance = this;
+            }
         }
 
         private async Task InitializeAsync()
         {
-            if (_isInitialized)
+            // Quick check without lock
+            if (_isInitialized && _browser != null && _browser.IsConnected)
                 return;
 
             lock (_lockObject)
             {
-                if (_isInitialized)
+                // Double-check pattern
+                if (_isInitialized && _browser != null && _browser.IsConnected)
                     return;
 
-                try
+                // Prevent concurrent initialization attempts
+                if (_isInitializing)
                 {
-                    // This will be done synchronously in first call
-                    Task.Run(async () =>
-                    {
-                        _playwright = await Microsoft.Playwright.Playwright.CreateAsync();
-                        _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-                        {
-                            Headless = false, // Visible browser for inspection
-                            Args = new[] { "--start-maximized" }
-                        });
-
-                        // Get or create a page
-                        var pages = _browser.Contexts.SelectMany(c => c.Pages).ToList();
-                        if (pages.Any())
-                        {
-                            _currentPage = pages.First();
-                        }
-                        else
-                        {
-                            var context = await _browser.NewContextAsync();
-                            _currentPage = await context.NewPageAsync();
-                        }
-
-                        _isInitialized = true;
-                    }).GetAwaiter().GetResult();
+                    Debug.WriteLine("Playwright initialization already in progress, skipping...");
+                    return;
                 }
-                catch (Exception ex)
+
+                _isInitializing = true;
+            }
+
+            try
+            {
+                Debug.WriteLine("Starting Playwright browser initialization...");
+
+                // Clean up any existing resources first
+                await CleanupAsync();
+
+                _playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+                _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
                 {
-                    Debug.WriteLine($"Playwright initialization error: {ex.Message}");
-                    _isInitialized = false;
+                    Headless = false, // Visible browser for inspection
+                    Args = new[] { "--start-maximized" }
+                });
+
+                // Create a single context and page
+                var context = await _browser.NewContextAsync();
+                _currentPage = await context.NewPageAsync();
+
+                _isInitialized = true;
+                Debug.WriteLine("Playwright browser initialized successfully (single instance)");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Playwright initialization error: {ex.Message}");
+                _isInitialized = false;
+            }
+            finally
+            {
+                lock (_lockObject)
+                {
+                    _isInitializing = false;
                 }
+            }
+        }
+
+        private async Task CleanupAsync()
+        {
+            try
+            {
+                if (_currentPage != null)
+                {
+                    try { await _currentPage.CloseAsync(); } catch { }
+                    _currentPage = null;
+                }
+
+                if (_browser != null)
+                {
+                    try { await _browser.CloseAsync(); } catch { }
+                    try { await _browser.DisposeAsync(); } catch { }
+                    _browser = null;
+                }
+
+                if (_playwright != null)
+                {
+                    _playwright.Dispose();
+                    _playwright = null;
+                }
+
+                _isInitialized = false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Playwright cleanup error: {ex.Message}");
             }
         }
 
         public bool CanDetect(System.Windows.Point screenPoint)
         {
-            // Playwright can detect elements in any open browser window
-            // For now, we'll always return true if initialized
-            if (!_isInitialized)
+            // IMPORTANT: CanDetect should NOT initialize the browser automatically
+            // Browser should only be initialized when user explicitly selects Playwright mode
+            // This prevents multiple browsers from opening during Auto Detect or All Technologies mode
+
+            // Only return true if browser is already initialized and connected
+            if (!_isInitialized || _browser == null || !_browser.IsConnected || _currentPage == null)
             {
-                try
-                {
-                    InitializeAsync().Wait();
-                }
-                catch
-                {
-                    return false;
-                }
+                return false;
             }
 
-            return _isInitialized && _currentPage != null;
+            return true;
+        }
+
+        /// <summary>
+        /// Explicitly initialize browser - call this only when user selects Playwright mode
+        /// </summary>
+        public async Task<bool> EnsureInitializedAsync()
+        {
+            if (_isInitialized && _browser != null && _browser.IsConnected && _currentPage != null)
+                return true;
+
+            await InitializeAsync();
+            return _isInitialized && _browser != null && _browser.IsConnected;
         }
 
         public async Task<ElementInfo> GetElementAtPoint(System.Windows.Point screenPoint, CollectionProfile profile)
@@ -593,14 +660,33 @@ namespace UIElementInspector.Core.Detectors
             }
         }
 
+        /// <summary>
+        /// Close the browser without disposing - useful when done with current session
+        /// </summary>
+        public async Task CloseBrowserAsync()
+        {
+            Debug.WriteLine("Closing Playwright browser...");
+            await CleanupAsync();
+            Debug.WriteLine("Playwright browser closed");
+        }
+
         public void Dispose()
         {
             try
             {
-                _currentPage?.CloseAsync().Wait();
-                _browser?.CloseAsync().Wait();
-                _browser?.DisposeAsync().AsTask().Wait();
-                _playwright?.Dispose();
+                Debug.WriteLine("Disposing PlaywrightDetector...");
+                CleanupAsync().GetAwaiter().GetResult();
+
+                // Clear static instance
+                lock (_instanceLock)
+                {
+                    if (_instance == this)
+                    {
+                        _instance = null;
+                    }
+                }
+
+                Debug.WriteLine("PlaywrightDetector disposed successfully");
             }
             catch (Exception ex)
             {

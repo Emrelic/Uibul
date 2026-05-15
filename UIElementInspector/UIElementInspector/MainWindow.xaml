@@ -5,16 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UIElementInspector"
         mc:Ignorable="d"
-        Title="Universal UI Element Inspector"
-        Height="800" Width="1400"
+        Title="UI Element Inspector"
+        Height="620" Width="1100"
+        MinHeight="500" MinWidth="900"
         WindowStartupLocation="CenterScreen">
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="42"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="25"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
         <!-- Menu Bar -->
@@ -63,109 +65,192 @@
             </MenuItem>
         </Menu>
 
-        <!-- Toolbar -->
-        <ToolBar Grid.Row="1">
-            <Button Name="btnStartInspection" Click="StartInspection_Click" ToolTip="Start Inspection (Window will minimize)">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="🔍" FontSize="16" Margin="0,0,5,0"/>
-                    <TextBlock Text="Start" VerticalAlignment="Center"/>
+        <!-- Toolbar - Compact Design -->
+        <Border Grid.Row="1" Background="#F0F0F0" BorderBrush="#CCC" BorderThickness="0,0,0,1">
+            <Grid Margin="5,3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- START / STOP BUTTONS -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button Name="btnStartInspection" Click="StartInspection_Click"
+                            Padding="12,6" Margin="2" Background="#1976D2" Foreground="White" FontSize="12" FontWeight="Bold">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="🔍 BAŞLAT (F1)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Element inceleme modunu başlatır. Bu pencere otomatik olarak gizlenir. Mouse ile element üzerine geldiğinizde bilgiler toplanır."/>
+                                <TextBlock Text="Kısayol: F1" Margin="0,5,0,0" FontStyle="Italic" Foreground="#AAA"/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔍" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text=" BAŞLAT" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Name="btnStartKeepVisible" Click="StartKeepVisible_Click"
+                            Background="#388E3C" Foreground="White" Padding="12,6" Margin="2" FontSize="12" FontWeight="Bold">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="▶ GÖRÜNÜR BAŞLAT (F3)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Element inceleme modunu başlatır. Bu pencere görünür kalır, böylece anlık sonuçları görebilirsiniz."/>
+                                <TextBlock Text="Kısayol: F3" Margin="0,5,0,0" FontStyle="Italic" Foreground="#AAA"/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="▶" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text=" GÖRÜNÜR" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Name="btnStopInspection" Click="StopInspection_Click" IsEnabled="False"
+                            Background="#D32F2F" Foreground="Black" Padding="12,6" Margin="2" FontSize="12" FontWeight="Bold">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="⏹ DURDUR (F2)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Element inceleme modunu durdurur. Pencere tekrar görünür hale gelir ve toplanan veriler korunur."/>
+                                <TextBlock Text="Kısayol: F2" Margin="0,5,0,0" FontStyle="Italic" Foreground="#AAA"/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⏹" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text=" DURDUR" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
-            </Button>
-            <Button Name="btnStartKeepVisible" Click="StartKeepVisible_Click" ToolTip="Start Inspection (Window stays visible)" Background="#228B22" Foreground="White">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="🔍" FontSize="16" Margin="0,0,5,0"/>
-                    <TextBlock Text="Start (Keep Visible)" VerticalAlignment="Center"/>
+
+                <!-- MODE SELECTION - Labels Above (negative margin), ComboBoxes Aligned with Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0" VerticalAlignment="Center">
+                    <!-- MODE -->
+                    <Grid Margin="2,0" MinWidth="95">
+                        <TextBlock Text="MODE" FontSize="9" Foreground="#1565C0" FontWeight="Bold" HorizontalAlignment="Center"
+                                   VerticalAlignment="Top" Margin="0,-12,0,0"/>
+                        <Border Background="#E3F2FD" CornerRadius="4" BorderBrush="#1976D2" BorderThickness="1" Padding="2" VerticalAlignment="Center">
+                            <Border.ToolTip>
+                                <StackPanel MaxWidth="300">
+                                    <TextBlock Text="📋 İNCELEME MODU" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                    <TextBlock TextWrapping="Wrap" Text="• Hover: Mouse üzerine gelince yakalar&#x0a;• Click: Tıklama ile yakalar&#x0a;• Region: Bölge seçerek yakalar&#x0a;• Window: Tüm pencereyi analiz eder"/>
+                                </StackPanel>
+                            </Border.ToolTip>
+                            <ComboBox Name="cmbInspectionMode" SelectedIndex="1" FontSize="12" FontWeight="Bold"
+                                      Padding="10,6" BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Center">
+                                <ComboBoxItem>Hover</ComboBoxItem>
+                                <ComboBoxItem>Click</ComboBoxItem>
+                                <ComboBoxItem>Region</ComboBoxItem>
+                                <ComboBoxItem>Window</ComboBoxItem>
+                            </ComboBox>
+                        </Border>
+                    </Grid>
+                    <!-- PROFILE -->
+                    <Grid Margin="2,0" MinWidth="95">
+                        <TextBlock Text="PROFİL" FontSize="9" Foreground="#2E7D32" FontWeight="Bold" HorizontalAlignment="Center"
+                                   VerticalAlignment="Top" Margin="0,-12,0,0"/>
+                        <Border Background="#E8F5E9" CornerRadius="4" BorderBrush="#388E3C" BorderThickness="1" Padding="2" VerticalAlignment="Center">
+                            <Border.ToolTip>
+                                <StackPanel MaxWidth="300">
+                                    <TextBlock Text="📊 VERİ PROFİLİ" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                    <TextBlock TextWrapping="Wrap" Text="• Quick: Temel bilgiler (hızlı)&#x0a;• Standard: Orta detay seviyesi&#x0a;• Full: Tüm özellikler (yavaş ama kapsamlı)"/>
+                                </StackPanel>
+                            </Border.ToolTip>
+                            <ComboBox Name="cmbCollectionProfile" SelectedIndex="2" FontSize="12" FontWeight="Bold"
+                                      Padding="10,6" BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Center">
+                                <ComboBoxItem>Quick</ComboBoxItem>
+                                <ComboBoxItem>Standard</ComboBoxItem>
+                                <ComboBoxItem>Full</ComboBoxItem>
+                            </ComboBox>
+                        </Border>
+                    </Grid>
+                    <!-- TECH -->
+                    <Grid Margin="2,0" MinWidth="95">
+                        <TextBlock Text="TECH" FontSize="9" Foreground="#E65100" FontWeight="Bold" HorizontalAlignment="Center"
+                                   VerticalAlignment="Top" Margin="0,-12,0,0"/>
+                        <Border Background="#FFF3E0" CornerRadius="4" BorderBrush="#E65100" BorderThickness="1" Padding="2" VerticalAlignment="Center">
+                            <Border.ToolTip>
+                                <StackPanel MaxWidth="300">
+                                    <TextBlock Text="⚙ TEKNOLOJİ" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                    <TextBlock TextWrapping="Wrap" Text="• Auto: Otomatik seçim&#x0a;• UIA: UI Automation (Windows)&#x0a;• CDP: Chrome DevTools Protocol&#x0a;• MSHTML: Internet Explorer&#x0a;• All: Tüm teknolojiler (en kapsamlı)"/>
+                                </StackPanel>
+                            </Border.ToolTip>
+                            <ComboBox Name="cmbDetectionTech" SelectedIndex="4" FontSize="12" FontWeight="Bold"
+                                      Padding="10,6" BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Center">
+                                <ComboBoxItem>Auto</ComboBoxItem>
+                                <ComboBoxItem>UIA</ComboBoxItem>
+                                <ComboBoxItem>CDP</ComboBoxItem>
+                                <ComboBoxItem>MSHTML</ComboBoxItem>
+                                <ComboBoxItem>All</ComboBoxItem>
+                            </ComboBox>
+                        </Border>
+                    </Grid>
                 </StackPanel>
-            </Button>
-            <Button Name="btnStopInspection" Click="StopInspection_Click" IsEnabled="False" ToolTip="Stop Inspection (F2)">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="⏹" FontSize="16" Margin="0,0,5,0"/>
-                    <TextBlock Text="Stop" VerticalAlignment="Center"/>
+
+                <!-- ACTION BUTTONS - Same Size as Start/Stop -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Name="btnRefresh" Click="Refresh_Click"
+                            Padding="12,6" Margin="2" Background="#0288D1" Foreground="White" FontSize="12" FontWeight="Bold">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="🔄 YENİLE (F5)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Seçili elementi yeniden analiz eder. Dinamik içeriklerde değişiklikleri güncellemek için kullanın."/>
+                                <TextBlock Text="Kısayol: F5" Margin="0,5,0,0" FontStyle="Italic" Foreground="#AAA"/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <TextBlock Text="🔄 YENİLE" FontSize="12"/>
+                    </Button>
+                    <Button Name="btnScreenshot" Click="Screenshot_Click"
+                            Padding="12,6" Margin="2" Background="#7B1FA2" Foreground="White" FontSize="12" FontWeight="Bold">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="📷 EKRAN GÖRÜNTÜSü" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Seçili elementin ve tüm ekranın görüntüsünü yakalar. Masaüstüne kaydeder."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <TextBlock Text="📷 GÖRÜNTÜ" FontSize="12"/>
+                    </Button>
+                    <Button Name="btnExportQuick" Click="ExportQuick_Click"
+                            Padding="12,6" Margin="2" Background="#455A64" Foreground="White" FontSize="12" FontWeight="Bold">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="💾 HIZLI KAYDET (Ctrl+S)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Mevcut element bilgilerini hızlıca masaüstüne TXT dosyası olarak kaydeder."/>
+                                <TextBlock Text="Kısayol: Ctrl+S" Margin="0,5,0,0" FontStyle="Italic" Foreground="#AAA"/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <TextBlock Text="💾 KAYDET" FontSize="12"/>
+                    </Button>
                 </StackPanel>
-            </Button>
-            <Separator/>
 
-            <!-- Inspection Mode -->
-            <TextBlock Text="Mode:" VerticalAlignment="Center" Margin="5,0"/>
-            <ComboBox Name="cmbInspectionMode" Width="120" SelectedIndex="0">
-                <ComboBoxItem>Hover (Real-time)</ComboBoxItem>
-                <ComboBoxItem>Click (Snapshot)</ComboBoxItem>
-                <ComboBoxItem>Region Select</ComboBoxItem>
-                <ComboBoxItem>Full Window</ComboBoxItem>
-            </ComboBox>
-
-            <Separator/>
-
-            <!-- Collection Profile -->
-            <TextBlock Text="Profile:" VerticalAlignment="Center" Margin="5,0"/>
-            <ComboBox Name="cmbCollectionProfile" Width="100" SelectedIndex="1">
-                <ComboBoxItem>Quick</ComboBoxItem>
-                <ComboBoxItem>Standard</ComboBoxItem>
-                <ComboBoxItem>Full</ComboBoxItem>
-                <ComboBoxItem>Custom</ComboBoxItem>
-            </ComboBox>
-
-            <Separator/>
-
-            <!-- Detection Technology -->
-            <TextBlock Text="Technology:" VerticalAlignment="Center" Margin="5,0"/>
-            <ComboBox Name="cmbDetectionTech" Width="130" SelectedIndex="0">
-                <ComboBoxItem>Auto Detect</ComboBoxItem>
-                <ComboBoxItem>UI Automation</ComboBoxItem>
-                <ComboBoxItem>WebView2/CDP</ComboBoxItem>
-                <ComboBoxItem>MSHTML</ComboBoxItem>
-                <ComboBoxItem>Playwright</ComboBoxItem>
-                <ComboBoxItem>All Technologies</ComboBoxItem>
-            </ComboBox>
-
-            <Separator/>
-
-            <Button Name="btnRefresh" Click="Refresh_Click" ToolTip="Refresh Current Element (F5)">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="🔄" FontSize="16" Margin="0,0,5,0"/>
-                    <TextBlock Text="Refresh" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-
-            <Button Name="btnScreenshot" Click="Screenshot_Click" ToolTip="Take Screenshot">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="📷" FontSize="16" Margin="0,0,5,0"/>
-                    <TextBlock Text="Screenshot" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-
-            <Button Name="btnExportQuick" Click="ExportQuick_Click" ToolTip="Quick Export (Ctrl+S)">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="💾" FontSize="16" Margin="0,0,5,0"/>
-                    <TextBlock Text="Export" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-
-            <Separator/>
-
-            <CheckBox Name="chkTopmost" Click="Topmost_Click" VerticalAlignment="Center" Margin="5,0" ToolTip="Keep window always on top">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="📌" FontSize="14" Margin="0,0,3,0"/>
-                    <TextBlock Text="Always On Top" VerticalAlignment="Center"/>
-                </StackPanel>
-            </CheckBox>
-        </ToolBar>
+                <!-- TOPMOST - Far Right -->
+                <ToggleButton Name="btnTopmost" Grid.Column="4" Click="Topmost_Click"
+                              Padding="12,6" Margin="2" Background="#FF5722" Foreground="White" HorizontalAlignment="Right" FontSize="12" FontWeight="Bold">
+                    <ToggleButton.ToolTip>
+                        <StackPanel MaxWidth="300">
+                            <TextBlock Text="📌 HER ZAMAN ÜSTTE" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                            <TextBlock TextWrapping="Wrap" Text="Pencereyi her zaman diğer pencerelerin üstünde tutar. Aktifken yeşil, pasifken turuncu renk alır."/>
+                        </StackPanel>
+                    </ToggleButton.ToolTip>
+                    <TextBlock Text="📌 ÜSTTE" FontSize="12" FontWeight="Bold"/>
+                </ToggleButton>
+            </Grid>
+        </Border>
 
         <!-- Main Content -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="350"/>
-                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="240"/>
+                <ColumnDefinition Width="4"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="4"/>
+                <ColumnDefinition Width="240"/>
             </Grid.ColumnDefinitions>
 
             <!-- Left Panel - Element Tree -->
-            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="5">
+            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="3">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="24"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
@@ -176,24 +261,24 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Element Hierarchy" VerticalAlignment="Center" Margin="5" FontWeight="Bold"/>
+                        <TextBlock Text="Elements" VerticalAlignment="Center" Margin="3" FontWeight="Bold" FontSize="11"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Expand All" Click="ExpandAll_Click" Margin="2" Padding="5,2"/>
-                            <Button Content="Collapse All" Click="CollapseAll_Click" Margin="2" Padding="5,2"/>
+                            <Button Content="+" Click="ExpandAll_Click" Margin="1" Padding="4,1" FontSize="10" ToolTip="Expand All"/>
+                            <Button Content="-" Click="CollapseAll_Click" Margin="1" Padding="4,1" FontSize="10" ToolTip="Collapse All"/>
                         </StackPanel>
                     </Grid>
 
                     <!-- Tree View -->
-                    <TreeView Name="tvElements" Grid.Row="1"
+                    <TreeView Name="tvElements" Grid.Row="1" FontSize="10"
                              SelectedItemChanged="TreeView_SelectedItemChanged"
                              MouseRightButtonUp="TreeView_MouseRightButtonUp">
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding ElementType}" FontWeight="Bold" Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding Name}" FontStyle="Italic"/>
+                                    <TextBlock Text="{Binding ElementType}" FontWeight="Bold" Margin="0,0,3,0"/>
+                                    <TextBlock Text="{Binding Name}" FontStyle="Italic" MaxWidth="100" TextTrimming="CharacterEllipsis"/>
                                     <TextBlock Text=" [" Foreground="Gray"/>
-                                    <TextBlock Text="{Binding AutomationId}" Foreground="Gray"/>
+                                    <TextBlock Text="{Binding AutomationId}" Foreground="Gray" MaxWidth="60" TextTrimming="CharacterEllipsis"/>
                                     <TextBlock Text="]" Foreground="Gray"/>
                                 </StackPanel>
                             </HierarchicalDataTemplate>
@@ -201,40 +286,84 @@
                     </TreeView>
 
                     <!-- Search Box -->
-                    <Grid Grid.Row="2" Margin="5">
+                    <Grid Grid.Row="2" Margin="3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Name="txtTreeSearch" Grid.Column="0"
+                        <TextBox Name="txtTreeSearch" Grid.Column="0" FontSize="10"
                                 TextChanged="TreeSearch_TextChanged"
                                 GotFocus="TreeSearch_GotFocus"
                                 LostFocus="TreeSearch_LostFocus"
-                                Text="Search elements..." Foreground="Gray"/>
-                        <Button Grid.Column="1" Content="Search" Click="TreeSearch_Click" Margin="5,0,0,0"/>
+                                Text="Search..." Foreground="Gray"/>
+                        <Button Grid.Column="1" Content="🔍" Click="TreeSearch_Click" Margin="2,0,0,0" Padding="4,1" FontSize="10"/>
                     </Grid>
                 </Grid>
             </Border>
 
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="Gray"/>
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" Background="Gray"/>
 
             <!-- Center Panel - Element Details -->
-            <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1" Margin="5">
+            <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1" Margin="3">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="24"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
                     <!-- Details Header -->
                     <Grid Grid.Row="0" Background="LightGray">
-                        <TextBlock Text="Element Properties" VerticalAlignment="Center" Margin="5" FontWeight="Bold"/>
+                        <TextBlock Text="Properties" VerticalAlignment="Center" Margin="3" FontWeight="Bold" FontSize="11"/>
                     </Grid>
 
+                    <!-- Quick Actions Bar - Moved from right panel -->
+                    <Border Grid.Row="1" Background="#E8E8E8" Padding="5,3">
+                        <WrapPanel>
+                            <Button Content="📋 Full Report" Click="CopyFullReport_Click" Margin="2" Padding="8,4"
+                                    Background="#4CAF50" Foreground="White" FontSize="10" FontWeight="Bold"
+                                    ToolTip="Copy Full Report (5 Tech)"/>
+                            <Button Content="📄 Copy Element" Click="CopyCurrentElement_Click" Margin="2" Padding="8,4"
+                                    Background="#2196F3" Foreground="White" FontSize="10"
+                                    ToolTip="Copy Current Element Data"/>
+                            <Button Content="📑 Copy All" Click="CopyAllElementsQuick_Click" Margin="2" Padding="8,4"
+                                    Background="#FF9800" Foreground="White" FontSize="10"
+                                    ToolTip="Copy All Collected Elements"/>
+                            <Button Content="📷 Screenshot" Click="SaveScreenshot_Click" Margin="2" Padding="8,4"
+                                    Background="#9C27B0" Foreground="White" FontSize="10"
+                                    ToolTip="Save Screenshot"/>
+                            <Button Content="💾 Export" Click="ExportToDesktop_Click" Margin="2" Padding="8,4"
+                                    Background="#607D8B" Foreground="White" FontSize="10"
+                                    ToolTip="Export to Desktop"/>
+                            <Button Content="🗑 Clear" Click="ClearAllData_Click" Margin="2" Padding="8,4"
+                                    Background="#F44336" Foreground="White" FontSize="10"
+                                    ToolTip="Clear All Data"/>
+                        </WrapPanel>
+                    </Border>
+
                     <!-- Tab Control for Different Views -->
-                    <TabControl Grid.Row="1">
+                    <TabControl Grid.Row="2">
+                        <TabControl.Resources>
+                            <Style TargetType="TabItem">
+                                <Setter Property="FontSize" Value="12"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="Background" Value="#E0E0E0"/>
+                                <Setter Property="BorderBrush" Value="#999"/>
+                                <Setter Property="BorderThickness" Value="1,1,1,0"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#1976D2"/>
+                                        <Setter Property="Foreground" Value="#FF0000"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#BBDEFB"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TabControl.Resources>
                         <!-- Raw Properties Tab -->
-                        <TabItem Header="Raw Properties">
+                        <TabItem Header="RAW PROPERTIES">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <TextBox Name="txtRawProperties"
                                         IsReadOnly="True"
@@ -245,45 +374,40 @@
                         </TabItem>
 
                         <!-- Categorized Properties Tab - ALL 5 TECHNOLOGIES -->
-                        <TabItem Header="All Properties (5 Tech)">
+                        <TabItem Header="ALL PROPERTIES">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
                                     <!-- 1. BASIC / UNIVERSAL PROPERTIES -->
-                                    <Expander Header="1. BASIC / UNIVERSAL PROPERTIES" IsExpanded="True" Background="#E3F2FD">
-                                        <DataGrid Name="dgBasicProperties" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="200">
+                                    <Expander Header="1. BASIC" IsExpanded="True" Background="#E3F2FD">
+                                        <DataGrid Name="dgBasicProperties" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120" FontSize="10">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                 <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </Expander>
 
                                     <!-- 2. UI AUTOMATION (UIA) PROPERTIES -->
-                                    <Expander Header="2. UI AUTOMATION (UIA) PROPERTIES" Background="#E8F5E9">
+                                    <Expander Header="2. UIA" Background="#E8F5E9">
                                         <StackPanel>
-                                            <!-- UIA Basic -->
-                                            <TextBlock Text="Basic UIA Properties" FontWeight="Bold" Margin="5,5,0,2"/>
-                                            <DataGrid Name="dgUIABasic" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                            <TextBlock Text="Basic" FontWeight="Bold" FontSize="9" Margin="3,3,0,1"/>
+                                            <DataGrid Name="dgUIABasic" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
-
-                                            <!-- UIA Control Patterns -->
-                                            <TextBlock Text="Control Patterns" FontWeight="Bold" Margin="5,10,0,2"/>
-                                            <DataGrid Name="dgUIAPatterns" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                            <TextBlock Text="Patterns" FontWeight="Bold" FontSize="9" Margin="3,5,0,1"/>
+                                            <DataGrid Name="dgUIAPatterns" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
-
-                                            <!-- LegacyIAccessible -->
-                                            <TextBlock Text="LegacyIAccessible" FontWeight="Bold" Margin="5,10,0,2"/>
-                                            <DataGrid Name="dgUIALegacy" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                            <TextBlock Text="Legacy" FontWeight="Bold" FontSize="9" Margin="3,5,0,1"/>
+                                            <DataGrid Name="dgUIALegacy" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="60" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
@@ -291,40 +415,33 @@
                                     </Expander>
 
                                     <!-- 3. WEBVIEW2 / CDP PROPERTIES -->
-                                    <Expander Header="3. WEBVIEW2 / CDP (Chrome DevTools Protocol)" Background="#FFF3E0">
+                                    <Expander Header="3. CDP/Web" Background="#FFF3E0">
                                         <StackPanel>
-                                            <!-- HTML DOM Attributes -->
-                                            <TextBlock Text="HTML DOM Attributes" FontWeight="Bold" Margin="5,5,0,2"/>
-                                            <DataGrid Name="dgWebDOM" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                            <TextBlock Text="DOM" FontWeight="Bold" FontSize="9" Margin="3,3,0,1"/>
+                                            <DataGrid Name="dgWebDOM" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
-
-                                            <!-- ARIA Attributes -->
-                                            <TextBlock Text="ARIA Accessibility Attributes" FontWeight="Bold" Margin="5,10,0,2"/>
-                                            <DataGrid Name="dgWebARIA" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                            <TextBlock Text="ARIA" FontWeight="Bold" FontSize="9" Margin="3,5,0,1"/>
+                                            <DataGrid Name="dgWebARIA" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="60" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
-
-                                            <!-- Layout / Box Model -->
-                                            <TextBlock Text="Layout / Box Model" FontWeight="Bold" Margin="5,10,0,2"/>
-                                            <DataGrid Name="dgWebLayout" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                            <TextBlock Text="Layout" FontWeight="Bold" FontSize="9" Margin="3,5,0,1"/>
+                                            <DataGrid Name="dgWebLayout" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="60" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
-
-                                            <!-- CSS Computed Styles -->
-                                            <TextBlock Text="CSS Computed Styles" FontWeight="Bold" Margin="5,10,0,2"/>
-                                            <DataGrid Name="dgWebCSS" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                            <TextBlock Text="CSS" FontWeight="Bold" FontSize="9" Margin="3,5,0,1"/>
+                                            <DataGrid Name="dgWebCSS" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
@@ -332,22 +449,19 @@
                                     </Expander>
 
                                     <!-- 4. MSHTML / IHTMLDocument PROPERTIES -->
-                                    <Expander Header="4. MSHTML / IHTMLDocument (Trident/IE)" Background="#FCE4EC">
+                                    <Expander Header="4. MSHTML" Background="#FCE4EC">
                                         <StackPanel>
-                                            <!-- IHTMLElement -->
-                                            <TextBlock Text="IHTMLElement Properties" FontWeight="Bold" Margin="5,5,0,2"/>
-                                            <DataGrid Name="dgMSHTMLElement" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                            <TextBlock Text="Element" FontWeight="Bold" FontSize="9" Margin="3,3,0,1"/>
+                                            <DataGrid Name="dgMSHTMLElement" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
-
-                                            <!-- IHTMLDocument -->
-                                            <TextBlock Text="IHTMLDocument Properties" FontWeight="Bold" Margin="5,10,0,2"/>
-                                            <DataGrid Name="dgMSHTMLDocument" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                            <TextBlock Text="Document" FontWeight="Bold" FontSize="9" Margin="3,5,0,1"/>
+                                            <DataGrid Name="dgMSHTMLDocument" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="60" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
@@ -355,31 +469,26 @@
                                     </Expander>
 
                                     <!-- 5. WIN32 API / SPY++ PROPERTIES -->
-                                    <Expander Header="5. WIN32 API / SPY++ PROPERTIES" Background="#F3E5F5">
+                                    <Expander Header="5. Win32" Background="#F3E5F5">
                                         <StackPanel>
-                                            <!-- Window Handle Info -->
-                                            <TextBlock Text="Window Handle Information" FontWeight="Bold" Margin="5,5,0,2"/>
-                                            <DataGrid Name="dgWin32Handle" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                            <TextBlock Text="Handle" FontWeight="Bold" FontSize="9" Margin="3,3,0,1"/>
+                                            <DataGrid Name="dgWin32Handle" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="60" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
-
-                                            <!-- Window Styles -->
-                                            <TextBlock Text="Window Styles (WS_* / WS_EX_*)" FontWeight="Bold" Margin="5,10,0,2"/>
-                                            <DataGrid Name="dgWin32Styles" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="120">
+                                            <TextBlock Text="Styles" FontWeight="Bold" FontSize="9" Margin="3,5,0,1"/>
+                                            <DataGrid Name="dgWin32Styles" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="60" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
-
-                                            <!-- Window Rectangles -->
-                                            <TextBlock Text="Window Rectangles" FontWeight="Bold" Margin="5,10,0,2"/>
-                                            <DataGrid Name="dgWin32Rect" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="100">
+                                            <TextBlock Text="Rect" FontWeight="Bold" FontSize="9" Margin="3,5,0,1"/>
+                                            <DataGrid Name="dgWin32Rect" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="50" FontSize="10">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                    <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                     <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
@@ -387,73 +496,68 @@
                                     </Expander>
 
                                     <!-- 6. POSITION & SIZE -->
-                                    <Expander Header="6. POSITION &amp; SIZE" Background="#ECEFF1">
-                                        <DataGrid Name="dgPosition" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                    <Expander Header="6. Position" Background="#ECEFF1">
+                                        <DataGrid Name="dgPosition" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                 <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </Expander>
 
                                     <!-- 7. SELECTORS -->
-                                    <Expander Header="7. SELECTORS" Background="#E0F7FA">
-                                        <StackPanel Margin="10">
-                                            <TextBlock Text="XPath:" FontWeight="Bold"/>
-                                            <TextBox Name="txtXPath" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-                                            <TextBlock Text="Full XPath:" FontWeight="Bold"/>
-                                            <TextBox Name="txtFullXPath" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-                                            <TextBlock Text="CSS Selector:" FontWeight="Bold"/>
-                                            <TextBox Name="txtCssSelector" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-                                            <TextBlock Text="Windows Path:" FontWeight="Bold"/>
-                                            <TextBox Name="txtWindowsPath" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-                                            <TextBlock Text="Playwright Selector:" FontWeight="Bold"/>
-                                            <TextBox Name="txtPlaywrightSelector" IsReadOnly="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-                                            <TextBlock Text="Tree Path:" FontWeight="Bold"/>
-                                            <TextBox Name="txtTreePath" IsReadOnly="True" TextWrapping="Wrap"/>
+                                    <Expander Header="7. Selectors" Background="#E0F7FA">
+                                        <StackPanel Margin="5">
+                                            <TextBlock Text="XPath:" FontWeight="Bold" FontSize="9"/>
+                                            <TextBox Name="txtXPath" IsReadOnly="True" TextWrapping="Wrap" FontSize="9" Margin="0,0,0,3"/>
+                                            <TextBlock Text="Full XPath:" FontWeight="Bold" FontSize="9"/>
+                                            <TextBox Name="txtFullXPath" IsReadOnly="True" TextWrapping="Wrap" FontSize="9" Margin="0,0,0,3"/>
+                                            <TextBlock Text="CSS:" FontWeight="Bold" FontSize="9"/>
+                                            <TextBox Name="txtCssSelector" IsReadOnly="True" TextWrapping="Wrap" FontSize="9" Margin="0,0,0,3"/>
+                                            <TextBlock Text="Windows:" FontWeight="Bold" FontSize="9"/>
+                                            <TextBox Name="txtWindowsPath" IsReadOnly="True" TextWrapping="Wrap" FontSize="9" Margin="0,0,0,3"/>
+                                            <TextBlock Text="Playwright:" FontWeight="Bold" FontSize="9"/>
+                                            <TextBox Name="txtPlaywrightSelector" IsReadOnly="True" TextWrapping="Wrap" FontSize="9" Margin="0,0,0,3"/>
+                                            <TextBlock Text="Tree:" FontWeight="Bold" FontSize="9"/>
+                                            <TextBox Name="txtTreePath" IsReadOnly="True" TextWrapping="Wrap" FontSize="9"/>
                                         </StackPanel>
                                     </Expander>
 
                                     <!-- 8. HIERARCHY -->
-                                    <Expander Header="8. HIERARCHY" Background="#FFF8E1">
-                                        <DataGrid Name="dgHierarchy" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                    <Expander Header="8. Hierarchy" Background="#FFF8E1">
+                                        <DataGrid Name="dgHierarchy" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                 <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </Expander>
 
                                     <!-- 9. TABLE/GRID PROPERTIES -->
-                                    <Expander Header="9. TABLE/GRID PROPERTIES" Background="#E8EAF6">
-                                        <DataGrid Name="dgTable" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                    <Expander Header="9. Table/Grid" Background="#E8EAF6">
+                                        <DataGrid Name="dgTable" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                 <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </Expander>
 
                                     <!-- 10. STATE PROPERTIES -->
-                                    <Expander Header="10. STATE PROPERTIES" Background="#E0F2F1">
-                                        <DataGrid Name="dgState" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                    <Expander Header="10. State" Background="#E0F2F1">
+                                        <DataGrid Name="dgState" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                 <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </Expander>
 
                                     <!-- 11. CUSTOM PROPERTIES -->
-                                    <Expander Header="11. CUSTOM / EXTRA PROPERTIES" Background="#EFEBE9">
-                                        <DataGrid Name="dgCustom" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150">
+                                    <Expander Header="11. Custom" Background="#EFEBE9">
+                                        <DataGrid Name="dgCustom" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="80" FontSize="10">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="180"/>
+                                                <DataGridTextColumn Header="Property" Binding="{Binding Key}" Width="140"/>
                                                 <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
@@ -463,7 +567,7 @@
                         </TabItem>
 
                         <!-- Source Code Tab -->
-                        <TabItem Header="Source Code">
+                        <TabItem Header="SOURCE CODE">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <TextBox Name="txtSourceCode"
                                         IsReadOnly="True"
@@ -475,98 +579,378 @@
                         </TabItem>
 
                         <!-- Screenshot Tab -->
-                        <TabItem Header="Screenshot">
+                        <TabItem Header="SCREENSHOT">
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                                 <Image Name="imgScreenshot" Stretch="None"/>
                             </ScrollViewer>
+                        </TabItem>
+
+                        <!-- Archive Tab -->
+                        <TabItem Header="ARCHIVE" Name="tabArchive">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="140"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Archive Toolbar -->
+                                <Border Grid.Row="0" Grid.ColumnSpan="2" Background="#E3F2FD" Padding="3">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="🔄 Refresh" Click="ArchiveRefresh_Click" Margin="1" Padding="6,2" FontSize="10"/>
+                                        <Button Content="📁 Open Folder" Click="ArchiveOpenFolder_Click" Margin="1" Padding="6,2" FontSize="10"/>
+                                        <TextBlock Name="txtArchivePath" VerticalAlignment="Center" Foreground="Gray" FontSize="9" Margin="10,0" MaxWidth="250" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Archive List -->
+                                <ListView Name="lvArchive" Grid.Row="1" Grid.Column="0" SelectionChanged="ArchiveList_SelectionChanged" FontSize="10">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="Name" Width="150">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="Time" Width="90">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding CaptureTime, StringFormat='{}{0:MM-dd HH:mm}'}"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="#" Width="25">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding FileCount}" HorizontalAlignment="Center"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="Actions" Width="130">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Button Content="✏" Tag="{Binding Id}" Click="ArchiveRename_Click"
+                                                                    Margin="1" Padding="4,2" Background="#2196F3" Foreground="White" FontSize="9" ToolTip="Rename"/>
+                                                            <Button Content="📂" Tag="{Binding Id}" Click="ArchiveOpenItem_Click"
+                                                                    Margin="1" Padding="4,2" FontSize="9" ToolTip="Open Folder"/>
+                                                            <Button Content="🗑" Tag="{Binding Id}" Click="ArchiveDelete_Click"
+                                                                    Margin="1" Padding="4,2" Background="#F44336" Foreground="White" FontSize="9" ToolTip="Delete"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+
+                                <!-- Right Side Actions Panel -->
+                                <Border Grid.Row="1" Grid.Column="1" Background="#F5F5F5" BorderBrush="#DDD" BorderThickness="1,0,0,0" Padding="5">
+                                    <StackPanel>
+                                        <TextBlock Text="QUICK ACTIONS" FontWeight="Bold" FontSize="9" Foreground="#666" Margin="0,0,0,8"/>
+
+                                        <TextBlock Text="Selected Item:" FontSize="9" Foreground="#888" Margin="0,0,0,3"/>
+
+                                        <Button Content="📋 Copy Full Report" Click="ArchiveSelectedCopyContent_Click"
+                                                Margin="0,2" Padding="5,4" FontSize="10" Background="#4CAF50" Foreground="White"
+                                                ToolTip="Copy all file contents to clipboard"/>
+
+                                        <Button Content="📎 Copy File Links" Click="ArchiveSelectedCopyLinks_Click"
+                                                Margin="0,2" Padding="5,4" FontSize="10" Background="#2196F3" Foreground="White"
+                                                ToolTip="Copy file paths to clipboard"/>
+
+                                        <Button Content="📂 Open in Explorer" Click="ArchiveSelectedOpen_Click"
+                                                Margin="0,2" Padding="5,4" FontSize="10"
+                                                ToolTip="Open folder in Windows Explorer"/>
+
+                                        <Separator Margin="0,8"/>
+
+                                        <TextBlock Text="All Elements:" FontSize="9" Foreground="#888" Margin="0,0,0,3"/>
+
+                                        <Button Content="📋 Copy All Elements" Click="CopyAllElementsQuick_Click"
+                                                Margin="0,2" Padding="5,4" FontSize="10" Background="#FF9800" Foreground="White"
+                                                ToolTip="Copy all collected elements"/>
+
+                                        <Button Content="📷 Save Screenshot" Click="SaveScreenshot_Click"
+                                                Margin="0,2" Padding="5,4" FontSize="10"
+                                                ToolTip="Save current screenshot"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
                         </TabItem>
                     </TabControl>
                 </Grid>
             </Border>
 
-            <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Stretch" Background="Gray"/>
+            <GridSplitter Grid.Column="3" Width="4" HorizontalAlignment="Stretch" Background="Gray"/>
 
             <!-- Right Panel - Collection Info & Actions -->
-            <Border Grid.Column="4" BorderBrush="Gray" BorderThickness="1" Margin="5">
+            <Border Grid.Column="4" BorderBrush="Gray" BorderThickness="1" Margin="3">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="24"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <!-- Info Header -->
                     <Grid Grid.Row="0" Background="LightGray">
-                        <TextBlock Text="Collection Information" VerticalAlignment="Center" Margin="5" FontWeight="Bold"/>
+                        <TextBlock Text="Info" VerticalAlignment="Center" Margin="3" FontWeight="Bold" FontSize="11"/>
                     </Grid>
 
                     <!-- Current Status -->
-                    <GroupBox Grid.Row="1" Header="Current Status" Margin="5">
-                        <StackPanel Margin="5">
-                            <TextBlock Text="Status:" FontWeight="Bold"/>
-                            <TextBlock Name="txtStatus" Text="Ready" Foreground="Green" Margin="0,0,0,5"/>
-
-                            <TextBlock Text="Elements Collected:" FontWeight="Bold"/>
-                            <TextBlock Name="txtElementCount" Text="0" Margin="0,0,0,5"/>
-
-                            <TextBlock Text="Collection Time:" FontWeight="Bold"/>
-                            <TextBlock Name="txtCollectionTime" Text="0 ms" Margin="0,0,0,5"/>
-
-                            <TextBlock Text="Detection Method:" FontWeight="Bold"/>
-                            <TextBlock Name="txtDetectionMethod" Text="None" Margin="0,0,0,5"/>
-
-                            <ProgressBar Name="pbProgress" Height="20" Visibility="Collapsed"/>
-                            <TextBlock Name="txtProgress" Text="" HorizontalAlignment="Center" Visibility="Collapsed"/>
-                        </StackPanel>
-                    </GroupBox>
+                    <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="0,0,0,1" Margin="3,3,3,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="2">
+                                <TextBlock Text="Status" FontSize="9" Foreground="Gray"/>
+                                <TextBlock Name="txtStatus" Text="Ready" Foreground="Green" FontSize="10"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="2">
+                                <TextBlock Text="Elements" FontSize="9" Foreground="Gray"/>
+                                <TextBlock Name="txtElementCount" Text="0" FontSize="10"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="2">
+                                <TextBlock Text="Time" FontSize="9" Foreground="Gray"/>
+                                <TextBlock Name="txtCollectionTime" Text="0 ms" FontSize="10"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="2">
+                                <TextBlock Text="Method" FontSize="9" Foreground="Gray"/>
+                                <TextBlock Name="txtDetectionMethod" Text="None" FontSize="10"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <ProgressBar Name="pbProgress" Grid.Row="1" Height="3" Visibility="Collapsed" VerticalAlignment="Bottom"/>
+                    <TextBlock Name="txtProgress" Grid.Row="1" Text="" HorizontalAlignment="Center" Visibility="Collapsed" FontSize="9"/>
 
                     <!-- Console Output -->
-                    <GroupBox Grid.Row="2" Header="Console Output" Margin="5">
+                    <Border Grid.Row="2" Margin="3">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <TextBox Name="txtConsole"
                                     IsReadOnly="True"
                                     FontFamily="Consolas"
+                                    FontSize="9"
                                     Background="Black"
                                     Foreground="LightGreen"
                                     TextWrapping="Wrap"/>
                         </ScrollViewer>
-                    </GroupBox>
-
-                    <!-- Quick Actions -->
-                    <GroupBox Grid.Row="3" Header="Quick Actions" Margin="5">
-                        <StackPanel Margin="5">
-                            <Button Content="📋 Copy Full Report (5 Tech)" Click="CopyFullReport_Click" Margin="0,2"
-                                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
-                                    ToolTip="Copy comprehensive report with ALL properties from all 5 technologies to clipboard"/>
-                            <Button Content="Copy Current Element" Click="CopyCurrentElement_Click" Margin="0,2"/>
-                            <Button Content="Copy All Elements" Click="CopyAllElementsQuick_Click" Margin="0,2"/>
-                            <Button Content="Save Screenshot" Click="SaveScreenshot_Click" Margin="0,2"/>
-                            <Button Content="Export to Desktop" Click="ExportToDesktop_Click" Margin="0,2"/>
-                            <Button Content="Clear All Data" Click="ClearAllData_Click" Margin="0,2"/>
-                        </StackPanel>
-                    </GroupBox>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>
 
-        <!-- Status Bar -->
-        <StatusBar Grid.Row="3">
-            <StatusBarItem>
-                <TextBlock Name="sbStatus" Text="Ready"/>
-            </StatusBarItem>
-            <Separator/>
-            <StatusBarItem>
-                <TextBlock Name="sbMousePosition" Text="Mouse: 0, 0"/>
-            </StatusBarItem>
-            <Separator/>
-            <StatusBarItem>
-                <TextBlock Name="sbElementInfo" Text="No element selected"/>
-            </StatusBarItem>
-            <Separator/>
-            <StatusBarItem>
-                <TextBlock Name="sbMemory" Text="Memory: 0 MB"/>
-            </StatusBarItem>
-        </StatusBar>
+        <!-- Hotkey Info Panel - Clickable Buttons with Descriptions -->
+        <Border Grid.Row="3" Background="#1E1E1E" Margin="3,1" Padding="3">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Hotkey Buttons - Larger with Detailed Tooltips -->
+                <WrapPanel Grid.Column="0" VerticalAlignment="Center">
+                    <Button Click="StartInspection_Click" Margin="2,1" Padding="10,5" Background="#1976D2" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="280">
+                                <TextBlock Text="🔍 F1 - BAŞLAT (GİZLE)" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Element inceleme modunu başlatır ve bu pencereyi gizler. Mouse ile elementler üzerine gelerek bilgi toplayın."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F1" FontWeight="Bold" Foreground="#FFD700" FontSize="12"/>
+                            <TextBlock Text=" BAŞLAT" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="StopInspection_Click" Margin="2,1" Padding="10,5" Background="#D32F2F" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="280">
+                                <TextBlock Text="⏹ F2 - DURDUR" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Element inceleme modunu durdurur. Pencere tekrar görünür hale gelir, toplanan veriler korunur."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F2" FontWeight="Bold" Foreground="#FFCDD2" FontSize="12"/>
+                            <TextBlock Text=" DURDUR" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="StartKeepVisible_Click" Margin="2,1" Padding="10,5" Background="#388E3C" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="280">
+                                <TextBlock Text="▶ F3 - GÖRÜNÜR BAŞLAT" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Element inceleme modunu başlatır ama pencere görünür kalır. Anlık sonuçları görmek için idealdir."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F3" FontWeight="Bold" Foreground="#A5D6A7" FontSize="12"/>
+                            <TextBlock Text=" GÖRÜNÜR" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="ShutterInfo_Click" Margin="2,1" Padding="10,5" Background="#B71C1C" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="📸 F4 - DEKLANŞÖR MODU" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Fotoğraf makinesi gibi çalışır:&#x0a;1. F4'e BASILI TUTUN&#x0a;2. Mouse'u element üzerine götürün&#x0a;3. F4'ü BIRAKIN = Element yakalanır!&#x0a;&#x0a;Menüler ve dropdown'lar için mükemmel."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F4" FontWeight="Bold" Foreground="#FF5252" FontSize="12"/>
+                            <TextBlock Text=" DEKLANŞÖR" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="Refresh_Click" Margin="2,1" Padding="10,5" Background="#0288D1" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="280">
+                                <TextBlock Text="🔄 F5 - YENİLE" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Seçili elementi yeniden analiz eder. Dinamik içeriklerde (AJAX, JavaScript) değişiklikleri güncellemek için kullanın."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F5" FontWeight="Bold" Foreground="#81D4FA" FontSize="12"/>
+                            <TextBlock Text=" YENİLE" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="ExportToDesktopAndArchive_Click" Margin="2,1" Padding="10,5" Background="#2E7D32" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="💾 F6 - EXPORT + ARŞİV" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Element bilgilerini TXT rapor olarak hem masaüstüne hem de arşive kaydeder. Hızlı kayıt için idealdir."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F6" FontWeight="Bold" Foreground="#A5D6A7" FontSize="12"/>
+                            <TextBlock Text=" EXPORT" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="FullCaptureToDesktopAndArchive_Click" Margin="2,1" Padding="10,5" Background="#E65100" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="320">
+                                <TextBlock Text="🎯 F7 - TAM YAKALAMA" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="En kapsamlı yakalama modu:&#x0a;• 5 Teknoloji ile element analizi&#x0a;• Sayfa yapısı (DOM tree)&#x0a;• Kaynak kodları&#x0a;• 3 Screenshot (tam ekran, pencere, element)&#x0a;&#x0a;Masaüstü + Arşive kaydedilir."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F7" FontWeight="Bold" Foreground="#FFCC80" FontSize="12"/>
+                            <TextBlock Text=" TAM YAKALAMA" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="FullCaptureToArchiveOnly_Click" Margin="2,1" Padding="10,5" Background="#7B1FA2" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="📦 F8 - SADECE ARŞİV" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="F7 ile aynı tam yakalama işlemini yapar, ancak sadece arşive kaydeder. Masaüstünü temiz tutmak isteyenler için."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="F8" FontWeight="Bold" Foreground="#CE93D8" FontSize="12"/>
+                            <TextBlock Text=" ARŞİV" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="ExportQuick_Click" Margin="2,1" Padding="10,5" Background="#455A64" Foreground="White" BorderThickness="0">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="280">
+                                <TextBlock Text="⚡ Ctrl+S - HIZLI KAYDET" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Mevcut element bilgilerini anında masaüstüne TXT olarak kaydeder. En hızlı kayıt yöntemi."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Ctrl+S" FontWeight="Bold" Foreground="#90A4AE" FontSize="11"/>
+                            <TextBlock Text=" HIZLI" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+
+                <!-- Status Indicator -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,5,0">
+                    <Border Name="brdShutterStatus" Background="Transparent" CornerRadius="3" Padding="8,2">
+                        <TextBlock Name="txtShutterStatus" Text="" FontWeight="Bold" Foreground="#FF5252" FontSize="10"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Status Bar with Visual Progress -->
+        <Grid Grid.Row="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Progress Indicator Panel - Shows during operations -->
+            <Border Name="pnlProgressIndicator" Grid.Row="0" Background="#FFF3E0" Padding="10,5" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="⏳" FontSize="16" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Name="txtProgressMessage" Text="İşlem devam ediyor..." FontSize="11" FontWeight="Bold" Foreground="#E65100"/>
+                        <ProgressBar Name="sbProgressBar" Height="6" Minimum="0" Maximum="100" Value="0" Margin="0,3,0,0"
+                                     Background="#FFCC80" Foreground="#FF6D00" IsIndeterminate="True"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Name="txtProgressWait" Text="Lütfen bekleyin..." FontSize="10" Foreground="#F57C00"
+                               VerticalAlignment="Center" Margin="10,0,0,0" FontStyle="Italic"/>
+                </Grid>
+            </Border>
+
+            <!-- Main Progress Bar - Always visible thin line -->
+            <ProgressBar Name="sbMainProgressBar" Grid.Row="1" Height="3" Minimum="0" Maximum="100" Value="0"
+                         Background="#E0E0E0" Foreground="#4CAF50" BorderThickness="0"/>
+
+            <!-- Status Info -->
+            <Border Grid.Row="2" Background="#F5F5F5" Padding="5,2">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBlock Text="Durum: " FontSize="10" Foreground="#666"/>
+                        <TextBlock Name="sbStatus" Text="Hazır" FontSize="10" FontWeight="Bold" Foreground="#4CAF50"/>
+                    </StackPanel>
+
+                    <Border Grid.Column="1" Background="#E0E0E0" Width="1" Margin="10,2"/>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <TextBlock Name="sbOperationStatus" Text="" Foreground="#FF6600" FontWeight="Bold" FontSize="10"/>
+                        <TextBlock Name="sbOperationProgress" Text="" Foreground="#0066FF" Margin="5,0,0,0" FontSize="10"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="10,0">
+                        <TextBlock Text="🖱 " FontSize="10"/>
+                        <TextBlock Name="sbMousePosition" Text="0, 0" FontSize="10" Foreground="#333"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4" Orientation="Horizontal" Margin="10,0">
+                        <TextBlock Text="📋 " FontSize="10"/>
+                        <TextBlock Name="sbElementInfo" Text="-" FontSize="10" Foreground="#333" MaxWidth="150" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="5" Orientation="Horizontal" Margin="10,0">
+                        <TextBlock Text="💾 " FontSize="10"/>
+                        <TextBlock Name="sbMemory" Text="0 MB" FontSize="10" Foreground="#666"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>
