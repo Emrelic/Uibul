@@ -948,6 +948,18 @@
                             <TextBlock Text=" Yapıştır" Foreground="White" FontSize="10"/>
                         </StackPanel>
                     </Button>
+                    <Button Click="AtlasKare_Click" Margin="1" Padding="2,4" Background="#C62828" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="340">
+                                <TextBlock Text="🗺 F11 - TARİH ATLASI KARESİ" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Atlastaki bir kusuru bildirmek için kare alır.&#x0a;• Mouse ile bölge seçilir&#x0a;• Kırpma sınırına 3 px kırmızı çerçeve çizilir&#x0a;• Altına ŞERİT basılır: tarih · koordinat · zoom · açık kronoloji maddesi&#x0a;• En uzun kenar 1200 px'e indirilir (küçükse büyütülmez)&#x0a;• PNG hem panoya hem %LOCALAPPDATA%\TarihAtlasiKare klasörüne&#x0a;&#x0a;Şerit görüntünün İÇİNE basıldığı için dosya adı kaybolsa bile tarih kareyle birlikte gider.&#x0a;&#x0a;Atlas başlığında damga yoksa kare yine alınır; şerit kırmızı zeminle 'TARİH/KOORDİNAT OKUNAMADI' der."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="F11" FontWeight="Bold" Foreground="#FFCDD2" FontSize="10"/>
+                            <TextBlock Text=" Atlas" Foreground="White" FontSize="10"/>
+                        </StackPanel>
+                    </Button>
                     <Button Click="ExportQuick_Click" Margin="1" Padding="2,4" Background="#455A64" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Center">
                         <Button.ToolTip>
                             <StackPanel MaxWidth="280">
