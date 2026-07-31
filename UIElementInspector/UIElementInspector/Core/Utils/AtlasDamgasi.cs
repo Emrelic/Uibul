@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -166,6 +167,55 @@ namespace UIElementInspector.Core.Utils
                            ".png";
                 return $"{Tarih}_{Enlem}_{Boylam}_{Zoom}.png";
             }
+        }
+
+        /// <summary>
+        /// OKUNABİLİR dosya adı — kullanıcı isteği: dosyaya bakan biri açmadan
+        /// hangi maddeyi, hangi tarihi ve nereyi gösterdiğini anlasın.
+        ///
+        ///   1281-01-01 · 39.34-40.77N 28.78-31.52E · Ertuğrul Gazi'nin ölümü.png
+        ///
+        /// <paramref name="bolgeYazisi"/> verilmezse merkez koordinatı yazılır.
+        /// Windows'ta yasak karakterler ( \ / : * ? " &lt; &gt; | ) ayıklanır ve ad
+        /// 150 karakterle sınırlanır — uzun madde başlıkları yol sınırını aşabilir.
+        /// </summary>
+        public string OkunakliDosyaAdi(string bolgeYazisi)
+        {
+            string govde;
+            if (Eksik)
+            {
+                govde = "TARIHSIZ " +
+                        _damgasizAn.ToString("yyyy-MM-dd HH-mm-ss", CultureInfo.InvariantCulture);
+                if (!string.IsNullOrWhiteSpace(Madde)) govde += " · " + Madde;
+            }
+            else
+            {
+                var koordinat = string.IsNullOrWhiteSpace(bolgeYazisi)
+                    ? Enlem + " " + Boylam
+                    : bolgeYazisi.Replace(" · ", " ");
+                govde = Tarih + " · " + koordinat;
+                if (!string.IsNullOrWhiteSpace(Madde)) govde += " · " + Madde;
+            }
+
+            return Temizle(govde) + ".png";
+        }
+
+        private static string Temizle(string ad)
+        {
+            var sb = new StringBuilder(ad.Length);
+            foreach (var c in ad)
+            {
+                // "–" (uzun tire) dosya adında geçerlidir ama bazı araçlar
+                // bozuk gösteriyor; düz tireye indiriliyor.
+                if (c == '–' || c == '—') { sb.Append('-'); continue; }
+                if (Array.IndexOf(Path.GetInvalidFileNameChars(), c) >= 0) { sb.Append(' '); continue; }
+                sb.Append(c);
+            }
+
+            var s = Regex.Replace(sb.ToString(), @"\s+", " ").Trim();
+            s = s.TrimEnd('.', ' ');                       // Windows sondaki nokta/boşluğu atar
+            if (s.Length > 150) s = s.Substring(0, 150).TrimEnd('.', ' ', '·');
+            return s.Length == 0 ? "atlas-kare" : s;
         }
 
         #region Ayrıştırma

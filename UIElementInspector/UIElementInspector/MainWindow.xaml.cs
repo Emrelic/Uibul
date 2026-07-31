@@ -887,8 +887,12 @@ namespace UIElementInspector
                                  "ya da secim haritanin disinda) - merkez koordinati yazildi.",
                                  Core.Utils.LogLevel.Warning);
 
+                // Dosya adi OKUNABILIR: acmadan hangi madde, hangi tarih, neresi
+                // belli olsun (kullanici istegi).
+                var dosyaAdi = damga.OkunakliDosyaAdi(bolgeYazisi);
+
                 sonuc = Core.Utils.AtlasKare.Uret(
-                    bolge, damgaSatiri, damga.MaddeSatiri, klasor, damga.DosyaAdi,
+                    bolge, damgaSatiri, damga.MaddeSatiri, klasor, dosyaAdi,
                     _appSettings.AtlasEnUzunKenar, damga.Eksik);
 
                 // ── 4. ADIM: PANO — goruntu + kimlik satiri birlikte ───────

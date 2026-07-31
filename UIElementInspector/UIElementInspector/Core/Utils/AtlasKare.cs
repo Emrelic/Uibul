@@ -52,8 +52,12 @@ namespace UIElementInspector.Core.Utils
         // Dosya adı deseni: 1361-02-01_41.35N_26.50E_z6.png
         // Budama YALNIZ bu desene uyan dosyalara dokunur; klasördeki başka
         // hiçbir şey silinmez.
+        // Ad artık okunabilir serbest metin ("1281-01-01 · 39.34-40.77N … · Madde")
+        // olduğu için sıkı desen tutmuyordu; budama hiçbir dosyayı eşleştiremez ve
+        // klasör sonsuza kadar büyürdü. Ölçüt gevşetildi ama HÂLÂ hedefli: ad ya
+        // bir tarihle ya da tarihsiz kare önekiyle başlamak zorunda.
         private static readonly Regex ReKareAdi = new Regex(
-            @"^(-?\d{1,5}-\d{2}-\d{2}_\d+\.\d+[NS]_\d+\.\d+[EW]_z[\d.]+|damgasiz_\d{4}-\d{2}-\d{2}_\d{6})(\-\d+)?\.png$",
+            @"^(-?\d{1,5}-\d{2}-\d{2}[ _·]|damgasiz_|TARIHSIZ ).*\.png$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public sealed class Sonuc
