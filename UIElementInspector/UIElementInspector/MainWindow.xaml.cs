@@ -142,7 +142,21 @@ namespace UIElementInspector
                 // F10 = Son yakalama dizin yolunu yapistir
                 var f10 = _hotkeyService.RegisterHotkey(Key.F10, ModifierKeys.None, PasteLastCapturePath_Click);
 
-                _logger.LogInfo($"Hotkey service initialized - F1:{f1}, F2:{f2}, F3:{f3}, F4:Shutter, F5:{f5}, F6:{f6}, F7:{f7}, F8:{f8}, F9:{f9}, F10:{f10}, Ctrl+S:{ctrlS}");
+                // F11 = TARIH ATLASI KARESI (bolge + kirmizi cerceve + kimlik seridi)
+                Key atlasTus; ModifierKeys atlasMod;
+                var atlasKisayol = _appSettings.AtlasKisayolu;
+                if (!KisayolCoz(atlasKisayol, out atlasTus, out atlasMod))
+                {
+                    LogToConsole($"[ATLAS] Kisayol cozulemedi: '{atlasKisayol}' - F11'e donuluyor.",
+                                 Core.Utils.LogLevel.Warning);
+                    atlasKisayol = "F11";
+                    atlasTus = Key.F11;
+                    atlasMod = ModifierKeys.None;
+                }
+                var atlas = _hotkeyService.RegisterHotkey(atlasTus, atlasMod, AtlasKare_Click);
+                _atlasKisayolAdi = atlasKisayol;
+
+                _logger.LogInfo($"Hotkey service initialized - F1:{f1}, F2:{f2}, F3:{f3}, F4:Shutter, F5:{f5}, F6:{f6}, F7:{f7}, F8:{f8}, F9:{f9}, F10:{f10}, Atlas({atlasKisayol}):{atlas}, Ctrl+S:{ctrlS}");
 
                 LogToConsole("===========================================");
                 LogToConsole("          KISAYOL TUSLARI (HOTKEYS)        ");
@@ -157,8 +171,15 @@ namespace UIElementInspector
                 LogToConsole("  F8  = SADECE ARSIV (Tam Yakalama)");
                 LogToConsole("  F9  = EKRAN GORUNTUSU (Bolge Sec)");
                 LogToConsole("  F10 = SON YAKALAMA YOLUNU YAPISTIR");
+                LogToConsole($"  {atlasKisayol,-3} = TARIH ATLASI KARESI (damgali)");
                 LogToConsole("  Ctrl+S = Hizli Export");
                 LogToConsole("===========================================");
+                if (atlasMod == ModifierKeys.None && atlasTus == Key.F11)
+                {
+                    LogToConsole("[ATLAS] NOT: F11 global kayitli oldugu icin Chrome'un tam ekran");
+                    LogToConsole("        kisayoli bu arac acikken CALISMAZ (olculdu). Istemezseniz");
+                    LogToConsole("        settings.json icinde AtlasKisayolu = \"Ctrl+F11\" yapin.");
+                }
 
                 // Initialize archive tab
                 InitializeArchiveTab();
@@ -728,6 +749,199 @@ namespace UIElementInspector
                 });
             }
         }
+
+        #region Tarih Atlasi Karesi (F11)
+
+        private string _atlasKisayolAdi = "F11";
+
+        /// <summary>
+        /// "F11" | "Ctrl+F11" | "Ctrl+Shift+F9" gibi bir metni tusa cevirir.
+        /// </summary>
+        private static bool KisayolCoz(string metin, out Key key, out ModifierKeys mods)
+        {
+            key = Key.None;
+            mods = ModifierKeys.None;
+            if (string.IsNullOrWhiteSpace(metin)) return false;
+
+            foreach (var parca in metin.Split('+'))
+            {
+                var p = parca.Trim();
+                if (p.Length == 0) continue;
+
+                switch (p.ToLowerInvariant())
+                {
+                    case "ctrl":
+                    case "control": mods |= ModifierKeys.Control; continue;
+                    case "alt": mods |= ModifierKeys.Alt; continue;
+                    case "shift": mods |= ModifierKeys.Shift; continue;
+                    case "win":
+                    case "windows": mods |= ModifierKeys.Windows; continue;
+                }
+
+                Key cozulen;
+                if (!Enum.TryParse<Key>(p, true, out cozulen)) return false;
+                key = cozulen;
+            }
+            return key != Key.None;
+        }
+
+        /// <summary>
+        /// TARIH ATLASI KARESI.
+        ///
+        /// Bir kusuru bildirmek icin alinan karenin, hangi TARIHE ve hangi
+        /// KOORDINATA ait oldugu goruntunun ICINDE yazili olmalidir. Dosya adi
+        /// yetmez: sohbete yapistirilan bir goruntunun dosya adi cogu zaman
+        /// karsi tarafa ulasmaz. Alt seritteki ~20 px'lik satir kopyalanınca da,
+        /// yapistirilinca da, yeniden kaydedilince de bilgiyi tasir.
+        ///
+        /// Akis: basligi OKU -> bolgeyi SEC -> kirp -> 1200 px tavani ->
+        ///       kirmizi cerceve -> kimlik seridi -> PNG + pano -> budama.
+        /// </summary>
+        private void AtlasKare_Click(object sender, RoutedEventArgs e)
+        {
+            var wasVisible = this.Visibility == Visibility.Visible;
+            Core.Utils.AtlasKare.Sonuc sonuc = null;
+
+            try
+            {
+                LogToConsole("===========================================");
+                LogToConsole($"       TARIH ATLASI KARESI ({_atlasKisayolAdi})           ");
+                LogToConsole("===========================================");
+
+                // ── 1. ADIM: DAMGAYI ONCE OKU ─────────────────────────────
+                // Bolge secme kaplamasi acildiktan SONRA on plandaki pencere
+                // artik atlas degil kaplamadir; baslik o an okunamaz.
+                string tani;
+                var damga = Core.Utils.AtlasDamgasi.Oku(out tani);
+
+                if (damga == null)
+                {
+                    LogToConsole("[ATLAS] KARE ALINMADI - tarih/koordinat okunamadi.",
+                                 Core.Utils.LogLevel.Warning);
+                    LogToConsole($"        Tani: {tani}");
+                    LogToConsole("        Atlas sayfasi document.title'i su hale getirmeli:");
+                    LogToConsole("        Osmanli Tarih Atlasi · 1361-02-01 · 41.35N 26.50E · z6 · <acik madde>");
+                    LogToConsole("        (Damgasiz kare, tam da cozulemeyen kusurlari uretiyor;");
+                    LogToConsole("         bu yuzden eksik damgayla kare ALINMAZ.)");
+                    Dispatcher.Invoke(() =>
+                    {
+                        sbOperationStatus.Text = "Atlas karesi: damga okunamadi";
+                        sbOperationProgress.Text = tani;
+                    });
+                    return;
+                }
+
+                LogToConsole($"[ATLAS] Damga: {damga.Satir}");
+                if (damga.MaddeSatiri != null)
+                    LogToConsole($"        {damga.MaddeSatiri}");
+                else
+                    LogToConsole("        (kronoloji maddesi okunamadi - baslikta yok)");
+                LogToConsole($"        ({tani})");
+                LogToConsole("Mouse ile bir bolge secin...  ESC = Iptal");
+
+                // ── 2. ADIM: BOLGE SEC ────────────────────────────────────
+                if (wasVisible) this.Hide();
+                System.Threading.Thread.Sleep(100);
+
+                var secilen = Windows.RegionSelectorWindow.SelectRegion();
+
+                if (!secilen.HasValue || secilen.Value.Width < 1 || secilen.Value.Height < 1)
+                {
+                    if (wasVisible) { this.Show(); this.Activate(); }
+                    LogToConsole("[ATLAS] Iptal edildi.");
+                    Dispatcher.Invoke(() =>
+                    {
+                        sbOperationStatus.Text = "Iptal edildi";
+                        sbOperationProgress.Text = "";
+                    });
+                    return;
+                }
+
+                // WPF birimi -> ekran pikseli (DPI olcegi %100 disindaysa sarttir)
+                var dpi = VisualTreeHelper.GetDpi(this);
+                var bolge = Core.Utils.AtlasKare.WpfDikdortgenden(
+                    secilen.Value, dpi.DpiScaleX, dpi.DpiScaleY);
+
+                // ── 3. ADIM: URET ─────────────────────────────────────────
+                var klasor = string.IsNullOrWhiteSpace(_appSettings.AtlasKlasoru)
+                    ? Core.Utils.AtlasKare.VarsayilanKlasor()
+                    : _appSettings.AtlasKlasoru;
+
+                sonuc = Core.Utils.AtlasKare.Uret(
+                    bolge, damga.Satir, damga.MaddeSatiri, klasor, damga.DosyaAdi,
+                    _appSettings.AtlasEnUzunKenar);
+
+                // ── 4. ADIM: PANO — goruntu + kimlik satiri birlikte ───────
+                Core.Utils.ScreenshotHelper.CopyImageAndPathToClipboard(
+                    sonuc.Kare, sonuc.DosyaYolu, damga.PanoMetni);
+
+                _lastCapturePath = sonuc.DosyaYolu;
+
+                // Onizleme
+                try
+                {
+                    var onizleme = new System.Windows.Media.Imaging.BitmapImage();
+                    onizleme.BeginInit();
+                    onizleme.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    onizleme.UriSource = new Uri(sonuc.DosyaYolu, UriKind.Absolute);
+                    onizleme.EndInit();
+                    onizleme.Freeze();
+                    imgScreenshot.Source = onizleme;
+                }
+                catch (Exception onizEx)
+                {
+                    LogToConsole($"[ATLAS] Onizleme yuklenemedi: {onizEx.Message}",
+                                 Core.Utils.LogLevel.Warning);
+                }
+
+                // ── 5. ADIM: BUDAMA ───────────────────────────────────────
+                var silinen = Core.Utils.AtlasKare.Buda(klasor, _appSettings.AtlasSonKareSayisi);
+
+                if (wasVisible) { this.Show(); this.Activate(); }
+
+                // Maliyet ~ piksel sayisi (format ve kalite hicbir sey degistirmez)
+                var token = (sonuc.SonGenislik * (long)sonuc.SonYukseklik) / 750;
+
+                LogToConsole("-------------------------------------------");
+                LogToConsole("ATLAS KARESI HAZIR");
+                LogToConsole($"  Dosya   : {sonuc.DosyaYolu}");
+                LogToConsole($"  Kaynak  : {sonuc.KaynakGenislik} x {sonuc.KaynakYukseklik} px");
+                LogToConsole($"  Kare    : {sonuc.SonGenislik} x {sonuc.SonYukseklik} px" +
+                             (sonuc.Kucultuldu
+                                ? $"  (KUCULTULDU, tavan {_appSettings.AtlasEnUzunKenar})"
+                                : "  (kucultme gerekmedi)"));
+                LogToConsole($"  Maliyet : ~{token} token");
+                if (silinen > 0)
+                    LogToConsole($"  Budama  : {silinen} eski kare silindi (son {_appSettings.AtlasSonKareSayisi} tutuluyor)");
+                LogToConsole("PANODA: goruntu + su metin ->");
+                LogToConsole($"  {damga.Satir}");
+                if (damga.MaddeSatiri != null) LogToConsole($"  {damga.MaddeSatiri}");
+                LogToConsole("===========================================");
+
+                Dispatcher.Invoke(() =>
+                {
+                    sbOperationStatus.Text = "Atlas karesi alindi";
+                    sbOperationProgress.Text = damga.Satir;
+                });
+            }
+            catch (Exception ex)
+            {
+                if (wasVisible) { this.Show(); this.Activate(); }
+                LogToConsole($"[ATLAS] HATA: {ex.Message}", Core.Utils.LogLevel.Error);
+                _logger.LogException(ex, "Atlas karesi alinamadi");
+                Dispatcher.Invoke(() =>
+                {
+                    sbOperationStatus.Text = "Atlas karesi: hata!";
+                    sbOperationProgress.Text = ex.Message;
+                });
+            }
+            finally
+            {
+                if (sonuc != null && sonuc.Kare != null) sonuc.Kare.Dispose();
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Core full capture method - saves to specified locations with progress indicator

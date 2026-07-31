@@ -33,6 +33,27 @@ namespace UIElementInspector.Core.Models
         public bool AutoCaptureScreenshot { get; set; } = true;
         public bool IncludeTimestampInFilename { get; set; } = true;
 
+        // ── Tarih Atlası karesi (F11) ────────────────────────────────────────
+        // Kayıt klasörü KASTEN OneDrive DIŞINDA: Desktop ve Belgeler bu
+        // makinede OneDrive'a bağlı (ölçüldü), her kare buluta yüklenirdi.
+        public string AtlasKlasoru { get; set; } = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "TarihAtlasiKare");
+
+        // Kısayol. ⚠️ ÖLÇÜLDÜ: F11 işletim sisteminde boştur ama global olarak
+        // kaydedilince Chrome F11'i ARTIK GÖRMEZ — tarayıcının tam ekranı
+        // araç açıkken çalışmaz. Bu bedeli istemiyorsanız "Ctrl+F11" yazın;
+        // o kombinasyon da ölçüldü, boş ve çakışmasız.
+        public string AtlasKisayolu { get; set; } = "F11";
+
+        // En uzun kenar tavanı. Token maliyeti YALNIZ piksel sayısına bağlı
+        // olduğu için tek gerçek tasarruf budur (format/kalite hiçbir şey
+        // değiştirmez). 0 = küçültme yok. Küçük kareler ASLA büyütülmez.
+        public int AtlasEnUzunKenar { get; set; } = 1200;
+
+        // Klasörde tutulacak kare sayısı; eskiler otomatik silinir.
+        public int AtlasSonKareSayisi { get; set; } = 50;
+
         // Performance Settings
         public int MouseHoverDelay { get; set; } = 500; // milliseconds
         public int MaxTreeDepth { get; set; } = 20;

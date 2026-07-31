@@ -392,7 +392,15 @@ namespace UIElementInspector.Core.Utils
         /// When pasting in image-supporting apps: pastes the image
         /// When pasting in text editors: pastes the file path
         /// </summary>
-        public static void CopyImageAndPathToClipboard(Bitmap bitmap, string filePath)
+        /// <param name="panoMetni">
+        /// Metin biçiminde ne yapıştırılacağı. null ise dosya yolu kullanılır.
+        /// Atlas karesi bunu kimlik satırıyla doldurur ("1361-02-01 · 41.35N
+        /// 26.50E · z6 · Osmanlı Tarih Atlası") — böylece görüntüyle birlikte
+        /// tarihi de yapıştırılabilir. F10'un yol yapıştırma akışı bundan
+        /// etkilenmez; o, panoyu değil `_lastCapturePath` alanını okur.
+        /// </param>
+        public static void CopyImageAndPathToClipboard(Bitmap bitmap, string filePath,
+            string panoMetni = null)
         {
             try
             {
@@ -411,8 +419,8 @@ namespace UIElementInspector.Core.Utils
                     dataObject.SetData(System.Windows.DataFormats.Dib, ms.ToArray());
                 }
 
-                // 3. Add file path as text
-                dataObject.SetText(filePath);
+                // 3. Add text: caller-supplied line, else the file path
+                dataObject.SetText(string.IsNullOrWhiteSpace(panoMetni) ? filePath : panoMetni);
 
                 // 4. Add as file drop (so you can paste as file in Explorer)
                 var fileDropList = new System.Collections.Specialized.StringCollection();

@@ -44,8 +44,46 @@ dotnet run
 - **F1** - İncelemeyi başlat
 - **ESC** - İncelemeyi durdur
 - **F5** - Seçili elementi yenile
+- **F9** - Ekran bölgesi görüntüsü
+- **F11** - Tarih Atlası karesi (aşağıya bakın)
 - **Ctrl+S** - Hızlı export
 - **Ctrl+C** - Element verilerini kopyala
+
+### F11 — Tarih Atlası karesi
+
+Atlas sitesindeki bir kusuru bildirmek için kullanılır. Bölge seçilir; kırpılan
+alanın etrafına 3 px kırmızı çerçeve, altına da ince bir kimlik şeridi çizilir:
+
+```
+1361-02-01 · 41.35N 26.50E · z6 · Osmanlı Tarih Atlası
+Madde: Edirne'nin fethi
+```
+
+Bu satırlar görüntünün **içine** basılır; dosya adı kaybolsa bile bilgi kareyle
+birlikte gider. Aynı metin panoya da konur. Kare hem panoya kopyalanır hem
+`%LOCALAPPDATA%\TarihAtlasiKare` altına PNG olarak kaydedilir (OneDrive dışında;
+son 50 kare tutulur, eskiler silinir).
+
+**Bilgi nereden okunur:** tarayıcı penceresinin başlığından. Atlas sayfası
+`document.title`'ı şu hâle getirmelidir:
+
+```
+Osmanlı Tarih Atlası · 1361-02-01 · 41.35N 26.50E · z6 · <açık kronoloji maddesi>
+```
+
+Ayarlar (`%AppData%\UIElementInspector\settings.json`):
+`AtlasKisayolu` · `AtlasKlasoru` · `AtlasEnUzunKenar` (varsayılan 1200) ·
+`AtlasSonKareSayisi` (varsayılan 50).
+
+> ⚠️ **Ölçülmüş uyarı:** F11 global kısayol olarak kaydedildiği için, bu araç
+> açıkken Chrome'un F11 tam ekran kısayolu **çalışmaz** (tuşu Windows bize
+> yönlendiriyor, tarayıcı hiç görmüyor). İstemezseniz `AtlasKisayolu` değerini
+> `"Ctrl+F11"` yapın — o kombinasyon boş ve çakışmasız.
+>
+> ⚠️ Görüntü maliyeti yalnız **piksel sayısına** bağlıdır; PNG/JPEG seçimi ve
+> sıkıştırma kalitesi hiçbir şey değiştirmez. Bu yüzden kalite ayarı yoktur,
+> tek gerçek tasarruf küçültmedir (en uzun kenar 1200 px'e indirilir; küçük
+> kareler asla büyütülmez).
 
 ### İnceleme Modları
 

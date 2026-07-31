@@ -118,7 +118,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
                                     <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
-                                    <RowDefinition/><RowDefinition/><RowDefinition/>
+                                    <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="F1" FontWeight="Bold" FontSize="13" Foreground="#1565C0" Margin="0,4"/>
@@ -153,6 +153,9 @@
 
                                 <TextBlock Grid.Row="10" Grid.Column="0" Text="F10" FontWeight="Bold" FontSize="13" Foreground="#00695C" Margin="0,4"/>
                                 <TextBlock Grid.Row="10" Grid.Column="1" Text="Son yakalama dizin yolunu panoya kopyala ve yapıştır" FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
+
+                                <TextBlock Grid.Row="11" Grid.Column="0" Text="F11" FontWeight="Bold" FontSize="13" Foreground="#C62828" Margin="0,4"/>
+                                <TextBlock Grid.Row="11" Grid.Column="1" Text="TARİH ATLASI KARESİ - bölge seç; kırmızı çerçeve, altına tarih + koordinat + yakınlaştırma + açık kronoloji maddesi yazılır. PNG hem panoya hem klasöre." FontSize="12" Margin="0,4" TextWrapping="Wrap"/>
                             </Grid>
                         </Border>
                     </StackPanel>
