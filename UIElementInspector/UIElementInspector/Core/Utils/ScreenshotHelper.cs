@@ -399,8 +399,33 @@ namespace UIElementInspector.Core.Utils
         /// tarihi de yapıştırılabilir. F10'un yol yapıştırma akışı bundan
         /// etkilenmez; o, panoyu değil `_lastCapturePath` alanını okur.
         /// </param>
+        /// <param name="dosyaListesiEkle">
+        /// Panoya dosya listesi (FileDrop/FileName) da konsun mu?
+        ///
+        /// ⚠️ ÖLÇÜLDÜ — Word'e resim yapıştırmayı BU bozuyordu. Pano dosya adı
+        /// taşıdığında Word resmi gömmek yerine dosyaya BAĞLANTI kurmaya
+        /// çalışıyor ve "…bağlantısının verilerini alamıyor" diyerek yalnız
+        /// metni yapıştırıyor; belgeye 0 resim düşüyor. Aynı kare panoya
+        /// yalnız görüntü olarak konduğunda Word sorunsuz yapıştırıyor
+        /// (satır içi resim: 1). Atlas karesi bu yüzden false geçer.
+        /// F9'un akışı dosya yapıştırmayı kullandığı için varsayılan true kaldı.
+        /// </param>
+        /// <param name="metinEkle">
+        /// Panoya metin biçimi de konsun mu?
+        ///
+        /// ⚠️ ÖLÇÜLDÜ — Word, panoda metin varsa RESMİ DEĞİL METNİ yapıştırıyor.
+        /// Deney: aynı kare panoya (a) yalnız görüntü olarak konduğunda Word'e
+        /// satır içi resim olarak girdi; (b) görüntü + metin olarak konduğunda
+        /// belgeye 0 resim, yalnız 93 karakterlik metin düştü. DIB'in bununla
+        /// ilgisi yok — DIB'siz denendi, sonuç aynı.
+        ///
+        /// Bu yüzden atlas karesi metni panoya KOYMAZ. Bilgi kaybı değildir:
+        /// aynı satırlar görüntünün İÇİNDEKİ şeritte yazılıdır (özelliğin varlık
+        /// sebebi zaten budur), dosya adında da vardır, ve F10 son karenin
+        /// yolunu metin olarak verir.
+        /// </param>
         public static void CopyImageAndPathToClipboard(Bitmap bitmap, string filePath,
-            string panoMetni = null)
+            string panoMetni = null, bool dosyaListesiEkle = true, bool metinEkle = true)
         {
             try
             {
@@ -411,25 +436,71 @@ namespace UIElementInspector.Core.Utils
                 //    avoids the unsafe Scan0-referencing BitmapSource that fails silently in WPF Clipboard
                 dataObject.SetImage(ConvertToBitmapImage(bitmap));
 
-                // 2. Add as DIB (Device Independent Bitmap) for better compatibility
-                using (var ms = new MemoryStream())
+                // 2. DIB (Device Independent Bitmap).
+                //
+                // ⚠️ İKİ DÜZELTME — Word'e yapıştırma bu yüzden bozuktu:
+                //
+                // a) Bitmap.Save(..., Bmp) tam bir BMP DOSYASI üretir; ilk 14 bayt
+                //    BITMAPFILEHEADER'dır ("BM" ile başlar). CF_DIB ise doğrudan
+                //    BITMAPINFOHEADER'dan başlamak zorundadır. Başlık atılmayınca
+                //    okuyan uygulama bozuk bitmap görür. Ölçüldü: panodaki DIB
+                //    'BM' (0x42 0x4D) ile başlıyordu.
+                //
+                // b) 32bpp + alfa kanalı Word'de siyah zemin üretebiliyor. Kare
+                //    zaten tamamen opak; 24bpp'ye indirmek sorunu tümden kaldırır.
+                using (var opak = new Bitmap(bitmap.Width, bitmap.Height,
+                                             System.Drawing.Imaging.PixelFormat.Format24bppRgb))
                 {
-                    bitmap.Save(ms, ImageFormat.Bmp);
-                    ms.Position = 0;
-                    dataObject.SetData(System.Windows.DataFormats.Dib, ms.ToArray());
+                    using (var g = Graphics.FromImage(opak))
+                    {
+                        g.Clear(System.Drawing.Color.White);
+                        g.DrawImage(bitmap, 0, 0, bitmap.Width, bitmap.Height);
+                    }
+
+                    using (var ms = new MemoryStream())
+                    {
+                        opak.Save(ms, ImageFormat.Bmp);
+                        var tamDosya = ms.ToArray();
+                        const int DOSYA_BASLIGI = 14;
+                        if (tamDosya.Length > DOSYA_BASLIGI)
+                        {
+                            var dib = new byte[tamDosya.Length - DOSYA_BASLIGI];
+                            Array.Copy(tamDosya, DOSYA_BASLIGI, dib, 0, dib.Length);
+                            dataObject.SetData(System.Windows.DataFormats.Dib, new MemoryStream(dib));
+                        }
+                    }
                 }
 
                 // 3. Add text: caller-supplied line, else the file path
-                dataObject.SetText(string.IsNullOrWhiteSpace(panoMetni) ? filePath : panoMetni);
+                if (metinEkle)
+                    dataObject.SetText(string.IsNullOrWhiteSpace(panoMetni) ? filePath : panoMetni);
 
                 // 4. Add as file drop (so you can paste as file in Explorer)
-                var fileDropList = new System.Collections.Specialized.StringCollection();
-                fileDropList.Add(filePath);
-                dataObject.SetFileDropList(fileDropList);
+                if (dosyaListesiEkle)
+                {
+                    var fileDropList = new System.Collections.Specialized.StringCollection();
+                    fileDropList.Add(filePath);
+                    dataObject.SetFileDropList(fileDropList);
+                }
 
-                // 5. Add as HTML format with embedded image reference
-                var htmlFormat = $@"<html><body><img src=""file:///{filePath.Replace("\\", "/")}"" /><br/>{filePath}</body></html>";
-                dataObject.SetData(System.Windows.DataFormats.Html, htmlFormat);
+                // 5. ⛔ HTML BİÇİMİ KASTEN EKLENMİYOR — Word'e yapıştırmayı BOZUYORDU.
+                //
+                // Eskiden panoya şu konuyordu:
+                //   <html><body><img src="file:///<yol>" /><br/><yol></body></html>
+                //
+                // İki ayrı kusuru vardı ve ikisi birleşince resim hiç yapışmıyordu:
+                //   • CF_HTML başlığı (Version/StartHTML/StartFragment) yoktu —
+                //     .NET bunu kendiliğinden eklemez, yani biçim zaten geçersizdi.
+                //   • Dosya yolu URL kodlanmamıştı; okunabilir adlara geçince yol
+                //     boşluk, "·" ve kesme işareti taşımaya başladı.
+                //
+                // Word yapıştırırken HTML'i ÖNCELİKLİ seçer. Ölçüldü (Word COM ile):
+                //   Paste hatası: "Word, …\1457-01-01 · … .png bağlantısının
+                //   verilerini alamıyor" → belgeye 0 resim, yalnız metin düştü.
+                //
+                // Biçim kaldırılınca Word bitmap'e düşer ve resim yapışır. HTML'in
+                // tek işlevi zaten bu kırık bağlantıydı; onarmaya değecek bir
+                // kazancı yok.
 
                 // Set to clipboard with retry — another process may briefly hold the clipboard
                 // (CLIPBRD_E_CANT_OPEN 0x800401D0). Retry a few times before giving up.

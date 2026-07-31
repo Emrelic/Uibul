@@ -902,8 +902,15 @@ namespace UIElementInspector
                     ? damgaSatiri
                     : damgaSatiri + Environment.NewLine + damga.MaddeSatiri;
 
+                // Panoya YALNIZ GORUNTU konur. Ikisi de olculdu: pano dosya adi
+                // tasirsa Word resme baglanti kurmaya calisip basarisiz oluyor,
+                // metin tasirsa resmi degil metni yapistiriyor. Kare Word'e
+                // yapistirilmak icin alindigina gore goruntu kazanir; metin zaten
+                // goruntunun icindeki seritte ve dosya adinda duruyor, dosya yolu
+                // da F10'da.
                 Core.Utils.ScreenshotHelper.CopyImageAndPathToClipboard(
-                    sonuc.Kare, sonuc.DosyaYolu, panoMetni);
+                    sonuc.Kare, sonuc.DosyaYolu, panoMetni,
+                    dosyaListesiEkle: false, metinEkle: false);
 
                 _lastCapturePath = sonuc.DosyaYolu;
 
