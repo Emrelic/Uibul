@@ -4050,6 +4050,41 @@ namespace UIElementInspector
             _floatingWindow.Show();
         }
 
+        /// <summary>
+        /// Ikinci bir kopya baslatildiginda gelen "kendini goster" yayinini
+        /// dinler. Pencere GIZLIYKEN de calisir — asil mesele budur; gizli
+        /// pencerenin Process.MainWindowHandle'i sifir oldugu icin cagiran
+        /// taraf onu bulamiyor, ileti ise tutamactan bagimsiz ulasiyor.
+        /// </summary>
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            var kaynak = System.Windows.Interop.HwndSource.FromHwnd(
+                new System.Windows.Interop.WindowInteropHelper(this).Handle);
+            kaynak?.AddHook(GosterKancasi);
+        }
+
+        private IntPtr GosterKancasi(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (App.GOSTER_ILETISI != 0 && msg == (int)App.GOSTER_ILETISI)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        ShowMainWindow();
+                        LogToConsole("[TEK ORNEK] Ikinci kopya baslatildi - bu pencere one getirildi.");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Goster iletisi: " + ex.Message);
+                    }
+                }));
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
         private void ShowMainWindow()
         {
             // Hide floating window
@@ -4060,7 +4095,29 @@ namespace UIElementInspector
             this.WindowState = WindowState.Normal;
             this.Activate();
             this.Focus();
+
+            // ⚠️ WPF'in Show()'u, Visibility zaten Visible ise HİÇBİR ŞEY YAPMAZ.
+            // Pencere WPF'in dışından (Win32 ShowWindow ile) gizlenmişse WPF bunu
+            // bilmez ve pencere gizli kalır — kullanıcı da "açamıyorum" der.
+            // Bu yüzden yerel çağrı da yapılıyor: iki gizlenme yolunun ikisini de
+            // geri alır.
+            try
+            {
+                var h = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                if (h != IntPtr.Zero)
+                {
+                    ShowWindow(h, SW_SHOW);
+                    SetForegroundWindow(h);
+                }
+            }
+            catch { /* gösterme çabası; başarısızlığı akışı durdurmamalı */ }
         }
+
+        // ShowWindow bildirimi dosyanın üst kısmında zaten var.
+        private const int SW_SHOW = 5;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         private void UpdateFloatingWindow(string status, int elementCount)
         {
