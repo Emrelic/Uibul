@@ -811,24 +811,33 @@ namespace UIElementInspector
                 // ── 1. ADIM: DAMGAYI ONCE OKU ─────────────────────────────
                 // Bolge secme kaplamasi acildiktan SONRA on plandaki pencere
                 // artik atlas degil kaplamadir; baslik o an okunamaz.
-                string tani;
-                var damga = Core.Utils.AtlasDamgasi.Oku(out tani);
+                string tani, bulunanBaslik;
+                var damga = Core.Utils.AtlasDamgasi.Oku(out tani, out bulunanBaslik);
 
                 if (damga == null)
                 {
-                    LogToConsole("[ATLAS] KARE ALINMADI - tarih/koordinat okunamadi.",
+                    // Damga yok. Iki secenek vardi: kare almamak, ya da tarihsiz
+                    // ama DURUSTCE isaretlenmis bir kare almak. Ilki secilmisti ve
+                    // araci kullanilamaz hale getirdi (atlas sayfasi damgayi henuz
+                    // yazmiyor). Artik kare alinir; serit kirmizi zeminle
+                    // "TARIH/KOORDINAT OKUNAMADI" der, tarih UYDURULMAZ.
+                    if (!_appSettings.AtlasDamgasizIzin)
+                    {
+                        LogToConsole("[ATLAS] KARE ALINMADI - damga yok, izin kapali.",
+                                     Core.Utils.LogLevel.Warning);
+                        LogToConsole($"        Tani: {tani}");
+                        Core.Utils.Bildirim.Goster("Atlas karesi alinmadi",
+                            "Tarih/koordinat okunamadi. (AtlasDamgasizIzin = false)", true);
+                        return;
+                    }
+
+                    damga = Core.Utils.AtlasDamgasi.Damgasiz(bulunanBaslik, DateTime.Now);
+                    LogToConsole("[ATLAS] Damga YOK - kare 'damgasiz' olarak alinacak.",
                                  Core.Utils.LogLevel.Warning);
                     LogToConsole($"        Tani: {tani}");
-                    LogToConsole("        Atlas sayfasi document.title'i su hale getirmeli:");
+                    LogToConsole("        Atlas sayfasi document.title'i su hale getirirse");
+                    LogToConsole("        tarih ve koordinat kendiliginden gelir:");
                     LogToConsole("        Osmanli Tarih Atlasi · 1361-02-01 · 41.35N 26.50E · z6 · <acik madde>");
-                    LogToConsole("        (Damgasiz kare, tam da cozulemeyen kusurlari uretiyor;");
-                    LogToConsole("         bu yuzden eksik damgayla kare ALINMAZ.)");
-                    Dispatcher.Invoke(() =>
-                    {
-                        sbOperationStatus.Text = "Atlas karesi: damga okunamadi";
-                        sbOperationProgress.Text = tani;
-                    });
-                    return;
                 }
 
                 LogToConsole($"[ATLAS] Damga: {damga.Satir}");
@@ -869,7 +878,7 @@ namespace UIElementInspector
 
                 sonuc = Core.Utils.AtlasKare.Uret(
                     bolge, damga.Satir, damga.MaddeSatiri, klasor, damga.DosyaAdi,
-                    _appSettings.AtlasEnUzunKenar);
+                    _appSettings.AtlasEnUzunKenar, damga.Eksik);
 
                 // ── 4. ADIM: PANO — goruntu + kimlik satiri birlikte ───────
                 Core.Utils.ScreenshotHelper.CopyImageAndPathToClipboard(
@@ -923,12 +932,22 @@ namespace UIElementInspector
                     sbOperationStatus.Text = "Atlas karesi alindi";
                     sbOperationProgress.Text = damga.Satir;
                 });
+
+                // Ana pencere gizliyken de gorunen bildirim
+                Core.Utils.Bildirim.Goster(
+                    damga.Eksik ? "Kare alindi — AMA TARIHSIZ" : "Atlas karesi panoda",
+                    (damga.Eksik
+                        ? "Atlas basliginda damga yok. Kare panoya kopyalandi.\n"
+                        : damga.Satir + "\n") +
+                    $"{sonuc.SonGenislik}x{sonuc.SonYukseklik} px  ·  ~{token} token  ·  Ctrl+V ile yapistirin",
+                    damga.Eksik);
             }
             catch (Exception ex)
             {
                 if (wasVisible) { this.Show(); this.Activate(); }
                 LogToConsole($"[ATLAS] HATA: {ex.Message}", Core.Utils.LogLevel.Error);
                 _logger.LogException(ex, "Atlas karesi alinamadi");
+                Core.Utils.Bildirim.Goster("Atlas karesi alinamadi", ex.Message, true);
                 Dispatcher.Invoke(() =>
                 {
                     sbOperationStatus.Text = "Atlas karesi: hata!";

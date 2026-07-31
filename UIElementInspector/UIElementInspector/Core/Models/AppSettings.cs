@@ -54,6 +54,13 @@ namespace UIElementInspector.Core.Models
         // Klasörde tutulacak kare sayısı; eskiler otomatik silinir.
         public int AtlasSonKareSayisi { get; set; } = 50;
 
+        // Başlıkta damga yoksa kare yine de alınsın mı? true ise alınır ve
+        // şerit kırmızı zeminle "TARİH/KOORDİNAT OKUNAMADI" der (tarih
+        // uydurulmaz). false ise kare hiç alınmaz.
+        // ⚠️ Başta false idi; atlas sayfası damgayı henüz yazmadığı için
+        // kısayol hiç çalışmıyor göründü. Varsayılan true olmalı.
+        public bool AtlasDamgasizIzin { get; set; } = true;
+
         // Performance Settings
         public int MouseHoverDelay { get; set; } = 500; // milliseconds
         public int MaxTreeDepth { get; set; } = 20;

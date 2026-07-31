@@ -71,9 +71,19 @@ son 50 kare tutulur, eskiler silinir).
 Osmanlı Tarih Atlası · 1361-02-01 · 41.35N 26.50E · z6 · <açık kronoloji maddesi>
 ```
 
+**Damga yoksa ne olur:** kare yine alınır, ama şerit koyu kırmızı zeminle
+`TARİH/KOORDİNAT OKUNAMADI` der ve karenin alındığı saati yazar — tarih
+**uydurulmaz**. Dosya adı `damgasiz_YYYY-AA-GG_SSDDss.png` olur. Ayrıca her
+kareden sonra ekranın sağ altında kısa bir bildirim çıkar; ana pencere gizliyken
+de ne olduğu görünür.
+
+Uygulama **tek örnek** çalışır: ikinci kez açılırsa var olan pencere öne gelir.
+Sebebi kısayol: global kısayolu yalnız ilk örnek alabilir, ikincisi tuşu yutmayan
+klavye kancasına düşer ve aynı tuşa iki örnek birden tepki verirdi.
+
 Ayarlar (`%AppData%\UIElementInspector\settings.json`):
 `AtlasKisayolu` · `AtlasKlasoru` · `AtlasEnUzunKenar` (varsayılan 1200) ·
-`AtlasSonKareSayisi` (varsayılan 50).
+`AtlasSonKareSayisi` (varsayılan 50) · `AtlasDamgasizIzin` (varsayılan true).
 
 > ⚠️ **Ölçülmüş uyarı:** F11 global kısayol olarak kaydedildiği için, bu araç
 > açıkken Chrome'un F11 tam ekran kısayolu **çalışmaz** (tuşu Windows bize

@@ -54,7 +54,43 @@ namespace UIElementInspector.Core.Utils
         /// <summary>Damganın okunduğu ham pencere başlığı (tanı için)</summary>
         public string HamBaslik { get; private set; }
 
+        /// <summary>
+        /// true ise başlıkta damga YOKTU; tarih/koordinat alanları gerçek
+        /// değil, kare "damgasız" olarak üretildi. Şerit bu durumda kırmızı
+        /// zeminle çizilir — sahte kesinlik izlenimi vermesin diye.
+        /// </summary>
+        public bool Eksik { get; private set; }
+
         private AtlasDamgasi() { }
+
+        /// <summary>
+        /// Başlıkta damga bulunamadığında kullanılan kare kimliği.
+        ///
+        /// Tarih UYDURULMAZ. Atlasın hangi güne bakıyor olduğu bilinmiyorsa
+        /// yazılabilecek tek dürüst şey karenin NE ZAMAN alındığıdır; şerit
+        /// bunu açıkça "tarih okunamadı" diyerek söyler. Alternatif —hiç kare
+        /// almamak— kullanıcıyı aracı hiç kullanamaz hâle getiriyordu.
+        /// </summary>
+        public static AtlasDamgasi Damgasiz(string pencereBasligi, DateTime an)
+        {
+            var pencere = string.IsNullOrWhiteSpace(pencereBasligi)
+                ? null
+                : ReTarayiciKuyrugu.Replace(pencereBasligi, "").Trim();
+
+            return new AtlasDamgasi
+            {
+                Tarih = an.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                Enlem = null,
+                Boylam = null,
+                Zoom = null,
+                Madde = pencere,
+                HamBaslik = pencereBasligi,
+                Eksik = true,
+                _damgasizAn = an
+            };
+        }
+
+        private DateTime _damgasizAn;
 
         /// <summary>
         /// Görüntünün İÇİNE basılacak ve panoya metin olarak konacak satır.
@@ -63,15 +99,27 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public string Satir
         {
-            get { return $"{Tarih} · {Enlem} {Boylam} · {Zoom} · Osmanlı Tarih Atlası"; }
+            get
+            {
+                if (Eksik)
+                    return "TARİH/KOORDİNAT OKUNAMADI — kare " +
+                           _damgasizAn.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture) +
+                           " tarihinde alındı";
+                return $"{Tarih} · {Enlem} {Boylam} · {Zoom} · Osmanlı Tarih Atlası";
+            }
         }
 
         /// <summary>
-        /// Şeridin ikinci satırı — açık kronoloji maddesi. Madde yoksa null.
+        /// Şeridin ikinci satırı — açık kronoloji maddesi (damga varsa) ya da
+        /// pencere başlığı (damga yoksa). Yoksa null.
         /// </summary>
         public string MaddeSatiri
         {
-            get { return string.IsNullOrWhiteSpace(Madde) ? null : "Madde: " + Madde; }
+            get
+            {
+                if (string.IsNullOrWhiteSpace(Madde)) return null;
+                return (Eksik ? "Pencere: " : "Madde: ") + Madde;
+            }
         }
 
         /// <summary>Panoya metin olarak konan tam kimlik (bir ya da iki satır).</summary>
@@ -84,10 +132,17 @@ namespace UIElementInspector.Core.Utils
             }
         }
 
-        /// <summary>YYYY-AA-GG_enlem_boylam_zN.png</summary>
+        /// <summary>YYYY-AA-GG_enlem_boylam_zN.png (damga yoksa damgasiz_...)</summary>
         public string DosyaAdi
         {
-            get { return $"{Tarih}_{Enlem}_{Boylam}_{Zoom}.png"; }
+            get
+            {
+                if (Eksik)
+                    return "damgasiz_" +
+                           _damgasizAn.ToString("yyyy-MM-dd_HHmmss", CultureInfo.InvariantCulture) +
+                           ".png";
+                return $"{Tarih}_{Enlem}_{Boylam}_{Zoom}.png";
+            }
         }
 
         #region Ayrıştırma
@@ -219,7 +274,20 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public static AtlasDamgasi Oku(out string tani)
         {
+            string yoksay;
+            return Oku(out tani, out yoksay);
+        }
+
+        /// <summary>
+        /// <paramref name="bulunanBaslik"/>: damga çıkmasa bile eldeki en
+        /// anlamlı pencere başlığı (varsa atlas penceresininki, yoksa ön
+        /// plandakininki). Damgasız kare bunu şeride yazar.
+        /// </summary>
+        public static AtlasDamgasi Oku(out string tani, out string bulunanBaslik)
+        {
             var onPlan = BaslikAl(GetForegroundWindow());
+            bulunanBaslik = onPlan;
+
             var d = Ayristir(onPlan);
             if (d != null)
             {
@@ -241,7 +309,10 @@ namespace UIElementInspector.Core.Utils
             }
 
             if (bulunanAtlas != null)
+            {
+                bulunanBaslik = bulunanAtlas;
                 tani = $"atlas penceresi bulundu ama başlıkta damga YOK: [{bulunanAtlas}]";
+            }
             else if (!string.IsNullOrWhiteSpace(onPlan))
                 tani = $"atlas penceresi bulunamadı; ön plandaki başlık: [{onPlan}]";
             else

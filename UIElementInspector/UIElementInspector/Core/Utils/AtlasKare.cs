@@ -40,6 +40,10 @@ namespace UIElementInspector.Core.Utils
 
         private static readonly Color CERCEVE_RENK = Color.FromArgb(255, 220, 20, 30);
         private static readonly Color SERIT_ZEMIN = Color.FromArgb(255, 24, 24, 26);
+        // Damga okunamadığında şerit koyu kırmızı olur: karenin tarihsiz
+        // olduğu bir bakışta anlaşılsın, sonradan "hangi yıldı bu" diye
+        // sorulmasın.
+        private static readonly Color SERIT_ZEMIN_UYARI = Color.FromArgb(255, 92, 14, 18);
         private static readonly Color SERIT_YAZI = Color.FromArgb(255, 245, 245, 245);
 
         private const int SERIT_ASGARI_YUKSEKLIK = 20;
@@ -49,7 +53,7 @@ namespace UIElementInspector.Core.Utils
         // Budama YALNIZ bu desene uyan dosyalara dokunur; klasördeki başka
         // hiçbir şey silinmez.
         private static readonly Regex ReKareAdi = new Regex(
-            @"^-?\d{1,5}-\d{2}-\d{2}_\d+\.\d+[NS]_\d+\.\d+[EW]_z[\d.]+(\-\d+)?\.png$",
+            @"^(-?\d{1,5}-\d{2}-\d{2}_\d+\.\d+[NS]_\d+\.\d+[EW]_z[\d.]+|damgasiz_\d{4}-\d{2}-\d{2}_\d{6})(\-\d+)?\.png$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public sealed class Sonuc
@@ -68,7 +72,8 @@ namespace UIElementInspector.Core.Utils
         /// Panoya kopyalamaz — onu çağıran yapar (Sonuc.Kare hazır durur).
         /// </summary>
         public static Sonuc Uret(Rectangle bolge, string damgaSatiri, string maddeSatiri,
-                                 string klasor, string dosyaAdi, int enUzunKenar)
+                                 string klasor, string dosyaAdi, int enUzunKenar,
+                                 bool uyari = false)
         {
             if (bolge.Width < 1 || bolge.Height < 1)
                 throw new ArgumentException("Bölge boş.");
@@ -102,7 +107,7 @@ namespace UIElementInspector.Core.Utils
                     }
 
                     // ── 2. ADIM: çerçeve + şerit ──────────────────────────────
-                    var kare = Cerceve(icerik, damgaSatiri, maddeSatiri);
+                    var kare = Cerceve(icerik, damgaSatiri, maddeSatiri, uyari);
                     sonuc.Kare = kare;
                     sonuc.SonGenislik = kare.Width;
                     sonuc.SonYukseklik = kare.Height;
@@ -164,7 +169,8 @@ namespace UIElementInspector.Core.Utils
         /// ve tuvali onun için genişletmek kareyi (dolayısıyla maliyeti)
         /// gereksiz büyütürdü.
         /// </summary>
-        private static Bitmap Cerceve(Bitmap icerik, string damgaSatiri, string maddeSatiri)
+        private static Bitmap Cerceve(Bitmap icerik, string damgaSatiri, string maddeSatiri,
+                                      bool uyari)
         {
             int cerceveliG = icerik.Width + 2 * CERCEVE;
             int cerceveliY = icerik.Height + 2 * CERCEVE;
@@ -211,7 +217,7 @@ namespace UIElementInspector.Core.Utils
                 {
                     // Zemin: şerit rengi. Tuval içerikten genişse yanlarda
                     // paspartu gibi durur, hiç boş/şeffaf piksel kalmaz.
-                    g.Clear(SERIT_ZEMIN);
+                    g.Clear(uyari ? SERIT_ZEMIN_UYARI : SERIT_ZEMIN);
 
                     int solKenar = (tuvalG - cerceveliG) / 2;
 
