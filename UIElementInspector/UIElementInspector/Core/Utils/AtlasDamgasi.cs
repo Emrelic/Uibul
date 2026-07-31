@@ -51,6 +51,18 @@ namespace UIElementInspector.Core.Utils
         /// </summary>
         public string Madde { get; private set; }
 
+        /// <summary>
+        /// Harita tuvalinin EKRAN pikselindeki dikdörtgeni: sol, üst, en, boy.
+        /// Başlıkta "g:" ile gelir. Yoksa null.
+        /// </summary>
+        public int[] Tuval { get; private set; }
+
+        /// <summary>
+        /// Görünen alanın coğrafi sınırları: kuzey, batı, güney, doğu.
+        /// Başlıkta "b:" ile gelir. Yoksa null.
+        /// </summary>
+        public double[] Sinir { get; private set; }
+
         /// <summary>Damganın okunduğu ham pencere başlığı (tanı için)</summary>
         public string HamBaslik { get; private set; }
 
@@ -107,6 +119,17 @@ namespace UIElementInspector.Core.Utils
                            " tarihinde alındı";
                 return $"{Tarih} · {Enlem} {Boylam} · {Zoom} · Osmanlı Tarih Atlası";
             }
+        }
+
+        /// <summary>
+        /// Şeridin birinci satırı, seçilen bölgenin koordinatıyla. Bölge
+        /// hesaplanamadıysa (eski biçim başlık, ya da seçim haritanın dışında)
+        /// merkez koordinatını yazan <see cref="Satir"/>'a düşer.
+        /// </summary>
+        public string SatirBolgeli(string bolgeYazisi)
+        {
+            if (Eksik || string.IsNullOrEmpty(bolgeYazisi)) return Satir;
+            return $"{Tarih} · {bolgeYazisi} · {Zoom} · Osmanlı Tarih Atlası";
         }
 
         /// <summary>
@@ -198,8 +221,101 @@ namespace UIElementInspector.Core.Utils
                         ? ((int)zoom).ToString(CultureInfo.InvariantCulture)
                         : zoom.ToString("0.0", CultureInfo.InvariantCulture)),
                 Madde = MaddeCikar(baslik),
+                Tuval = TamsayiDizisi(baslik, "g:", 4),
+                Sinir = SayiDizisi(baslik, "b:", 4),
                 HamBaslik = baslik
             };
+        }
+
+        private static int[] TamsayiDizisi(string baslik, string onEk, int adet)
+        {
+            var d = SayiDizisi(baslik, onEk, adet);
+            if (d == null) return null;
+            var s = new int[adet];
+            for (int i = 0; i < adet; i++) s[i] = (int)Math.Round(d[i]);
+            return s;
+        }
+
+        // "g:8,131,1180,700" / "b:44.1000,20.3000,38.2000,32.9000" bölümlerini okur.
+        private static double[] SayiDizisi(string baslik, string onEk, int adet)
+        {
+            foreach (var ham in baslik.Split('·'))
+            {
+                var b = ham.Trim();
+                if (!b.StartsWith(onEk, StringComparison.OrdinalIgnoreCase)) continue;
+
+                var parcalar = b.Substring(onEk.Length).Split(',');
+                if (parcalar.Length != adet) return null;
+
+                var d = new double[adet];
+                for (int i = 0; i < adet; i++)
+                {
+                    d[i] = Sayi(parcalar[i].Trim());
+                    if (double.IsNaN(d[i])) return null;
+                }
+                return d;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Ekranda seçilen dikdörtgenin coğrafi karşılığını yazar:
+        /// "40.20–41.90N · 25.10–28.90E". Başlıkta g:/b: yoksa ya da seçim
+        /// haritanın tamamen dışındaysa null.
+        ///
+        /// Doğruluk şartı: harita kuzeye bakmalı ve eğik olmamalı. app.js'te
+        /// bearing/pitch hiç geçmiyor (ölçüldü), bu yüzden aşağıdaki ters
+        /// Mercator dönüşümü yaklaşık değil TAM sonuç verir.
+        /// </summary>
+        public string BolgeYazisi(int secX, int secY, int secEn, int secBoy)
+        {
+            if (Tuval == null || Sinir == null) return null;
+
+            double gx = Tuval[0], gy = Tuval[1], gw = Tuval[2], gh = Tuval[3];
+            if (gw <= 0 || gh <= 0) return null;
+
+            // Seçimi tuvalle kes — panel/araç çubuğu seçime girmiş olabilir.
+            double x1 = Math.Max(secX, gx), x2 = Math.Min(secX + secEn, gx + gw);
+            double y1 = Math.Max(secY, gy), y2 = Math.Min(secY + secBoy, gy + gh);
+            if (x2 <= x1 || y2 <= y1) return null;   // seçim haritanın dışında
+
+            double kuzey = Sinir[0], bati = Sinir[1], guney = Sinir[2], dogu = Sinir[3];
+
+            // Boylam doğrusal
+            double lonB = bati + (x1 - gx) / gw * (dogu - bati);
+            double lonD = bati + (x2 - gx) / gw * (dogu - bati);
+
+            // Enlem Mercator'da doğrusal
+            double mK = Merkatore(kuzey), mG = Merkatore(guney);
+            double lat1 = MerkatordenGeri(mK + (y1 - gy) / gh * (mG - mK));   // üst kenar
+            double lat2 = MerkatordenGeri(mK + (y2 - gy) / gh * (mG - mK));   // alt kenar
+
+            double enlemUst = Math.Max(lat1, lat2), enlemAlt = Math.Min(lat1, lat2);
+
+            return Aralik(enlemAlt, enlemUst, "N", "S") + " · " +
+                   Aralik(lonB, lonD, "E", "W");
+        }
+
+        private static double Merkatore(double enlem)
+        {
+            var r = Math.Max(-85.05, Math.Min(85.05, enlem)) * Math.PI / 180.0;
+            return Math.Log(Math.Tan(Math.PI / 4.0 + r / 2.0));
+        }
+
+        private static double MerkatordenGeri(double m)
+        {
+            return (2.0 * Math.Atan(Math.Exp(m)) - Math.PI / 2.0) * 180.0 / Math.PI;
+        }
+
+        // "40.20–41.90N" — iki uç aynı yarımkürede ise tek harf, değilse ikisi de.
+        private static string Aralik(double a, double b, string artiHarf, string eksiHarf)
+        {
+            string Yaz(double v) => Math.Abs(v).ToString("0.00", CultureInfo.InvariantCulture);
+
+            if (a >= 0 && b >= 0) return Yaz(a) + "–" + Yaz(b) + artiHarf;
+            if (a < 0 && b < 0) return Yaz(b) + "–" + Yaz(a) + eksiHarf;
+            return Yaz(a) + (a < 0 ? eksiHarf : artiHarf) + "–" +
+                   Yaz(b) + (b < 0 ? eksiHarf : artiHarf);
         }
 
         // Bir bölümün "veri" mi yoksa madde metni mi olduğunu ayırt eden desenler.
@@ -233,6 +349,9 @@ namespace UIElementInspector.Core.Utils
                 if (ReSaltTarih.IsMatch(b)) continue;
                 if (ReSaltKoordinat.IsMatch(b)) continue;
                 if (ReSaltZoom.IsMatch(b)) continue;
+                // Makine alanları: g: tuval dikdörtgeni, b: görünen alan sınırları
+                if (b.StartsWith("g:", StringComparison.OrdinalIgnoreCase)) continue;
+                if (b.StartsWith("b:", StringComparison.OrdinalIgnoreCase)) continue;
                 if (b.IndexOf("atlas", StringComparison.OrdinalIgnoreCase) >= 0) continue;
                 return b;
             }

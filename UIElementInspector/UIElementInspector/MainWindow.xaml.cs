@@ -876,13 +876,30 @@ namespace UIElementInspector
                     ? Core.Utils.AtlasKare.VarsayilanKlasor()
                     : _appSettings.AtlasKlasoru;
 
+                // Seçilen dikdörtgenin COĞRAFİ karşılığı — başlıktaki g:/b:
+                // alanlarından hesaplanır. Yoksa merkez koordinatına düşer.
+                var bolgeYazisi = damga.BolgeYazisi(bolge.X, bolge.Y, bolge.Width, bolge.Height);
+                var damgaSatiri = damga.SatirBolgeli(bolgeYazisi);
+                if (bolgeYazisi != null)
+                    LogToConsole($"[ATLAS] Secilen bolge: {bolgeYazisi}");
+                else if (!damga.Eksik)
+                    LogToConsole("[ATLAS] Bolge koordinati hesaplanamadi (baslikta g:/b: yok " +
+                                 "ya da secim haritanin disinda) - merkez koordinati yazildi.",
+                                 Core.Utils.LogLevel.Warning);
+
                 sonuc = Core.Utils.AtlasKare.Uret(
-                    bolge, damga.Satir, damga.MaddeSatiri, klasor, damga.DosyaAdi,
+                    bolge, damgaSatiri, damga.MaddeSatiri, klasor, damga.DosyaAdi,
                     _appSettings.AtlasEnUzunKenar, damga.Eksik);
 
                 // ── 4. ADIM: PANO — goruntu + kimlik satiri birlikte ───────
+                // Panodaki metin, seritteki metnin AYNISI olmali; ayrisirsa
+                // hangisinin dogru oldugu sorusu dogar.
+                var panoMetni = damga.MaddeSatiri == null
+                    ? damgaSatiri
+                    : damgaSatiri + Environment.NewLine + damga.MaddeSatiri;
+
                 Core.Utils.ScreenshotHelper.CopyImageAndPathToClipboard(
-                    sonuc.Kare, sonuc.DosyaYolu, damga.PanoMetni);
+                    sonuc.Kare, sonuc.DosyaYolu, panoMetni);
 
                 _lastCapturePath = sonuc.DosyaYolu;
 
@@ -923,14 +940,14 @@ namespace UIElementInspector
                 if (silinen > 0)
                     LogToConsole($"  Budama  : {silinen} eski kare silindi (son {_appSettings.AtlasSonKareSayisi} tutuluyor)");
                 LogToConsole("PANODA: goruntu + su metin ->");
-                LogToConsole($"  {damga.Satir}");
+                LogToConsole($"  {damgaSatiri}");
                 if (damga.MaddeSatiri != null) LogToConsole($"  {damga.MaddeSatiri}");
                 LogToConsole("===========================================");
 
                 Dispatcher.Invoke(() =>
                 {
                     sbOperationStatus.Text = "Atlas karesi alindi";
-                    sbOperationProgress.Text = damga.Satir;
+                    sbOperationProgress.Text = damgaSatiri;
                 });
 
                 // Ana pencere gizliyken de gorunen bildirim
@@ -938,7 +955,7 @@ namespace UIElementInspector
                     damga.Eksik ? "Kare alindi — AMA TARIHSIZ" : "Atlas karesi panoda",
                     (damga.Eksik
                         ? "Atlas basliginda damga yok. Kare panoya kopyalandi.\n"
-                        : damga.Satir + "\n") +
+                        : damgaSatiri + "\n") +
                     $"{sonuc.SonGenislik}x{sonuc.SonYukseklik} px  ·  ~{token} token  ·  Ctrl+V ile yapistirin",
                     damga.Eksik);
             }
