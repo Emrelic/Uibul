@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UIBUL — Tanıtım ve Kullanım Belgesi</title>
+<style>
+  :root {
+    --lacivert:#1565C0; --koyu:#263238; --yesil:#2E7D32;
+    --turuncu:#E65100; --gri:#616161; --cizgi:#E0E0E0;
+    --zemin:#ffffff; --metin:#252525; --yumusak:#FAFAFA;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --zemin:#16191c; --metin:#e6e6e6; --cizgi:#31363b;
+      --yumusak:#1e2226; --gri:#9aa4ac; --lacivert:#64B5F6;
+      --yesil:#81C784; --turuncu:#FFB74D; --koyu:#cfd8dc;
+    }
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; padding:0; background:var(--zemin); color:var(--metin);
+    font:16px/1.65 "Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  .sar { max-width:900px; margin:0 auto; padding:0 24px 80px; }
+
+  header {
+    background:linear-gradient(135deg,#0D47A1,#1565C0);
+    color:#fff; padding:52px 24px 44px; margin-bottom:40px;
+  }
+  header .sar { padding-bottom:0; }
+  header h1 { margin:0 0 8px; font-size:2.5rem; letter-spacing:-.5px; }
+  header .slogan { font-size:1.15rem; opacity:.92; margin:0 0 18px; }
+  header .kunye { font-size:.85rem; opacity:.75; }
+
+  h2 {
+    color:var(--lacivert); font-size:1.55rem; margin:46px 0 14px;
+    padding-bottom:8px; border-bottom:2px solid var(--cizgi);
+  }
+  h3 { font-size:1.15rem; margin:28px 0 8px; color:var(--metin); }
+  p { margin:0 0 14px; }
+  ul,ol { margin:0 0 16px; padding-left:24px; }
+  li { margin-bottom:7px; }
+  code {
+    background:var(--yumusak); border:1px solid var(--cizgi);
+    padding:1px 6px; border-radius:4px; font-size:.88em;
+    font-family:Consolas,"Courier New",monospace;
+  }
+
+  .kutu { border-left:4px solid var(--lacivert); background:var(--yumusak);
+          padding:14px 18px; margin:20px 0; border-radius:0 6px 6px 0; }
+  .kutu.iyi { border-color:var(--yesil); }
+  .kutu.dikkat { border-color:var(--turuncu); }
+  .kutu .et { font-size:.75rem; font-weight:700; letter-spacing:.7px;
+              text-transform:uppercase; color:var(--lacivert); display:block; margin-bottom:6px; }
+  .kutu.iyi .et { color:var(--yesil); }
+  .kutu.dikkat .et { color:var(--turuncu); }
+  .kutu p:last-child { margin-bottom:0; }
+
+  .tablo-sar { overflow-x:auto; margin:18px 0 24px; }
+  table { border-collapse:collapse; width:100%; min-width:520px; font-size:.94rem; }
+  th,td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--cizgi); vertical-align:top; }
+  th { background:var(--yumusak); font-weight:600; font-size:.82rem;
+       text-transform:uppercase; letter-spacing:.4px; color:var(--gri); }
+  td kbd {
+    display:inline-block; background:var(--koyu); color:var(--zemin);
+    padding:2px 9px; border-radius:4px; font-weight:700; font-size:.85em;
+    font-family:Consolas,monospace; min-width:38px; text-align:center;
+  }
+  @media (prefers-color-scheme: dark) { td kbd { background:#37474F; color:#fff; } }
+
+  .kartlar { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; margin:20px 0 26px; }
+  .kart { border:1px solid var(--cizgi); border-radius:8px; padding:16px 18px; background:var(--yumusak); }
+  .kart h4 { margin:0 0 6px; font-size:1rem; color:var(--lacivert); }
+  .kart p { margin:0; font-size:.92rem; color:var(--gri); }
+
+  .senaryo { border:1px solid var(--cizgi); border-radius:8px; padding:0; margin:16px 0; overflow:hidden; }
+  .senaryo .bas { background:var(--yumusak); padding:10px 16px; font-weight:600;
+                  border-bottom:1px solid var(--cizgi); font-size:.95rem; }
+  .senaryo .gov { padding:14px 16px; font-size:.94rem; }
+  .senaryo .gov p:last-child { margin-bottom:0; }
+
+  footer { margin-top:56px; padding-top:22px; border-top:1px solid var(--cizgi);
+           font-size:.86rem; color:var(--gri); }
+
+  @media print {
+    header { background:#1565C0 !important; -webkit-print-color-adjust:exact; }
+    h2 { page-break-after:avoid; }
+    .senaryo,.kutu,table { page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="sar">
+    <h1>UIBUL</h1>
+    <p class="slogan">Universal UI Element Inspector — ekranda gördüğünüz her şeyi okuyan, yakalayan ve belgeleyen araç</p>
+    <p class="kunye">Sürüm 3.1 · Windows 10/11 · Tanıtım ve kullanım belgesi</p>
+  </div>
+</header>
+
+<div class="sar">
+
+<h2>Bir cümlede</h2>
+<p>
+  UIBUL, Windows'ta çalışan <strong>her uygulamanın ve her web sayfasının arayüzünü içeriden
+  okuyabilen</strong> bir inceleme aracıdır; aynı zamanda gündelik işler için hızlı bir
+  <strong>ekran görüntüsü ve arşivleme</strong> programıdır.
+</p>
+
+<div class="kutu">
+  <span class="et">Neden iki şey birden?</span>
+  <p>
+    Çünkü aynı altyapıyı kullanıyorlar. Bir düğmenin kimliğini okumak için ekranı ve pencere
+    ağacını çözmek gerekir; ekranın bir bölgesini kesip kaydetmek de aynı yeteneğin daha basit
+    hâlidir. Bir kez yazılan bu altyapı, hem yazılımcının işini hem de "şu ekranı hızlıca
+    kaydet" ihtiyacını karşılıyor.
+  </p>
+</div>
+
+<h2>Ne yapar?</h2>
+
+<div class="kartlar">
+  <div class="kart">
+    <h4>Element okur</h4>
+    <p>Bir düğmenin adını, tipini, kimliğini, konumunu, HTML'ini ve erişilebilirlik
+       bilgilerini çıkarır. 100'den fazla özellik, 10 kategoride.</p>
+  </div>
+  <div class="kart">
+    <h4>Beş ayrı motorla</h4>
+    <p>UI Automation, WebView2/CDP, MSHTML, Win32 ve Playwright. Biri okuyamazsa diğeri
+       devreye girer — masaüstü de web de tek araçla.</p>
+  </div>
+  <div class="kart">
+    <h4>Yakalar ve paketler</h4>
+    <p>Tek tuşla: element analizi + DOM ağacı + kaynak kod + üç ekran görüntüsü, tek klasörde.</p>
+  </div>
+  <div class="kart">
+    <h4>Ekran görüntüsü alır</h4>
+    <p>Bölge seçimi, otomatik kayıt, panoya hem resim hem dosya yolu. Her uygulamada çalışır.</p>
+  </div>
+  <div class="kart">
+    <h4>Dışa aktarır</h4>
+    <p>CSV, JSON, XML, HTML, TXT. Excel'e, test scriptine ya da rapora doğrudan gider.</p>
+  </div>
+  <div class="kart">
+    <h4>Arşivler</h4>
+    <p>Yakaladığınız her şey tarihli ve okunabilir adlarla saklanır; program içinden
+       yeniden bulunabilir.</p>
+  </div>
+</div>
+
+<h2>Bir yazılımcının ne işine yarar?</h2>
+
+<p>
+  Aşağıdakiler, aracın <em>gerçekte</em> ne kazandırdığına dair dürüst bir değerlendirmedir —
+  neyi iyi yaptığı kadar, neyi yapmadığı da yazılıdır.
+</p>
+
+<h3>1. Test otomasyonunda selector bulma (en somut fayda)</h3>
+<p>
+  Selenium, Playwright, Appium ya da WinAppDriver ile test yazarken zamanın büyük kısmı
+  koda değil, <strong>elementleri güvenilir biçimde bulmaya</strong> gider. Web tarafında
+  tarayıcının DevTools'u iş görür. Ama masaüstü uygulamalarında elinizde genellikle
+  <em>hiçbir şey</em> yoktur: Microsoft'un <code>inspect.exe</code>'si vardır, o da Windows SDK
+  ile gelir, arayüzü ilkeldir ve çıktı alma imkânı yok denecek kadar azdır.
+</p>
+<p>
+  UIBUL'un kazandırdığı şey burada net: <strong>web ve masaüstü için tek araç</strong>,
+  <strong>hazır XPath/CSS seçicileri</strong>, <strong>AutomationId ve desteklenen
+  pattern listesi</strong>, ve en önemlisi <strong>toplu dışa aktarma</strong>. Bir ekranın
+  tüm elementlerini gezip JSON'a döküp Page Object sınıfınıza dönüştürebilirsiniz —
+  <code>inspect.exe</code> ile bu, elle kopyalayarak saatler alır.
+</p>
+
+<h3>2. Hata raporunu tartışmasız hâle getirmek</h3>
+<p>
+  "Bende tekrar etmiyor" cümlesi, yazılım ekiplerinde en çok zaman yakan cümledir.
+  <code>F7</code> tek tuşta ekran görüntüsü + element özellikleri + DOM + pencere bilgisini
+  aynı klasöre koyar. Bu klasörü issue'ya eklemek, üç ekran görüntüsü ve bir paragraf
+  açıklamadan daha fazla bilgi taşır — ve karşı tarafın soru sormasına gerek bırakmaz.
+</p>
+
+<h3>3. Erişilebilirlik denetimi</h3>
+<p>
+  Ekran okuyucuların gördüğü katman ile UIBUL'un okuduğu katman <strong>aynıdır</strong>
+  (UI Automation / ARIA). Yani bir düğmenin adı boşsa, rolü yanlışsa veya etiketi yoksa
+  UIBUL bunu size gösterir. Full profil ile tüm etkileşimli elementleri gezip HTML rapor
+  almak, ücretli a11y araçlarının temel taramasına yakın bir sonuç verir.
+</p>
+
+<h3>4. Belgesiz ve eski (legacy) sistemleri çözmek</h3>
+<p>
+  Kaynak kodu kaybolmuş, kimsenin hatırlamadığı bir iç uygulamayı otomatikleştirmeniz
+  gerekiyorsa, UIBUL uygulamanın iç yapısını dışarıdan haritalandırır: pencere sınıfları,
+  kontrol hiyerarşisi, handle'lar. Bu harita olmadan böyle bir işe başlamak körlemedir.
+</p>
+
+<h3>5. Yapay zekâya ekran bağlamı vermek</h3>
+<p>
+  Bir dil modelinden "şu ekrandaki şu düğmeye tıklayan kodu yaz" diye istediğinizde en
+  büyük eksik, modelin ekranı görmemesidir. <code>F7</code> çıktısı tam da bu boşluğu
+  doldurur: görüntü, element özellikleri ve seçiciler birlikte gider. Bu, aracın
+  ilk tasarlandığında düşünülmemiş ama pratikte en çok işe yarayan kullanımlarından biri
+  hâline geldi.
+</p>
+
+<div class="kutu dikkat">
+  <span class="et">Dürüst sınırlar</span>
+  <p>
+    UIBUL bir <strong>inceleme</strong> aracıdır, test koşucusu değildir — test yazmaz,
+    çalıştırmaz, doğrulamaz. Selector'leri size verir, gerisi sizin kodunuzdadır.
+  </p>
+  <p>
+    Yönetici olarak çalışan uygulamaları okumak için kendisinin de yönetici olması gerekir
+    (Windows'un güvenlik kuralı, aşılamaz). Bazı özel çizimli arayüzler
+    (oyunlar, Flutter/Skia ile çizilmiş bazı uygulamalar, canvas tabanlı editörler)
+    işletim sistemine hiç element bildirmez; oralarda UIBUL yalnızca ekran görüntüsü
+    aracı olarak kalır. Playwright motoru deneyseldir ve ayrıca tarayıcı indirmek ister.
+  </p>
+</div>
+
+<h2>Yazılımcı olmayanlar için: gündelik kullanım</h2>
+
+<p>
+  Programın en çok kullanılan tuşu, yazılımla hiç ilgisi olmayan <code>F9</code>'dur.
+  Windows'un kendi Ekran Alıntısı aracına benzer ama üç farkı vardır:
+  dosya <strong>otomatik kaydedilir</strong> (kaydet penceresiyle uğraşmazsınız),
+  panoya <strong>hem resim hem dosya yolu</strong> konur,
+  ve <strong>her uygulamada</strong> çalışır.
+</p>
+
+<div class="senaryo">
+  <div class="bas">Destek talebi</div>
+  <div class="gov"><p>Bankanın sitesinde hata aldınız. <code>F9</code> ile hata mesajını seçin,
+  destek sohbetine doğrudan <code>Ctrl+V</code>. Ne olduğunu anlatmaya çalışmaktan kurtulursunuz.</p></div>
+</div>
+
+<div class="senaryo">
+  <div class="bas">Fatura, dekont, rezervasyon arşivi</div>
+  <div class="gov"><p>Online ödeme yaptınız ya da bilet aldınız. Onay ekranını <code>F9</code> ile
+  alın. Dosya adı tarihli olduğu için aylar sonra aramak kolaydır. E-posta gelmezse elinizde kayıt olur.</p></div>
+</div>
+
+<div class="senaryo">
+  <div class="bas">Alışverişte fiyat kanıtı</div>
+  <div class="gov"><p>Bir ürün indirimdeyken fiyatı <code>F9</code> ile kaydedin.
+  İndirim iddiası tutmazsa elinizde tarihli kanıt olur.</p></div>
+</div>
+
+<div class="senaryo">
+  <div class="bas">Ders, toplantı, sunum notu</div>
+  <div class="gov"><p>Ekrandaki bir grafiği veya slaytı <code>F9</code> ile alıp not defterinize
+  yapıştırın. Telefonla fotoğraf çekmekten çok daha temiz olur.</p></div>
+</div>
+
+<div class="senaryo">
+  <div class="bas">Uzun form doldururken güvenlik ağı</div>
+  <div class="gov"><p>Uzun bir başvuru formunu doldururken tamamladığınız bölümleri
+  <code>F9</code> ile kaydedin. Sayfa çökerse ne yazdığınızı hatırlarsınız.</p></div>
+</div>
+
+<div class="senaryo">
+  <div class="bas">Dosyayı birine göndermek</div>
+  <div class="gov"><p><code>F9</code> ile görüntüyü alın, sohbet penceresine geçin,
+  <code>F10</code>'a basın — dosya yolu yazılır, dosyayı seçmek saniyeler alır.</p></div>
+</div>
+
+<div class="senaryo">
+  <div class="bas">Tarihli, kimlikli kanıt</div>
+  <div class="gov"><p><code>F11</code> ile alınan karede tarih ve konum bilgisi
+  <strong>görüntünün içine</strong> basılır. Dosya adı kaybolsa bile bilgi kareyle birlikte gider.</p></div>
+</div>
+
+<h2>Kısayol tuşları</h2>
+
+<div class="tablo-sar">
+<table>
+  <thead><tr><th style="width:88px">Tuş</th><th>Ne yapar</th><th style="width:230px">Ne zaman kullanılır</th></tr></thead>
+  <tbody>
+    <tr><td><kbd>F1</kbd></td><td>İncelemeyi başlat — pencere gizlenir</td><td>Tek monitörde element incelerken</td></tr>
+    <tr><td><kbd>F2</kbd></td><td>İncelemeyi durdur — pencere geri gelir</td><td>Her zaman; global çalışır</td></tr>
+    <tr><td><kbd>F3</kbd></td><td>İncelemeyi başlat — pencere görünür kalır</td><td>Çift monitörde, sonucu anlık görmek için</td></tr>
+    <tr><td><kbd>F4</kbd></td><td>Deklanşör: basılı tut → hedefe git → bırak</td><td>Açılır menü, dropdown, tooltip yakalarken</td></tr>
+    <tr><td><kbd>F5</kbd></td><td>Seçili elementi yeniden analiz et</td><td>Dinamik/JavaScript içerikte</td></tr>
+    <tr><td><kbd>F6</kbd></td><td>TXT rapor → masaüstü + arşiv</td><td>Sadece bilgi lazımsa, hızlı</td></tr>
+    <tr><td><kbd>F7</kbd></td><td>Tam yakalama → masaüstü + arşiv</td><td>Hata raporu hazırlarken (en kapsamlı)</td></tr>
+    <tr><td><kbd>F8</kbd></td><td>Tam yakalama → sadece arşiv</td><td>Uzun seanslarda, masaüstü kirlenmesin diye</td></tr>
+    <tr><td><kbd>F9</kbd></td><td>Bölge ekran görüntüsü</td><td>Gündelik hayatta en çok kullanılan tuş</td></tr>
+    <tr><td><kbd>F10</kbd></td><td>Son yakalama yolunu panoya kopyala/yapıştır</td><td>Dosyayı birine gönderirken</td></tr>
+    <tr><td><kbd>F11</kbd></td><td>Kimlik şeritli kare (tarih + konum görüntünün içinde)</td><td>Tarihli kanıt gerektiğinde</td></tr>
+    <tr><td><kbd>Ctrl+S</kbd></td><td>Hızlı kaydet</td><td>Acele varken</td></tr>
+    <tr><td><kbd>Ctrl+C</kbd></td><td>Element verisini panoya kopyala</td><td>Bir yere yapıştıracakken</td></tr>
+    <tr><td><kbd>ESC</kbd></td><td>Bölge seçimini iptal et</td><td>Yanlış bastığınızda</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="kutu dikkat">
+  <span class="et">Kısayollar hakkında bilinmesi gereken</span>
+  <p>
+    Bu tuşlar <strong>global</strong> kaydedilir: UIBUL açıkken her uygulamada çalışırlar.
+    Bunun bedeli, aynı tuşu kullanan başka programların o tuşu görmemesidir — örneğin
+    <strong>Chrome'un <code>F11</code> tam ekran kısayolu UIBUL açıkken çalışmaz</strong>.
+    Rahatsız ederse <code>%AppData%\UIElementInspector\settings.json</code> içinde
+    <code>AtlasKisayolu</code> değerini <code>"Ctrl+F11"</code> yapın, ya da programı kapatın.
+  </p>
+</div>
+
+<h2>Kurulum</h2>
+
+<ol>
+  <li><code>UIBUL_Setup.exe</code> dosyasına çift tıklayın.</li>
+  <li>Kurulum bilgisayarınızı denetler (Windows sürümü, disk alanı, WebView2 Runtime).
+      Eksik bir şey varsa kurmayı teklif eder.</li>
+  <li>İleri → İleri → Kur. Yönetici hakkı sormaz.</li>
+  <li>Program ilk açılışta size adım adım öğreticiyi gösterir.</li>
+</ol>
+
+<div class="kutu iyi">
+  <span class="et">Ön koşul yok</span>
+  <p>
+    Kurulum dosyası, uygulamanın çalışması için gereken .NET çalışma zamanını da içerir.
+    Hedef bilgisayarda <strong>hiçbir şeyin kurulu olması gerekmez</strong>. Tek isteğe
+    bağlı bileşen, tarayıcı içi element okuma için kullanılan WebView2 Runtime'dır; o da
+    yoksa kurulum indirip kurmayı teklif eder — reddederseniz program yine çalışır,
+    yalnızca tarayıcı algılama motoru devre dışı kalır.
+  </p>
+</div>
+
+<h3>Kaldırma</h3>
+<p>
+  Windows Ayarlar ▸ Uygulamalar listesinden "UIBUL" seçilip kaldırılır.
+  Ayarlarınız ve arşiviniz <code>%AppData%\UIElementInspector</code> altında
+  <strong>silinmeden kalır</strong>.
+</p>
+
+<h2>Güncellemeler</h2>
+<p>
+  UIBUL yeni sürümleri kendisi arar. Açılışta (günde en fazla bir kez) yayın sayfasına
+  bakar; yeni bir sürüm varsa bir pencere açılır, yoksa hiçbir şey olmaz.
+  "Şimdi güncelle" dediğinizde dosya indirilir, program kapanır, güncellenir ve yeniden açılır.
+  Ayarlarınız ve arşiviniz korunur.
+</p>
+<ul>
+  <li>Kontrolü kendiniz yapmak için: <strong>Help ▸ Güncellemeleri kontrol et</strong></li>
+  <li>Bir sürümü istemiyorsanız: <strong>Bu sürümü atla</strong></li>
+  <li>Tamamen kapatmak için: <code>settings.json</code> içinde
+      <code>OtomatikGuncellemeKontrolu</code> → <code>false</code></li>
+</ul>
+<p>
+  İnternet yoksa açılışta <strong>hata penceresi çıkmaz</strong>; durum yalnızca alttaki
+  konsola yazılır. Program internetsiz de sorunsuz çalışır.
+</p>
+
+<h2>Sık karşılaşılan durumlar</h2>
+
+<div class="tablo-sar">
+<table>
+  <thead><tr><th style="width:38%">Durum</th><th>Sebep ve çözüm</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Kısayol tuşu hiçbir şey yapmıyor</td>
+      <td>Başka bir program tuşu kapmış olabilir. Alttaki konsolda kısayolların kayıt durumu
+          yazar — oraya bakın. UIBUL tek örnek çalışır; ikinci kez açarsanız var olan pencere öne gelir.</td>
+    </tr>
+    <tr>
+      <td>Yönetici olarak çalışan uygulamalar okunamıyor</td>
+      <td>Windows'un güvenlik kuralı: düşük yetkili program yüksek yetkiliyi okuyamaz.
+          UIBUL'a sağ tıklayıp "Yönetici olarak çalıştır" deyin.</td>
+    </tr>
+    <tr>
+      <td>Element özellikleri eksik geliyor</td>
+      <td>Collection Profile'ı <strong>Full</strong> yapın, <code>F5</code> ile yenileyin.</td>
+    </tr>
+    <tr>
+      <td>Chrome'da F11 tam ekran çalışmıyor</td>
+      <td>Beklenen davranış — yukarıdaki kısayol uyarısına bakın.</td>
+    </tr>
+    <tr>
+      <td>Yakalama çok yavaş</td>
+      <td>Collection Profile'ı <strong>Standard</strong> veya <strong>Quick</strong>'e alın.
+          Full profil her elementte 100'den fazla özelliği tek tek sorar.</td>
+    </tr>
+    <tr>
+      <td>Masaüstü ekran görüntüsüyle doldu</td>
+      <td>Tools ▸ Settings ▸ çıktı klasörünü değiştirin. <code>F8</code> zaten
+          yalnızca arşive yazar.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Teknik künye</h2>
+
+<div class="tablo-sar">
+<table>
+  <tbody>
+    <tr><td style="width:32%"><strong>Platform</strong></td><td>Windows 10 / 11, 64-bit</td></tr>
+    <tr><td><strong>Teknoloji</strong></td><td>.NET 10 · WPF · C#</td></tr>
+    <tr><td><strong>Algılama motorları</strong></td><td>UI Automation, WebView2/CDP, MSHTML, Win32, Playwright (deneysel)</td></tr>
+    <tr><td><strong>Dışa aktarma</strong></td><td>CSV, JSON, XML, HTML, TXT</td></tr>
+    <tr><td><strong>Ayarlar</strong></td><td><code>%AppData%\UIElementInspector\settings.json</code></td></tr>
+    <tr><td><strong>Günlükler</strong></td><td><code>%AppData%\UIElementInspector\Logs</code></td></tr>
+    <tr><td><strong>Ön koşul</strong></td><td>Yok (self-contained). İsteğe bağlı: WebView2 Runtime</td></tr>
+    <tr><td><strong>Depo</strong></td><td><a href="https://github.com/Emrelic/Uibul">github.com/Emrelic/Uibul</a></td></tr>
+  </tbody>
+</table>
+</div>
+
+<footer>
+  <p>
+    UIBUL — Universal UI Element Inspector · Sürüm 3.1 · © 2026 Emrelic<br>
+    Bu belge programla birlikte kurulur. Program içinden açmak için: <strong>Help ▸ Documentation</strong>.
+    Adım adım öğretici için: <strong>Help ▸ Öğretici</strong>.
+  </p>
+</footer>
+
+</div>
+</body>
+</html>

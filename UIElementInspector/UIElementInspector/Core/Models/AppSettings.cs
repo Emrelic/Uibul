@@ -72,6 +72,25 @@ namespace UIElementInspector.Core.Models
         public bool ShowNotifications { get; set; } = true;
         public bool ShowTooltips { get; set; } = true;
 
+        // ── Otomatik güncelleme ──────────────────────────────────────────────
+        // Uygulama açılışta GitHub Releases'e bakar. Kontrol ARKA PLANDA ve
+        // sessizdir: güncelleme yoksa hiçbir şey gösterilmez, ağ yoksa da
+        // kullanıcı hata görmez (yalnız konsola yazılır). Yalnızca gerçekten
+        // yeni sürüm varsa bildirim çıkar.
+        public bool OtomatikGuncellemeKontrolu { get; set; } = true;
+
+        // Aynı gün içinde tekrar tekrar sorulmasın diye son kontrol zamanı.
+        public DateTime SonGuncellemeKontrolu { get; set; } = DateTime.MinValue;
+
+        // Kaç saatte bir kontrol edilsin.
+        public int GuncellemeKontrolAraligiSaat { get; set; } = 24;
+
+        // "sahip/depo" biçiminde GitHub deposu. Çatallayan biri burayı değiştirir.
+        public string GuncellemeDeposu { get; set; } = "Emrelic/Uibul";
+
+        // Kullanıcının "bu sürümü atla" dediği etiket.
+        public string AtlananSurum { get; set; } = "";
+
         // Advanced Settings
         public bool EnableLogging { get; set; } = true;
         public string LogLevel { get; set; } = "Info"; // Debug, Info, Warning, Error

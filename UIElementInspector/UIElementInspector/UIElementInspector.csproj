@@ -9,6 +9,19 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
+
+    <!-- ── Sürüm ────────────────────────────────────────────────────────────
+         Tek doğruluk kaynağı burasıdır. UpdateService bu değeri assembly'den
+         okuyup GitHub'daki en son release etiketiyle karşılaştırır.
+         Yeni sürüm çıkarırken: burayı artır → tools\yeni-surum.ps1 çalıştır. -->
+    <Version>3.1.0</Version>
+    <AssemblyVersion>3.1.0.0</AssemblyVersion>
+    <FileVersion>3.1.0.0</FileVersion>
+    <Product>UIBUL - Universal UI Element Inspector</Product>
+    <Company>UIBUL</Company>
+    <Authors>Emrelic</Authors>
+    <Copyright>Copyright © 2026 Emrelic</Copyright>
+    <Description>Windows uygulamaları ve tarayıcılar için UI element inceleme, yakalama ve ekran görüntüsü aracı</Description>
   </PropertyGroup>
 
   <ItemGroup>

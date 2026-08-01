@@ -15,3 +15,8 @@ obj/
 # Build outputs
 UIElementInspector/Setup/Output/
 UIElementInspector/UIElementInspector/publish/
+
+# Surum uretme ciktilari (tools/build-release.ps1)
+build/
+dist/
+Installer/UibulSetup/Payload/

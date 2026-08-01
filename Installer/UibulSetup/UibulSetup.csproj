@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>UIBUL_Setup</AssemblyName>
+    <RootNamespace>UibulSetup</RootNamespace>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Tek dosya, .NET kurulu olmayan makinede de calisan kurulum programi.
+         Kurulacak uygulama da self-contained oldugu icin hedef bilgisayarda
+         hicbir on kosul aranmaz. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
+    <Version>3.1.0</Version>
+    <AssemblyVersion>3.1.0.0</AssemblyVersion>
+    <FileVersion>3.1.0.0</FileVersion>
+    <Product>UIBUL Kurulum</Product>
+    <Company>Emrelic</Company>
+    <Copyright>Copyright © 2026 Emrelic</Copyright>
+    <Description>UIBUL - Universal UI Element Inspector kurulum programı</Description>
+  </PropertyGroup>
+
+  <!-- ⚠️ Yuk (uygulamanin publish ciktisi) build sirasinda gomulur.
+       Bu zip'i tools\build-release.ps1 uretir. Zip yoksa proje yine derlenir
+       ama kurulum calisirken "yuk bulunamadi" der - boylece derleme
+       sirasinda degil, calisma aninda anlasilir bir hata verir. -->
+  <ItemGroup Condition="Exists('Payload\uibul-payload.zip')">
+    <EmbeddedResource Include="Payload\uibul-payload.zip" LogicalName="UIBUL_PAYLOAD" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="app.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

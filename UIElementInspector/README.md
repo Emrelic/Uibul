@@ -15,7 +15,7 @@ Windows uygulamaları ve web tarayıcıları için kapsamlı bir UI element ince
 
 ### Gereksinimler
 - Windows 10/11
-- .NET 8.0 Runtime
+- .NET 10.0 Runtime (kurulum paketinde gömülü gelir)
 - Visual Studio 2022 (geliştirme için)
 
 ### Kurulum ve Çalıştırma
@@ -195,6 +195,6 @@ Bu proje eğitim ve geliştirme amaçlı oluşturulmuştur.
 Sorularınız için GitHub Issues kullanabilirsiniz.
 
 ---
-**Versiyon**: 1.0.0
+**Versiyon**: 3.1.0
 **Durum**: Aktif Geliştirme (%95 Tamamlandı)
-**Son Güncelleme**: 2024-11-23
+**Son Güncelleme**: 2026-08-01

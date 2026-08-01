@@ -59,7 +59,10 @@
                 <MenuItem Header="_Settings" Click="Settings_Click"/>
             </MenuItem>
             <MenuItem Header="_Help">
+                <MenuItem Header="🎓 _Öğretici (Tutorial)" Click="Tutorial_Click" FontWeight="Bold"/>
                 <MenuItem Header="📖 _Kullanım Kılavuzu" Click="Guide_Click" FontWeight="Bold"/>
+                <Separator/>
+                <MenuItem Header="🔄 _Güncellemeleri kontrol et" Click="CheckUpdates_Click"/>
                 <Separator/>
                 <MenuItem Header="_Documentation" Click="Documentation_Click"/>
                 <MenuItem Header="_Keyboard Shortcuts" Click="KeyboardShortcuts_Click"/>
@@ -251,6 +254,16 @@
                             </StackPanel>
                         </Button.ToolTip>
                         <TextBlock Text="💾 KAYDET" FontSize="11"/>
+                    </Button>
+                    <Button Name="btnTutorial" Click="Tutorial_Click"
+                            Padding="10,4" Margin="1" Background="#6A1B9A" Foreground="White" FontSize="11" FontWeight="Bold">
+                        <Button.ToolTip>
+                            <StackPanel MaxWidth="320">
+                                <TextBlock Text="🎓 ÖĞRETİCİ" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" Text="Adım adım öğretici. Hangi tuş ne yapar, hangi panel ne gösterir, günlük işlerde nasıl kullanılır — hepsi sırayla anlatılır. İlk kez kullananlar buradan başlamalı."/>
+                            </StackPanel>
+                        </Button.ToolTip>
+                        <TextBlock Text="🎓 ÖĞRETİCİ" FontSize="11"/>
                     </Button>
                     <Button Name="btnGuide" Click="Guide_Click"
                             Padding="10,4" Margin="1" Background="#00897B" Foreground="White" FontSize="11" FontWeight="Bold">

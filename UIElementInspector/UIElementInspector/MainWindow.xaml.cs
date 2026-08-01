@@ -73,10 +73,135 @@ namespace UIElementInspector
             SetupTimers();
 
             // Log startup
-            LogToConsole("Universal UI Element Inspector started successfully.");
+            LogToConsole($"Universal UI Element Inspector v{Core.Utils.UpdateService.MevcutSurumMetni} started successfully.");
             LogToConsole($"Log file: {_logger.GetLogFilePath()}");
             LogToConsole($"Available detectors: {string.Join(", ", _detectors.Select(d => d.Name))}");
+
+            // Ilk acilista tutorial, sonrasinda sessiz guncelleme kontrolu.
+            Loaded += MainWindow_AcilisIsleri;
         }
+
+        #region Guncelleme ve Tutorial
+
+        /// <summary>
+        /// Pencere yuklendikten sonra calisan acilis isleri:
+        ///  1. Program ilk kez calistiriliyorsa tutorial'i acar.
+        ///  2. Arka planda sessizce guncelleme kontrolu yapar.
+        /// Ikisi de UI'yi bloklamaz; hata olursa kullaniciya gosterilmez.
+        /// </summary>
+        private async void MainWindow_AcilisIsleri(object sender, RoutedEventArgs e)
+        {
+            Loaded -= MainWindow_AcilisIsleri;
+
+            if (Windows.TutorialWindow.IlkCalistirmaMi())
+            {
+                try
+                {
+                    var t = new Windows.TutorialWindow { Owner = this };
+                    t.Show();
+                    Windows.TutorialWindow.IlkCalistirmayiIsaretle();
+                }
+                catch (Exception ex)
+                {
+                    LogToConsole($"[TUTORIAL] Acilamadi: {ex.Message}", Core.Utils.LogLevel.Warning);
+                }
+            }
+
+            await SessizGuncellemeKontrolu();
+        }
+
+        /// <summary>
+        /// Arka plan guncelleme kontrolu.
+        ///
+        /// ⚠️ SESSIZ OLMAK ZORUNDA: internet yoksa, GitHub yanit vermezse veya
+        /// depoda release yoksa kullanici HICBIR SEY gormez — yalnizca konsola
+        /// bir satir yazilir. Uygulama acilisinda hata kutusu cikarmak, aracin
+        /// asil isiyle ilgisi olmayan bir engeldir. Kutu YALNIZCA gercekten
+        /// yeni bir surum varsa cikar.
+        /// </summary>
+        private async System.Threading.Tasks.Task SessizGuncellemeKontrolu()
+        {
+            try
+            {
+                if (_appSettings == null || !_appSettings.OtomatikGuncellemeKontrolu)
+                    return;
+
+                // Aralik dolmadiysa hic bakma (varsayilan gunde bir).
+                var gecen = DateTime.Now - _appSettings.SonGuncellemeKontrolu;
+                if (gecen.TotalHours < Math.Max(1, _appSettings.GuncellemeKontrolAraligiSaat))
+                    return;
+
+                var sonuc = await Core.Utils.UpdateService.KontrolEtAsync(_appSettings.GuncellemeDeposu);
+
+                _appSettings.SonGuncellemeKontrolu = DateTime.Now;
+                try { _appSettings.Save(); } catch { }
+
+                if (!sonuc.Basarili)
+                {
+                    LogToConsole($"[GUNCELLEME] Kontrol edilemedi: {sonuc.Hata}");
+                    return;
+                }
+
+                if (!sonuc.GuncellemeVar)
+                {
+                    LogToConsole($"[GUNCELLEME] En guncel surum kullaniliyor (v{Core.Utils.UpdateService.MevcutSurumMetni}).");
+                    return;
+                }
+
+                // Kullanici bu surumu "atla" demisse rahatsiz etme.
+                if (!string.IsNullOrWhiteSpace(_appSettings.AtlananSurum) &&
+                    string.Equals(_appSettings.AtlananSurum, sonuc.Yeni!.Etiket, StringComparison.OrdinalIgnoreCase))
+                {
+                    LogToConsole($"[GUNCELLEME] Yeni surum var ({sonuc.Yeni.Etiket}) ama atlanmis.");
+                    return;
+                }
+
+                LogToConsole($"[GUNCELLEME] Yeni surum bulundu: {sonuc.Yeni!.Etiket}");
+
+                var pencere = new Windows.UpdateWindow(_appSettings, sonuc) { Owner = this };
+                pencere.Show();
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"[GUNCELLEME] Kontrol hatasi: {ex.Message}");
+            }
+        }
+
+        /// <summary>Yardim menusu ve dugme: guncellemeleri elle kontrol et.</summary>
+        private void CheckUpdates_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _appSettings ??= Core.Models.AppSettings.Load();
+
+                // Elle kontrolde "atlanan surum" kaydi temizlenir; kullanici
+                // bilerek bakiyorsa gizlenen surumu de gormeli.
+                _appSettings.AtlananSurum = "";
+
+                var pencere = new Windows.UpdateWindow(_appSettings) { Owner = this };
+                pencere.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"[GUNCELLEME] Pencere acilamadi: {ex.Message}", Core.Utils.LogLevel.Error);
+            }
+        }
+
+        /// <summary>Yardim menusu ve dugme: adim adim ogretici.</summary>
+        private void Tutorial_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var t = new Windows.TutorialWindow { Owner = this };
+                t.Show();
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"[TUTORIAL] Acilamadi: {ex.Message}", Core.Utils.LogLevel.Error);
+            }
+        }
+
+        #endregion
 
         private void InitializeFloatingWindow()
         {
@@ -4913,9 +5038,16 @@ namespace UIElementInspector
         {
             try
             {
+                // Kurulumla birlikte gelen yerel tanitim dokumani varsa onu ac;
+                // yoksa depo sayfasina dus. Cevrimdisi makinede de calissin diye.
+                var yerel = System.IO.Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory, "Docs", "TANITIM.html");
+
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "https://github.com/ikizler1/UIElementInspector",
+                    FileName = System.IO.File.Exists(yerel)
+                        ? yerel
+                        : $"https://github.com/{Core.Utils.UpdateService.VarsayilanDepo}",
                     UseShellExecute = true
                 });
             }
@@ -4938,6 +5070,7 @@ F7 - Tam Yakalama (Masaüstü + Arşiv)
 F8 - Sadece Arşiv (Tam Yakalama)
 F9 - Ekran Görüntüsü (Bölge Seç)
 F10 - Son Yakalama Yolunu Yapıştır
+F11 - Tarih Atlası Karesi (kimlik şeritli kare)
 Ctrl+S - Hızlı Kaydet
 Ctrl+C - Element Verisini Kopyala
 Ctrl+Shift+C - Tüm Elementleri Kopyala";
@@ -4947,18 +5080,22 @@ Ctrl+Shift+C - Tüm Elementleri Kopyala";
 
         private void About_Click(object sender, RoutedEventArgs e)
         {
-            var about = @"Universal UI Element Inspector
-Versiyon 1.0.0
+            var about = $@"UIBUL — Universal UI Element Inspector
+Sürüm {Core.Utils.UpdateService.MevcutSurumMetni}
 
-Windows uygulamalarından UI element verisi toplayan kapsamlı bir araç.
+Windows uygulamalarından ve tarayıcılardan UI element verisi toplayan,
+ekran görüntüsü alan ve raporlayan kapsamlı bir araç.
 
 Desteklenen tespit teknolojileri:
-- UI Automation
-- WebView2/CDP
-- MSHTML
-- Playwright
+- UI Automation (masaüstü uygulamaları)
+- WebView2 / Chrome DevTools Protocol (Chrome, Edge)
+- MSHTML (Internet Explorer, eski web kontrolleri)
+- Win32 (klasik pencere sınıfları)
+- Playwright (deneysel)
 
-© 2025 UIBUL";
+Depo: https://github.com/{Core.Utils.UpdateService.VarsayilanDepo}
+
+© 2026 Emrelic";
 
             System.Windows.MessageBox.Show(about, "Hakkında", MessageBoxButton.OK, MessageBoxImage.Information);
         }
