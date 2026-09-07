@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace UIElementInspector.Windows
 {
@@ -66,7 +66,7 @@ namespace UIElementInspector.Windows
                     Blok.H("İki farklı kullanıcı, aynı program"),
                     Blok.M(
                         "YAZILIMCI: test otomasyonu için selector toplar, hata raporu hazırlar, erişilebilirlik denetler, eski uygulamaları çözer.",
-                        "HERKES: F9 ile saniyede bölge görüntüsü alır, dosya yollarını yapıştırır, ekran kanıtlarını tarih damgalı arşivler."),
+                        "HERKES: F2 ile saniyede bölge görüntüsü alır, dosya yollarını yapıştırır, ekran kanıtlarını tarih damgalı arşivler."),
                     Blok.Bilgi("Bu öğretici ikisini de anlatır. Yazılımcı değilseniz 4. bölüm " +
                                "(Günlük Kullanım) sizin için en değerli kısım — isterseniz soldaki " +
                                "listeden doğrudan oraya atlayabilirsiniz."),
@@ -87,8 +87,8 @@ namespace UIElementInspector.Windows
                            "öğretici ve güncelleme kontrolü buradan da açılır."),
 
                     Blok.H("② Üst şerit: büyük renkli düğmeler"),
-                    Blok.P("En sık kullanılan işlemler: BAŞLAT (F1), GÖRÜNÜR BAŞLAT (F3), DURDUR (F2), " +
-                           "YENİLE (F5), KAYDET, ÖĞRETİCİ, KILAVUZ ve en sağda 📌 HER ZAMAN ÜSTTE. " +
+                    Blok.P("En sık kullanılan işlemler: BAŞLAT, GÖRÜNÜR BAŞLAT, DURDUR, " +
+                           "YENİLE, KAYDET, ÖĞRETİCİ, KILAVUZ ve en sağda 📌 HER ZAMAN ÜSTTE. " +
                            "Her düğmenin üzerine gelirseniz ne yaptığını anlatan bir balon çıkar."),
 
                     Blok.H("③ Sol panel: toplanan elementler"),
@@ -104,7 +104,7 @@ namespace UIElementInspector.Windows
                         "ARCHIVE — geçmiş yakalamalarınızın arşivi"),
 
                     Blok.H("⑤ Alt: kısayol çubuğu ve konsol"),
-                    Blok.P("Pencerenin altında F1'den F11'e kadar tüm kısayolların düğmeleri sıralanır. " +
+                    Blok.P("Pencerenin altında dört kısayolun (F1–F4) düğmeleri sıralanır. " +
                            "Tuşu hatırlamıyorsanız düğmeye tıklayabilirsiniz. Altındaki konsol ise " +
                            "programın ne yaptığını satır satır yazar — bir şey çalışmadığında ilk " +
                            "bakılacak yer burasıdır."),
@@ -118,41 +118,41 @@ namespace UIElementInspector.Windows
             new Adim
             {
                 Bolum = "2 · ELEMENT İNCELEME",
-                Baslik = "F1 — İncelemeyi başlat",
+                Baslik = "BAŞLAT — İncelemeyi başlat",
                 Ozet = "Programın kalbi. Basınca UIBUL kaybolur ve ekranda gezindiğiniz her şeyi okumaya başlar.",
                 Bloklar = new[]
                 {
-                    Blok.T("F1", "İncelemeyi başlat — ana pencere gizlenir"),
+                    Blok.T("BAŞLAT", "İncelemeyi başlat — ana pencere gizlenir"),
                     Blok.N(
                         "İncelemek istediğiniz uygulamayı veya web sayfasını açın.",
-                        "F1'e basın. UIBUL penceresi kaybolur, sağ üstte küçük bir kontrol paneli belirir.",
+                        "Üst şeritteki BAŞLAT düğmesine basın. UIBUL penceresi kaybolur, sağ üstte küçük bir kontrol paneli belirir.",
                         "Mouse'u incelemek istediğiniz düğmenin/kutunun üzerine getirin.",
                         "Element anında algılanır; küçük panelde sayaç artar.",
-                        "F2 ile durdurun — pencere geri gelir, topladığınız her şey içindedir."),
+                        "Küçük paneldeki DURDUR ile bitirin — pencere geri gelir, topladığınız her şey içindedir."),
                     Blok.Bilgi("Pencerenin gizlenmesi kasıtlıdır: incelemek istediğiniz şeyin önünü " +
                                "kapatmasın diye. Ekran görüntüsü alırken de UIBUL görüntüye girmez."),
-                    Blok.Uyari("F1 ve F2 GLOBAL kısayollardır — UIBUL arka planda, hatta gizliyken bile " +
-                               "çalışırlar. Başka bir uygulamadayken F2'ye basmanız yeter."),
-                    Blok.Ipucu("Bir şeyi \"tam olarak neresi\" diye merak ediyorsanız F1 ile gezinip " +
-                               "F2'ye basın; sol panelde gezdiğiniz her elementin listesi durur.")
+                    Blok.Uyari("İnceleme başlat/durdur artık global bir tuşa bağlı DEĞİLDİR. Pencere gizliyken " +
+                               "sağ üstte kalan küçük kontrol paneli bunun içindir — durdurmak için oradan basarsınız."),
+                    Blok.Ipucu("Bir şeyi \"tam olarak neresi\" diye merak ediyorsanız BAŞLAT ile gezinip " +
+                               "DURDUR'a basın; sol panelde gezdiğiniz her elementin listesi durur.")
                 }
             },
 
             new Adim
             {
                 Bolum = "2 · ELEMENT İNCELEME",
-                Baslik = "F3 — Görünür başlat",
+                Baslik = "GÖRÜNÜR BAŞLAT",
                 Ozet = "Aynı inceleme, ama pencere gizlenmez. Sonucu anında görmek isteyenler için.",
                 Bloklar = new[]
                 {
-                    Blok.T("F3", "İncelemeyi başlat — pencere görünür kalır"),
-                    Blok.P("F1 pencereyi gizler, F3 gizlemez. Fark bu kadar basit."),
-                    Blok.H("F3 ne zaman daha iyi?"),
+                    Blok.T("GÖRÜNÜR", "İncelemeyi başlat — pencere görünür kalır"),
+                    Blok.P("BAŞLAT pencereyi gizler, GÖRÜNÜR BAŞLAT gizlemez. Fark bu kadar basit."),
+                    Blok.H("GÖRÜNÜR BAŞLAT ne zaman daha iyi?"),
                     Blok.M(
                         "İki monitörünüz varsa: hedef uygulama birinde, UIBUL diğerinde açık kalır.",
                         "Element özelliklerini anında okumak istiyorsanız — panel gözünüzün önünde durur.",
-                        "Küçük bir şeye hızlı bakacaksanız, F2'ye basıp pencereyi geri çağırmakla uğraşmazsınız."),
-                    Blok.H("F1 ne zaman daha iyi?"),
+                        "Küçük bir şeye hızlı bakacaksanız, durdurup pencereyi geri çağırmakla uğraşmazsınız."),
+                    Blok.H("Gizleyerek başlatmak ne zaman daha iyi?"),
                     Blok.M(
                         "Tek monitörde çalışıyorsanız.",
                         "İnceleyeceğiniz alan ekranın büyük kısmını kaplıyorsa.",
@@ -163,43 +163,18 @@ namespace UIElementInspector.Windows
             new Adim
             {
                 Bolum = "2 · ELEMENT İNCELEME",
-                Baslik = "F4 — Deklanşör: kaybolan menüleri yakalama",
-                Ozet = "Açılır menüler mouse'u çekince kapanır. F4 bu sorunu çözer.",
-                Bloklar = new[]
-                {
-                    Blok.T("F4", "Basılı tut → hedefe git → bırak = yakala"),
-                    Blok.P("Klasik problem: bir sağ tık menüsünü veya dropdown listesini incelemek " +
-                           "istersiniz, ama UIBUL'a dönmek için mouse'u oynattığınızda menü kapanır. " +
-                           "F4 tam olarak bunun içindir — fotoğraf makinesinin deklanşörü gibi çalışır."),
-                    Blok.N(
-                        "Menüyü/dropdown'ı açın; açık kalsın.",
-                        "F4 tuşuna BASILI TUTUN (bırakmayın).",
-                        "Basılı tutarken mouse'u menüdeki öğenin üzerine götürün.",
-                        "F4'ü BIRAKIN — tam o andaki element yakalanır."),
-                    Blok.Ipucu("Sağ tık menüleri, otomatik tamamlama listeleri, tooltip'ler, tarih " +
-                               "seçiciler ve hover ile açılan alt menüler için tek pratik yol budur."),
-                    Blok.Ornek("Gerçek senaryo",
-                        "Bir web sitesindeki dropdown'ın seçeneklerinin gerçek value'larını öğrenmeniz " +
-                        "gerekiyor. Dropdown'ı açın, F4'ü basılı tutun, seçeneğin üzerine gelin, " +
-                        "bırakın. Value, index ve seçici bilgisi elinizde.")
-                }
-            },
-
-            new Adim
-            {
-                Bolum = "2 · ELEMENT İNCELEME",
-                Baslik = "F2 ve F5 — Durdur ve yenile",
+                Baslik = "DURDUR ve YENİLE",
                 Ozet = "İki küçük ama sürekli kullanılan tuş.",
                 Bloklar = new[]
                 {
-                    Blok.T("F2", "İncelemeyi durdur, pencereyi geri getir"),
+                    Blok.T("DURDUR", "İncelemeyi durdur, pencereyi geri getir"),
                     Blok.P("Toplanan veriler silinmez; sol panelde durur ve incelemeye hazırdır. " +
-                           "F2 global çalışır: hangi uygulamada olursanız olun basabilirsiniz."),
-                    Blok.T("F5", "Seçili elementi yeniden analiz et"),
+                           "Pencere gizliyse sağ üstteki küçük kontrol panelinden durdurursunuz."),
+                    Blok.T("YENİLE", "Seçili elementi yeniden analiz et"),
                     Blok.P("Sayfa JavaScript ile değiştiyse, bir alan dolduysa ya da durum " +
-                           "(enabled/checked) değiştiyse F5 elementi baştan okur. Dinamik sayfalarda " +
+                           "(enabled/checked) değiştiyse YENİLE elementi baştan okur. Dinamik sayfalarda " +
                            "\"bu bilgi eski mi?\" diye şüphelendiğinizde ilk yapacağınız şey."),
-                    Blok.Uyari("F5'in yenilediği şey SEÇİLİ elementtir — listenin tamamı değil. " +
+                    Blok.Uyari("YENİLE'nin yenilediği şey SEÇİLİ elementtir — listenin tamamı değil. " +
                                "Tüm listeyi tazelemek için incelemeyi yeniden çalıştırmanız gerekir.")
                 }
             },
@@ -231,7 +206,7 @@ namespace UIElementInspector.Windows
                     Blok.P("Web elementinin HTML kaynağı. Masaüstü uygulamalarında boş kalabilir — normaldir."),
 
                     Blok.H("SCREENSHOT"),
-                    Blok.P("Elementin görüntüsü. F7 ile yakaladıysanız üç ayrı görüntü olur: " +
+                    Blok.P("Elementin görüntüsü. F1 ile yakaladıysanız üç ayrı görüntü olur: " +
                            "tam ekran, pencere ve elementin kendisi."),
 
                     Blok.H("ARCHIVE"),
@@ -244,23 +219,23 @@ namespace UIElementInspector.Windows
             new Adim
             {
                 Bolum = "3 · YAKALAMA VE KAYIT",
-                Baslik = "F7 — Tam yakalama (en güçlü tuş)",
+                Baslik = "F1 — Tam yakalama (en güçlü tuş)",
                 Ozet = "Tek tuşta: 5 teknolojiyle analiz + DOM ağacı + kaynak kod + 3 ekran görüntüsü.",
                 Bloklar = new[]
                 {
-                    Blok.T("F7", "Tam yakalama → masaüstü + arşiv"),
-                    Blok.P("F7, elinizdeki en kapsamlı komuttur. Bastığınızda şunların hepsi bir " +
+                    Blok.T("F1", "Tam yakalama → çıktı klasörü + arşiv"),
+                    Blok.P("F1, elinizdeki en kapsamlı komuttur. Bastığınızda şunların hepsi bir " +
                            "klasöre paketlenir:"),
                     Blok.M(
                         "Beş algılama teknolojisinin (UIA, CDP, MSHTML, Win32, Playwright) ayrı ayrı sonucu",
                         "Sayfa/pencere yapısı — DOM ağacı",
                         "Kaynak kodlar",
                         "Üç ekran görüntüsü: tam ekran, aktif pencere, elementin kendisi"),
-                    Blok.P("Çıktı hem masaüstüne hem arşive yazılır. Klasör adı okunabilir: " +
+                    Blok.P("Çıktı hem çıktı klasörüne hem arşive yazılır. Klasör adı okunabilir: " +
                            "tarih, saat ve içerik bilgisi içerir."),
-                    Blok.Uyari("F7 kapsamlı olduğu için birkaç saniye sürebilir. Ekranda dairesel bir " +
+                    Blok.Uyari("F1 kapsamlı olduğu için birkaç saniye sürebilir. Ekranda dairesel bir " +
                                "ilerleme göstergesi çıkar — bitmesini bekleyin."),
-                    Blok.Ipucu("Bir hatayı birine anlatmanız gerekiyorsa F7 en iyi yatırımdır: " +
+                    Blok.Ipucu("Bir hatayı birine anlatmanız gerekiyorsa F1 en iyi yatırımdır: " +
                                "klasörü zipleyip gönderin, karşı taraf her şeyi görür.")
                 }
             },
@@ -268,29 +243,26 @@ namespace UIElementInspector.Windows
             new Adim
             {
                 Bolum = "3 · YAKALAMA VE KAYIT",
-                Baslik = "F8, F6 ve Ctrl+S — daha hafif kayıtlar",
-                Ozet = "Her zaman tam paket gerekmez. Üç kademe daha var.",
+                Baslik = "Daha hafif kayıtlar",
+                Ozet = "Her zaman tam paket gerekmez. İki kademe daha var — ikisi de menü/düğmeden.",
                 Bloklar = new[]
                 {
-                    Blok.T("F8", "F7'nin aynısı, ama SADECE arşive"),
-                    Blok.P("Masaüstünüzü kirletmeden çalışmak istiyorsanız F8 kullanın. İçerik " +
-                           "birebir aynıdır, yalnızca hedef farklıdır. Uzun bir inceleme " +
-                           "seansında onlarca yakalama yapıyorsanız F8 tercih edilir."),
+                    Blok.T("Tools ▸ sadece arşive", "F1'in aynısı, ama SADECE arşive"),
+                    Blok.P("Çıktı klasörünü kirletmeden çalışmak istiyorsanız bunu kullanın: " +
+                           "Tools ▸ Tam yakalama — sadece arşive. İçerik birebir aynıdır, " +
+                           "yalnızca hedef farklıdır. Uzun bir inceleme seansında onlarca " +
+                           "yakalama yapıyorsanız bu tercih edilir."),
 
-                    Blok.T("F6", "TXT rapor → masaüstü + arşiv"),
+                    Blok.T("EXPORT düğmesi", "TXT rapor → çıktı klasörü + arşiv"),
                     Blok.P("Ekran görüntüsü ve kaynak kod olmadan, sadece okunabilir bir metin raporu. " +
                            "Hızlıdır, küçüktür, e-postaya yapıştırmaya uygundur."),
 
-                    Blok.T("Ctrl+S", "Hızlı kaydet"),
-                    Blok.P("En hızlı yol. Mevcut element bilgisini anında masaüstüne TXT olarak atar, " +
-                           "hiçbir soru sormaz."),
 
                     Blok.H("Hangisini ne zaman?"),
                     Blok.M(
-                        "Sorunu birine göstereceksem → F7",
-                        "Kendi arşivim için topluyorsam → F8",
-                        "Sadece bilgi lazımsa → F6",
-                        "Acelem varsa → Ctrl+S")
+                        "Sorunu birine göstereceksem → F1",
+                        "Kendi arşivim için topluyorsam → Tools ▸ sadece arşive",
+                        "Sadece bilgi lazımsa → EXPORT düğmesi")
                 }
             },
 
@@ -307,7 +279,7 @@ namespace UIElementInspector.Windows
                         "XML — kurumsal sistemlere, şema doğrulaması gereken yerlere.",
                         "HTML — birine göstermek için. Tarayıcıda açılır, filtrelenebilir tablo olur.",
                         "TXT — okumak, e-postaya yapıştırmak, log tutmak için."),
-                    Blok.P("Menüden: File ▸ Export. Ya da Ctrl+S ile varsayılan biçimde hızlı kayıt."),
+                    Blok.P("Menüden: File ▸ Export. Ya da üst şeritteki EXPORT düğmesiyle hızlı kayıt."),
                     Blok.Ipucu("Varsayılan çıktı klasörünü Tools ▸ Settings'ten değiştirebilirsiniz. " +
                                "Tarihe göre alt klasör açma seçeneği de oradadır."),
                     Blok.Ornek("Gerçek senaryo",
@@ -321,54 +293,54 @@ namespace UIElementInspector.Windows
             new Adim
             {
                 Bolum = "4 · GÜNLÜK KULLANIM",
-                Baslik = "F9 — Bölge ekran görüntüsü",
+                Baslik = "F2 — Bölge ekran görüntüsü",
                 Ozet = "Yazılımla hiç ilgisi olmayan, ama en çok kullanacağınız tuş.",
                 Bloklar = new[]
                 {
-                    Blok.T("F9", "Mouse ile bölge seç → PNG"),
-                    Blok.P("F9, UIBUL'un \"herkesin aracı\" tarafıdır. Windows'un kendi Ekran Alıntısı " +
+                    Blok.T("F2", "Mouse ile bölge seç → PNG"),
+                    Blok.P("F2, UIBUL'un \"herkesin aracı\" tarafıdır. Windows'un kendi Ekran Alıntısı " +
                            "aracına benzer ama üç farkı vardır:"),
                     Blok.M(
                         "Dosya OTOMATİK kaydedilir — \"kaydet\" penceresiyle uğraşmazsınız.",
                         "Panoya hem RESİM hem DOSYA YOLU kopyalanır — Word'e de yapıştırabilirsiniz, sohbete de.",
-                        "Global çalışır — hangi programda olursanız olun F9 çalışır."),
+                        "Global çalışır — hangi programda olursanız olun F2 çalışır."),
                     Blok.N(
-                        "F9'a basın. Ekran hafifçe kararır.",
+                        "F2'ye basın. Ekran hafifçe kararır.",
                         "Mouse ile istediğiniz alanı sürükleyerek seçin.",
                         "Bırakın. Görüntü masaüstünüze PNG olarak kaydedilir ve panoya kopyalanır.",
                         "İstediğiniz yere Ctrl+V ile yapıştırın."),
                     Blok.Ipucu("Vazgeçmek için ESC. Seçim yaparken koordinatlar canlı gösterilir."),
-                    Blok.Uyari("F9 GLOBAL kısayoldur; UIBUL açık olduğu sürece başka programlarda " +
-                               "F9'a atanmış işlevler çalışmayabilir. Rahatsız ederse UIBUL'u kapatmanız yeter.")
+                    Blok.Uyari("F2 GLOBAL kısayoldur; UIBUL açık olduğu sürece başka programlarda " +
+                               "F2'ye atanmış işlevler çalışmayabilir. Rahatsız ederse UIBUL'u kapatmanız yeter.")
                 }
             },
 
             new Adim
             {
                 Bolum = "4 · GÜNLÜK KULLANIM",
-                Baslik = "Günlük hayatta F9 ile neler yapılır?",
+                Baslik = "Günlük hayatta F2 ile neler yapılır?",
                 Ozet = "Somut örnekler — hiçbiri yazılım işi değil.",
                 Bloklar = new[]
                 {
                     Blok.Ornek("Destek talebi",
-                        "Bankanın sitesinde bir hata aldınız. F9 ile hata mesajını seçin, " +
+                        "Bankanın sitesinde bir hata aldınız. F2 ile hata mesajını seçin, " +
                         "destek sohbetine doğrudan Ctrl+V. Ne olduğunu anlatmaya çalışmaktan kurtulursunuz."),
                     Blok.Ornek("Fatura ve dekont arşivi",
-                        "Online ödeme yaptınız. Dekont ekranını F9 ile alın. Dosya adında tarih " +
+                        "Online ödeme yaptınız. Dekont ekranını F2 ile alın. Dosya adında tarih " +
                         "olduğu için sonradan aramak kolaydır."),
                     Blok.Ornek("Alışverişte fiyat kanıtı",
-                        "Bir ürün indirimdeyken F9 ile fiyatı kaydedin. İndirim iddiası tutmazsa " +
+                        "Bir ürün indirimdeyken F2 ile fiyatı kaydedin. İndirim iddiası tutmazsa " +
                         "elinizde tarihli kanıt olur."),
                     Blok.Ornek("Ders / toplantı notu",
-                        "Ekrandaki bir grafiği ya da slaytı F9 ile alıp not defterinize yapıştırın. " +
+                        "Ekrandaki bir grafiği ya da slaytı F2 ile alıp not defterinize yapıştırın. " +
                         "Fotoğraf çekmekten çok daha temiz olur."),
                     Blok.Ornek("Form doldurma yardımı",
-                        "Uzun bir başvuru formunu doldururken, doldurduğunuz bölümleri F9 ile " +
+                        "Uzun bir başvuru formunu doldururken, doldurduğunuz bölümleri F2 ile " +
                         "kaydedin. Sayfa çökerse ne yazdığınızı hatırlarsınız."),
                     Blok.Ornek("Rezervasyon / bilet",
-                        "Uçuş, otel ya da randevu onay ekranını F9 ile alın. " +
+                        "Uçuş, otel ya da randevu onay ekranını F2 ile alın. " +
                         "E-posta gelmezse elinizde kayıt olur."),
-                    Blok.Ipucu("F9 ile alınan görüntüler masaüstüne düşer. Karışmasını istemiyorsanız " +
+                    Blok.Ipucu("F2 ile alınan görüntüler çıktı klasörüne düşer. Karışmasını istemiyorsanız " +
                                "Tools ▸ Settings'ten çıktı klasörünü değiştirin.")
                 }
             },
@@ -376,24 +348,24 @@ namespace UIElementInspector.Windows
             new Adim
             {
                 Bolum = "4 · GÜNLÜK KULLANIM",
-                Baslik = "F10 — Son yakalama yolunu yapıştır",
+                Baslik = "F3 — Son yakalama yolunu yapıştır",
                 Ozet = "\"Dosyayı nereye kaydetti?\" sorusunun cevabı, tek tuşla.",
                 Bloklar = new[]
                 {
-                    Blok.T("F10", "Son yakalama klasörünün yolunu panoya kopyala ve yapıştır"),
-                    Blok.P("F7/F8/F9 ile bir şey yakaladınız. Şimdi o klasörü birine göndermek ya da " +
-                           "bir programa açtırmak istiyorsunuz. F10, yolu panoya koyar ve aktif " +
+                    Blok.T("F3", "Son yakalama klasörünün yolunu panoya kopyala ve yapıştır"),
+                    Blok.P("F1 veya F2 ile bir şey yakaladınız. Şimdi o klasörü birine göndermek ya da " +
+                           "bir programa açtırmak istiyorsunuz. F3, yolu panoya koyar ve aktif " +
                            "pencereye yapıştırmayı dener."),
                     Blok.N(
-                        "Önce F7, F8 veya F9 ile bir yakalama yapın.",
+                        "Önce F1 veya F2 ile bir yakalama yapın.",
                         "Yolu yazmak istediğiniz yere gidin (sohbet kutusu, Explorer adres çubuğu, terminal).",
-                        "F10'a basın."),
-                    Blok.Uyari("UIBUL penceresi öndeyken F10 otomatik yapıştırmaz — yol yalnızca " +
+                        "F3'e basın."),
+                    Blok.Uyari("UIBUL penceresi öndeyken F3 otomatik yapıştırmaz — yol yalnızca " +
                                "panoya konur. Hedef pencereye geçip Ctrl+V yapmanız gerekir. " +
                                "Bu kasıtlıdır: yanlış yere yazmasın diye."),
                     Blok.Ornek("Gerçek senaryo",
                         "Ekran görüntüsünü bir arkadaşınıza WhatsApp Web'den göndereceksiniz. " +
-                        "F9 ile alın, WhatsApp'a geçin, F10'a basın — dosya yolu yazılır, " +
+                        "F2 ile alın, WhatsApp'a geçin, F3'e basın — dosya yolu yazılır, " +
                         "oradan dosyayı seçmek saniyeler alır.")
                 }
             },
@@ -401,12 +373,12 @@ namespace UIElementInspector.Windows
             new Adim
             {
                 Bolum = "4 · GÜNLÜK KULLANIM",
-                Baslik = "F11 — Kimlik şeritli kare (Atlas)",
+                Baslik = "F4 — Kimlik şeritli kare (Atlas)",
                 Ozet = "Görüntünün içine tarih ve konum basan özel bir yakalama.",
                 Bloklar = new[]
                 {
-                    Blok.T("F11", "Bölge seç → kırmızı çerçeve + kimlik şeridi"),
-                    Blok.P("F11 başlangıçta Osmanlı Tarih Atlası projesindeki bir kusuru bildirmek için " +
+                    Blok.T("F4", "Bölge seç → kırmızı çerçeve + kimlik şeridi"),
+                    Blok.P("F4 başlangıçta Osmanlı Tarih Atlası projesindeki bir kusuru bildirmek için " +
                            "yapıldı, ama mantığı geneldir: aldığınız karenin ÜZERİNE, o karenin nereden " +
                            "ve ne zaman alındığını yazar."),
                     Blok.M(
@@ -417,11 +389,11 @@ namespace UIElementInspector.Windows
                     Blok.Bilgi("Bilgi, tarayıcı penceresinin başlığından okunur. Başlıkta uygun damga " +
                                "yoksa kare yine alınır; şerit kırmızı zeminle 'TARİH/KOORDİNAT OKUNAMADI' " +
                                "der ve karenin alındığı saati yazar. Tarih asla uydurulmaz."),
-                    Blok.Uyari("F11 global kısayol olarak kaydedildiği için, UIBUL açıkken Chrome'un " +
-                               "F11 tam ekran kısayolu ÇALIŞMAZ. Rahatsız ederse ayar dosyasında " +
-                               "AtlasKisayolu değerini \"Ctrl+F11\" yapın."),
+                    Blok.Bilgi("Atlas karesi önce F11'deydi; F11 global kaydedilince Chrome'un tam ekran " +
+                               "kısayolu çalışmıyordu. Bu yüzden F4'e taşındı. Başka bir tuş isterseniz " +
+                               "ayar dosyasında AtlasKisayolu değerini değiştirebilirsiniz."),
                     Blok.Ipucu("Genel amaçlı kullanım: bir web sayfasından tarihli kanıt alırken " +
-                               "F11 tercih edin — kimin, ne zaman, nereden aldığı görüntünün içinde durur.")
+                               "F4 tercih edin — kimin, ne zaman, nereden aldığı görüntünün içinde durur.")
                 }
             },
 
@@ -445,11 +417,11 @@ namespace UIElementInspector.Windows
                         "Toplu toplama: bir ekrandaki tüm elementleri tek seferde alıp CSV/JSON'a dökebilirsiniz."),
                     Blok.Ornek("İş akışı",
                         "1. Test edilecek ekranı açın.\n" +
-                        "2. F1 ile inceleme başlatın, etkileşilecek elementler üzerinde gezin.\n" +
-                        "3. F2 ile durdurun.\n" +
+                        "2. BAŞLAT ile inceleme başlatın, etkileşilecek elementler üzerinde gezin.\n" +
+                        "3. DURDUR ile bitirin.\n" +
                         "4. JSON export alın.\n" +
                         "5. JSON'daki AutomationId / XPath değerlerini Page Object sınıfınıza dökün."),
-                    Blok.Ipucu("Dinamik id üreten uygulamalarda F5 ile elementi birkaç kez yenileyip " +
+                    Blok.Ipucu("Dinamik id üreten uygulamalarda YENİLE ile elementi birkaç kez yenileyip " +
                                "hangi alanın sabit kaldığına bakın — kararlı seçiciyi böyle bulursunuz.")
                 }
             },
@@ -467,19 +439,19 @@ namespace UIElementInspector.Windows
                            "rolü yanlışsa ya da etiketi yoksa UIBUL bunu size gösterir."),
                     Blok.M(
                         "Collection Profile'ı Full yapın.",
-                        "F1 ile tüm etkileşimli elementler üzerinden geçin.",
+                        "BAŞLAT ile tüm etkileşimli elementler üzerinden geçin.",
                         "HTML export alın — filtrelenebilir bir denetim raporu olur.",
                         "Adı boş, rolü generic olan elementleri işaretleyin."),
 
                     Blok.H("Hata raporu (bug report)"),
                     Blok.P("İyi bir hata raporu üç şey ister: ne göründüğü, hangi elementte olduğu, " +
-                           "hangi ortamda olduğu. F7 üçünü birden tek klasöre koyar."),
+                           "hangi ortamda olduğu. F1 üçünü birden tek klasöre koyar."),
                     Blok.Ornek("Pratik",
-                        "Hatayı ekranda yakaladığınız anda F7'ye basın. Oluşan klasörü zipleyin ve " +
+                        "Hatayı ekranda yakaladığınız anda F1'e basın. Oluşan klasörü zipleyin ve " +
                         "issue'ya ekleyin. Ekran görüntüsü, DOM, element özellikleri ve pencere " +
                         "bilgisi paketin içindedir — karşı taraf \"tekrar edemiyorum\" diyemez."),
                     Blok.Ipucu("Ekibinizde UIBUL herkeste varsa, hata raporu formatınızı " +
-                               "\"F7 klasörünü ekle\" diye standartlaştırabilirsiniz.")
+                               "\"F1 klasörünü ekle\" diye standartlaştırabilirsiniz.")
                 }
             },
 
@@ -502,9 +474,9 @@ namespace UIElementInspector.Windows
 
                     Blok.H("Yapay zekâya bağlam vermek"),
                     Blok.P("Bir LLM'e \"şu ekranda şu düğmeye tıklayan kodu yaz\" derken en büyük sorun, " +
-                           "modelin ekranı görmemesidir. F7 çıktısı tam olarak bu boşluğu doldurur: " +
+                           "modelin ekranı görmemesidir. F1 çıktısı tam olarak bu boşluğu doldurur: " +
                            "görüntü + element özellikleri + seçiciler birlikte gider."),
-                    Blok.Ipucu("F11'in kimlik şeridi mantığı burada da işe yarar: görüntünün içine " +
+                    Blok.Ipucu("F4'ün kimlik şeridi mantığı burada da işe yarar: görüntünün içine " +
                                "basılan bilgi, dosya adı kaybolsa bile modele hangi ekranın " +
                                "konuşulduğunu söyler.")
                 }
@@ -530,7 +502,7 @@ namespace UIElementInspector.Windows
                     Blok.P("Tüm ayarlar şu dosyada JSON olarak durur:"),
                     Blok.P("%AppData%\\UIElementInspector\\settings.json"),
                     Blok.M(
-                        "AtlasKisayolu — F11 yerine başka bir tuş",
+                        "AtlasKisayolu — F4 yerine başka bir tuş",
                         "AtlasKlasoru — atlas karelerinin kaydedileceği yer",
                         "AtlasEnUzunKenar — görüntü küçültme sınırı (varsayılan 1200 px)",
                         "OtomatikGuncellemeKontrolu — açılışta güncelleme baksın mı",
@@ -584,12 +556,13 @@ namespace UIElementInspector.Windows
                            "olanı okuyamaz. UIBUL'a sağ tıklayıp \"Yönetici olarak çalıştır\" deyin."),
 
                     Blok.H("Element özellikleri eksik geliyor"),
-                    Blok.P("Collection Profile'ı Full yapın ve F5 ile yenileyin. Bazı uygulamalar " +
+                    Blok.P("Collection Profile'ı Full yapın ve YENİLE ile tazeleyin. Bazı uygulamalar " +
                            "bilgiyi yalnız derin tarama sırasında verir."),
 
-                    Blok.H("Chrome'da F11 tam ekran çalışmıyor"),
-                    Blok.P("Beklenen davranış. F11'i UIBUL global olarak kaydettiği için tarayıcı " +
-                           "tuşu hiç görmez. Ayar dosyasından AtlasKisayolu'nu \"Ctrl+F11\" yapın."),
+                    Blok.H("Bir kısayol başka programda çalışmıyor"),
+                    Blok.P("Beklenen davranış: F1–F4 GLOBAL kaydedilir, yani UIBUL açıkken o dört tuşu " +
+                           "başka programlar görmez. Rahatsız ederse UIBUL'u kapatın; atlas karesi için " +
+                           "ayar dosyasından AtlasKisayolu'nu başka bir kombinasyona alabilirsiniz."),
 
                     Blok.H("Yakalama çok yavaş"),
                     Blok.P("Collection Profile'ı Standard veya Quick'e alın. Full profil " +
@@ -607,20 +580,15 @@ namespace UIElementInspector.Windows
                 Ozet = "Öğretici bitti. Bu sayfayı ekran görüntüsü alıp saklayabilirsiniz.",
                 Bloklar = new[]
                 {
-                    Blok.T("F1", "İncelemeyi başlat (pencere gizlenir)"),
-                    Blok.T("F2", "İncelemeyi durdur (pencere geri gelir)"),
-                    Blok.T("F3", "İncelemeyi başlat (pencere görünür kalır)"),
-                    Blok.T("F4", "Deklanşör — basılı tut, hedefe git, bırak"),
-                    Blok.T("F5", "Seçili elementi yenile"),
-                    Blok.T("F6", "TXT rapor → masaüstü + arşiv"),
-                    Blok.T("F7", "Tam yakalama → masaüstü + arşiv"),
-                    Blok.T("F8", "Tam yakalama → sadece arşiv"),
-                    Blok.T("F9", "Bölge ekran görüntüsü"),
-                    Blok.T("F10", "Son yakalama yolunu yapıştır"),
-                    Blok.T("F11", "Kimlik şeritli kare (Atlas)"),
-                    Blok.T("Ctrl+S", "Hızlı kaydet"),
-                    Blok.T("Ctrl+C", "Element verisini kopyala"),
+                    Blok.T("F1", "Tam yakalama → çıktı klasörü + arşiv"),
+                    Blok.T("F2", "Bölge ekran görüntüsü"),
+                    Blok.T("F3", "Son yakalama yolunu yapıştır"),
+                    Blok.T("F4", "Kimlik şeritli kare (Atlas)"),
                     Blok.T("ESC", "Bölge seçimini iptal et"),
+                    Blok.Bilgi("Global kısayol bu dördüdür, başkası yoktur. İnceleme başlat/durdur, " +
+                               "yenile, TXT rapor ve sadece-arşive yakalama üst şeritteki düğmelerden " +
+                               "ve menülerden yapılır — böylece UIBUL açıkken başka programların " +
+                               "tuşlarını çalmaz."),
                     Blok.Ipucu("Bu öğreticiyi tekrar açmak için: üst şeritteki 🎓 ÖĞRETİCİ düğmesi " +
                                "ya da Help ▸ Öğretici. Daha ayrıntılı başvuru için 📖 KILAVUZ."),
                     Blok.Bilgi("İyi kullanımlar. Takıldığınız yerde alttaki konsola bakmayı unutmayın.")

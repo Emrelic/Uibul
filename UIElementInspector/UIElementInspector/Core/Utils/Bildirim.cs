@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -12,8 +12,8 @@ namespace UIElementInspector.Core.Utils
     /// <summary>
     /// Ekranın sağ altında birkaç saniye görünen bildirim.
     ///
-    /// ⚠️ NEDEN VAR: F11 karesi ana pencere gizliyken alınıyor ve sonuç
-    /// yalnızca uygulamanın konsol sekmesine yazılıyordu. Kullanıcı F11'e
+    /// ⚠️ NEDEN VAR: Atlas karesi (F4) ana pencere gizliyken alınıyor ve sonuç
+    /// yalnızca uygulamanın konsol sekmesine yazılıyordu. Kullanıcı tuşa
     /// bastı, hiçbir şey görmedi, "çalışmıyor" diye bildirdi — oysa kısayol
     /// çalışıyordu, kare almayı kod reddetmişti ve red görünmüyordu.
     /// SESSİZ BAŞARISIZLIK, HATANIN KENDİSİNDEN KÖTÜDÜR.

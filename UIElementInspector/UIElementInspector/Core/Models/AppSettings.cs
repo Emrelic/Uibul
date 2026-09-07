@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,18 +33,18 @@ namespace UIElementInspector.Core.Models
         public bool AutoCaptureScreenshot { get; set; } = true;
         public bool IncludeTimestampInFilename { get; set; } = true;
 
-        // ── Tarih Atlası karesi (F11) ────────────────────────────────────────
+        // ── Tarih Atlası karesi (F4) ────────────────────────────────────────
         // Kayıt klasörü KASTEN OneDrive DIŞINDA: Desktop ve Belgeler bu
         // makinede OneDrive'a bağlı (ölçüldü), her kare buluta yüklenirdi.
         public string AtlasKlasoru { get; set; } = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "TarihAtlasiKare");
 
-        // Kısayol. ⚠️ ÖLÇÜLDÜ: F11 işletim sisteminde boştur ama global olarak
-        // kaydedilince Chrome F11'i ARTIK GÖRMEZ — tarayıcının tam ekranı
-        // araç açıkken çalışmaz. Bu bedeli istemiyorsanız "Ctrl+F11" yazın;
-        // o kombinasyon da ölçüldü, boş ve çakışmasız.
-        public string AtlasKisayolu { get; set; } = "F11";
+        // Kısayol. Varsayılan F11 idi; ÖLÇÜLDÜ: F11 global kaydedilince
+        // Chrome F11'i ARTIK GÖRMEZ — tarayıcının tam ekranı araç açıkken
+        // çalışmıyordu. Atlas bu yüzden F4'e taşındı. Başka bir tuş
+        // istiyorsanız buraya "Ctrl+F11" gibi bir kombinasyon yazabilirsiniz.
+        public string AtlasKisayolu { get; set; } = "F4";
 
         // En uzun kenar tavanı. Token maliyeti YALNIZ piksel sayısına bağlı
         // olduğu için tek gerçek tasarruf budur (format/kalite hiçbir şey
@@ -107,7 +107,18 @@ namespace UIElementInspector.Core.Models
                 {
                     var json = File.ReadAllText(SettingsFilePath);
                     var settings = JsonConvert.DeserializeObject<AppSettings>(json);
-                    return settings ?? CreateDefault();
+                    if (settings == null) return CreateDefault();
+
+                    // Eski kurulumlardan devralınan F11'i F4'e taşı. F11 artık
+                    // hiçbir işe bağlı değil; diskte kalırsa kullanıcı atlas
+                    // karesini F4'te arar, tuş F11'de kalırdı.
+                    if (settings.AtlasKisayolu == "F11")
+                    {
+                        settings.AtlasKisayolu = "F4";
+                        try { settings.Save(); } catch { }
+                    }
+
+                    return settings;
                 }
             }
             catch (Exception ex)

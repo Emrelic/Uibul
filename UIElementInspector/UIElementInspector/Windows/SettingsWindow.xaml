@@ -1,4 +1,4 @@
-<Window x:Class="UIElementInspector.Windows.SettingsWindow"
+﻿<Window x:Class="UIElementInspector.Windows.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Settings - UI Element Inspector"
@@ -56,7 +56,7 @@
 
                         <Separator Margin="0,10"/>
 
-                        <TextBlock Text="Cikti klasoru (F6, F7, F9 dosyalari buraya kaydedilir):" FontWeight="Bold"/>
+                        <TextBlock Text="Cikti klasoru (F1 ve F2 dosyalari buraya kaydedilir):" FontWeight="Bold"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>

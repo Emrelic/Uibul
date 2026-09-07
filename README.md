@@ -34,16 +34,16 @@ Program içinde: **Help ▸ Öğretici** (6 bölüm, 21 adım) ve **Help ▸ Kul
 
 ## Kısayollar
 
-| Tuş | | Tuş | |
-|---|---|---|---|
-| `F1` | İncelemeyi başlat (gizle) | `F7` | Tam yakalama → masaüstü + arşiv |
-| `F2` | İncelemeyi durdur | `F8` | Tam yakalama → sadece arşiv |
-| `F3` | İncelemeyi başlat (görünür) | `F9` | **Bölge ekran görüntüsü** |
-| `F4` | Deklanşör (menü yakalama) | `F10` | Son yakalama yolunu yapıştır |
-| `F5` | Elementi yenile | `F11` | Kimlik şeritli kare |
-| `F6` | TXT rapor | `Ctrl+S` | Hızlı kaydet |
+| Tuş | |
+|---|---|
+| `F1` | Tam yakalama → çıktı klasörü + arşiv |
+| `F2` | **Bölge ekran görüntüsü** |
+| `F3` | Son yakalama yolunu yapıştır |
+| `F4` | Kimlik şeritli kare (Atlas) |
 
-Tuşlar **global**'dir — UIBUL açıkken her uygulamada çalışır.
+Bu dört tuş **global**'dir — UIBUL açıkken her uygulamada çalışır. Başka global kısayol
+yoktur; inceleme başlat/durdur, yenile, TXT rapor ve sadece-arşive yakalama üst şeritteki
+düğmelerden ve menülerden yapılır.
 
 ---
 

@@ -234,76 +234,51 @@ namespace UIElementInspector
                 // Initialize hotkey service
                 _hotkeyService = new HotkeyService(this);
 
-                // F1 = Start Inspection (pencere minimize edilir)
-                var f1 = _hotkeyService.RegisterHotkey(Key.F1, ModifierKeys.None, StartInspection_Click);
+                // ── KISAYOLLAR ──────────────────────────────────────────
+                // Dort tus, dort is. Eski F1/F2/F3 (inceleme baslat/durdur),
+                // F4 deklansor, F5 yenile, F6 rapor, F8 sadece arsiv ve Ctrl+S
+                // KASTEN kaldirildi: hepsi global kayit demekti, yani o tuslari
+                // baska programlardan da caliyorlardi. Islevler duruyor -
+                // ust seritteki butonlar ve menuler ayni isi yapar.
 
-                // F2 = Stop Inspection
-                var f2 = _hotkeyService.RegisterHotkey(Key.F2, ModifierKeys.None, StopInspection_Click);
+                // F1 = TAM YAKALAMA - 5 teknoloji + element listesi + kaynak kod + screenshot
+                var f1 = _hotkeyService.RegisterHotkey(Key.F1, ModifierKeys.None, FullCaptureToDesktopAndArchive_Click);
 
-                // F3 = Start Inspection (pencere minimize edilmez - Keep Visible)
-                var f3 = _hotkeyService.RegisterHotkey(Key.F3, ModifierKeys.None, StartKeepVisible_Click);
+                // F2 = EKRAN GORUNTUSU - Bolge secip ekran goruntusu al
+                var f2 = _hotkeyService.RegisterHotkey(Key.F2, ModifierKeys.None, ScreenshotRegion_Click);
 
-                // F4 = Shutter Mode - Deklansor (basili tutunca aktif, birakinca durur)
-                _hotkeyService.RegisterShutterKey(Key.F4, ShutterDown, ShutterUp);
+                // F3 = Son yakalama dizin yolunu yapistir
+                var f3 = _hotkeyService.RegisterHotkey(Key.F3, ModifierKeys.None, PasteLastCapturePath_Click);
 
-                // F5 = Refresh current element
-                var f5 = _hotkeyService.RegisterHotkey(Key.F5, ModifierKeys.None, Refresh_Click);
-
-                // F6 = Export all reports to Desktop AND Archive
-                var f6 = _hotkeyService.RegisterHotkey(Key.F6, ModifierKeys.None, ExportToDesktopAndArchive_Click);
-
-                // F7 = FULL CAPTURE - 5 teknoloji + element listesi + kaynak kod + screenshot
-                var f7 = _hotkeyService.RegisterHotkey(Key.F7, ModifierKeys.None, FullCaptureToDesktopAndArchive_Click);
-
-                // F8 = ARCHIVE ONLY - Save to archive folder only
-                var f8 = _hotkeyService.RegisterHotkey(Key.F8, ModifierKeys.None, FullCaptureToArchiveOnly_Click);
-
-                // Ctrl+S = Quick Export
-                var ctrlS = _hotkeyService.RegisterHotkey(Key.S, ModifierKeys.Control, ExportQuick_Click);
-
-                // F9 = Screenshot Region - Bolge secip ekran goruntusu al
-                var f9 = _hotkeyService.RegisterHotkey(Key.F9, ModifierKeys.None, ScreenshotRegion_Click);
-
-                // F10 = Son yakalama dizin yolunu yapistir
-                var f10 = _hotkeyService.RegisterHotkey(Key.F10, ModifierKeys.None, PasteLastCapturePath_Click);
-
-                // F11 = TARIH ATLASI KARESI (bolge + kirmizi cerceve + kimlik seridi)
+                // F4 = TARIH ATLASI KARESI (bolge + kirmizi cerceve + kimlik seridi)
                 Key atlasTus; ModifierKeys atlasMod;
                 var atlasKisayol = _appSettings.AtlasKisayolu;
                 if (!KisayolCoz(atlasKisayol, out atlasTus, out atlasMod))
                 {
-                    LogToConsole($"[ATLAS] Kisayol cozulemedi: '{atlasKisayol}' - F11'e donuluyor.",
+                    LogToConsole($"[ATLAS] Kisayol cozulemedi: '{atlasKisayol}' - F4'e donuluyor.",
                                  Core.Utils.LogLevel.Warning);
-                    atlasKisayol = "F11";
-                    atlasTus = Key.F11;
+                    atlasKisayol = "F4";
+                    atlasTus = Key.F4;
                     atlasMod = ModifierKeys.None;
                 }
                 var atlas = _hotkeyService.RegisterHotkey(atlasTus, atlasMod, AtlasKare_Click);
                 _atlasKisayolAdi = atlasKisayol;
 
-                _logger.LogInfo($"Hotkey service initialized - F1:{f1}, F2:{f2}, F3:{f3}, F4:Shutter, F5:{f5}, F6:{f6}, F7:{f7}, F8:{f8}, F9:{f9}, F10:{f10}, Atlas({atlasKisayol}):{atlas}, Ctrl+S:{ctrlS}");
+                _logger.LogInfo($"Hotkey service initialized - F1:{f1}, F2:{f2}, F3:{f3}, Atlas({atlasKisayol}):{atlas}");
 
                 LogToConsole("===========================================");
                 LogToConsole("          KISAYOL TUSLARI (HOTKEYS)        ");
                 LogToConsole("===========================================");
-                LogToConsole("  F1  = Start Inspection (Pencere Gizlenir)");
-                LogToConsole("  F2  = Stop Inspection");
-                LogToConsole("  F3  = Start Inspection (Pencere Gorunur)");
-                LogToConsole("  F4  = DEKLANSOR (Basili Tut = Aktif)");
-                LogToConsole("  F5  = Refresh Element");
-                LogToConsole("  F6  = Masaustu + Arsiv (TXT Rapor)");
-                LogToConsole("  F7  = TAM YAKALAMA (Masaustu + Arsiv)");
-                LogToConsole("  F8  = SADECE ARSIV (Tam Yakalama)");
-                LogToConsole("  F9  = EKRAN GORUNTUSU (Bolge Sec)");
-                LogToConsole("  F10 = SON YAKALAMA YOLUNU YAPISTIR");
+                LogToConsole("  F1  = TAM YAKALAMA (Masaustu + Arsiv)");
+                LogToConsole("  F2  = EKRAN GORUNTUSU (Bolge Sec)");
+                LogToConsole("  F3  = SON YAKALAMA YOLUNU YAPISTIR");
                 LogToConsole($"  {atlasKisayol,-3} = TARIH ATLASI KARESI (damgali)");
-                LogToConsole("  Ctrl+S = Hizli Export");
                 LogToConsole("===========================================");
                 if (atlasMod == ModifierKeys.None && atlasTus == Key.F11)
                 {
                     LogToConsole("[ATLAS] NOT: F11 global kayitli oldugu icin Chrome'un tam ekran");
-                    LogToConsole("        kisayoli bu arac acikken CALISMAZ (olculdu). Istemezseniz");
-                    LogToConsole("        settings.json icinde AtlasKisayolu = \"Ctrl+F11\" yapin.");
+                    LogToConsole("        kisayoli bu arac acikken CALISMAZ (olculdu). Atlas artik");
+                    LogToConsole("        F4'te; settings.json icinde AtlasKisayolu = \"F4\" yapin.");
                 }
 
                 // Initialize archive tab
@@ -315,99 +290,6 @@ namespace UIElementInspector
                 LogToConsole($"Error initializing services: {ex.Message}", Core.Utils.LogLevel.Error);
             }
         }
-
-        #region Shutter Mode (Deklansor)
-
-        private bool _shutterActive = false;
-
-        private void ShutterDown()
-        {
-            if (_shutterActive) return;
-            _shutterActive = true;
-
-            LogToConsole("[DEKLANSOR] Basili - Element yakalama AKTIF");
-            txtStatus.Text = "DEKLANSOR AKTIF";
-            txtStatus.Foreground = System.Windows.Media.Brushes.Red;
-
-            // Update shutter status indicator
-            txtShutterStatus.Text = ">>> F4 BASILI - YAKALAMA AKTIF <<<";
-            brdShutterStatus.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(139, 0, 0));
-
-            // Start capturing without minimizing window
-            if (!_isInspecting)
-            {
-                _isInspecting = true;
-                _inspectionCts = new CancellationTokenSource();
-                _mouseHook.StartHook();
-            }
-        }
-
-        private async void ShutterUp()
-        {
-            if (!_shutterActive) return;
-            _shutterActive = false;
-
-            LogToConsole("[DEKLANSOR] Birakildi - Element yakalaniyor...");
-
-            // Show progress indicator with wait cursor
-            StartProgress("Element yakalanıyor...", "Lütfen bekleyiniz, UI element bilgileri toplanıyor...");
-
-            // Capture current element
-            try
-            {
-                var point = System.Windows.Forms.Cursor.Position;
-                var wpfPoint = new System.Windows.Point(point.X, point.Y);
-
-                SetProgressValue(25, "Element bilgileri toplanıyor...", "Analiz ediliyor");
-                await CaptureElementAtPoint(wpfPoint);
-                SetProgressValue(75, "Element bilgileri alındı", "Tamamlanıyor");
-
-                await Task.Delay(200); // Brief pause to show progress
-                SetProgressValue(100, "Element yakalandı!", "Başarılı");
-                await Task.Delay(300); // Show completion
-
-                LogToConsole("[DEKLANSOR] Element basariyla yakalandi");
-            }
-            catch (Exception ex)
-            {
-                LogToConsole($"[DEKLANSOR] Yakalama hatasi: {ex.Message}", Core.Utils.LogLevel.Error);
-            }
-
-            // Stop progress and restore cursor
-            StopProgress();
-
-            // Stop inspection
-            _isInspecting = false;
-            _mouseHook.StopHook();
-            _inspectionCts?.Cancel();
-
-            txtStatus.Text = "Ready";
-            txtStatus.Foreground = System.Windows.Media.Brushes.Green;
-
-            // Clear shutter status indicator
-            txtShutterStatus.Text = "";
-            brdShutterStatus.Background = System.Windows.Media.Brushes.Transparent;
-        }
-
-        /// <summary>
-        /// F4 Button Click - Shows info about shutter mode
-        /// </summary>
-        private void ShutterInfo_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.MessageBox.Show(
-                "DEKLANŞÖR MODU (F4)\n\n" +
-                "Kullanım:\n" +
-                "1. F4 tuşuna BASILI TUTUN\n" +
-                "2. Mouse'u yakalamak istediğiniz element üzerine götürün\n" +
-                "3. F4 tuşunu BIRAKIN\n\n" +
-                "Element otomatik olarak yakalanacaktır.\n\n" +
-                "Not: Bu özellik klavye ile çalışır, butona tıklamak yerine F4 tuşunu kullanın.",
-                "Deklanşör Modu - Bilgi",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-
-        #endregion
 
         #region Desktop Export
 
@@ -5059,21 +4941,15 @@ namespace UIElementInspector
 
         private void KeyboardShortcuts_Click(object sender, RoutedEventArgs e)
         {
-            var shortcuts = @"Klavye Kısayolları:
-F1 - İnceleme Başlat (Pencere Gizlenir)
-F2 - İnceleme Durdur (Pencere Gösterilir)
-F3 - İnceleme Başlat (Pencere Görünür Kalır)
-F4 - Deklanşör Modu (Basılı Tut + Bırak)
-F5 - Elementi Yenile
-F6 - Masaüstü + Arşiv (TXT Rapor)
-F7 - Tam Yakalama (Masaüstü + Arşiv)
-F8 - Sadece Arşiv (Tam Yakalama)
-F9 - Ekran Görüntüsü (Bölge Seç)
-F10 - Son Yakalama Yolunu Yapıştır
-F11 - Tarih Atlası Karesi (kimlik şeritli kare)
-Ctrl+S - Hızlı Kaydet
-Ctrl+C - Element Verisini Kopyala
-Ctrl+Shift+C - Tüm Elementleri Kopyala";
+            var shortcuts = $@"Klavye Kısayolları:
+F1 - Tam Yakalama (çıktı klasörü + arşiv)
+F2 - Ekran Görüntüsü (bölge seç)
+F3 - Son Yakalama Yolunu Yapıştır
+{_atlasKisayolAdi} - Tarih Atlası Karesi (kimlik şeritli kare)
+
+Başka global kısayol yoktur. İnceleme başlat/durdur, yenile,
+rapor ve sadece-arşive yakalama üstteki butonlardan ve
+menülerden yapılır.";
 
             System.Windows.MessageBox.Show(shortcuts, "Klavye Kısayolları", MessageBoxButton.OK, MessageBoxImage.Information);
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -396,7 +396,7 @@ namespace UIElementInspector.Core.Utils
         /// Metin biçiminde ne yapıştırılacağı. null ise dosya yolu kullanılır.
         /// Atlas karesi bunu kimlik satırıyla doldurur ("1361-02-01 · 41.35N
         /// 26.50E · z6 · Osmanlı Tarih Atlası") — böylece görüntüyle birlikte
-        /// tarihi de yapıştırılabilir. F10'un yol yapıştırma akışı bundan
+        /// tarihi de yapıştırılabilir. F3'ün yol yapıştırma akışı bundan
         /// etkilenmez; o, panoyu değil `_lastCapturePath` alanını okur.
         /// </param>
         /// <param name="dosyaListesiEkle">
@@ -408,7 +408,7 @@ namespace UIElementInspector.Core.Utils
         /// metni yapıştırıyor; belgeye 0 resim düşüyor. Aynı kare panoya
         /// yalnız görüntü olarak konduğunda Word sorunsuz yapıştırıyor
         /// (satır içi resim: 1). Atlas karesi bu yüzden false geçer.
-        /// F9'un akışı dosya yapıştırmayı kullandığı için varsayılan true kaldı.
+        /// F2'nin akışı dosya yapıştırmayı kullandığı için varsayılan true kaldı.
         /// </param>
         /// <param name="metinEkle">
         /// Panoya metin biçimi de konsun mu?
@@ -421,7 +421,7 @@ namespace UIElementInspector.Core.Utils
         ///
         /// Bu yüzden atlas karesi metni panoya KOYMAZ. Bilgi kaybı değildir:
         /// aynı satırlar görüntünün İÇİNDEKİ şeritte yazılıdır (özelliğin varlık
-        /// sebebi zaten budur), dosya adında da vardır, ve F10 son karenin
+        /// sebebi zaten budur), dosya adında da vardır, ve F3 son karenin
         /// yolunu metin olarak verir.
         /// </param>
         public static void CopyImageAndPathToClipboard(Bitmap bitmap, string filePath,

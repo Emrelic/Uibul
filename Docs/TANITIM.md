@@ -50,7 +50,7 @@ Bir ekranın tüm elementlerini gezip JSON'a döküp Page Object sınıfına dö
 
 ### 2. Hata raporunu tartışmasız hâle getirmek
 
-"Bende tekrar etmiyor", yazılım ekiplerinde en çok zaman yakan cümledir. `F7` tek tuşta
+"Bende tekrar etmiyor", yazılım ekiplerinde en çok zaman yakan cümledir. `F1` tek tuşta
 ekran görüntüsü + element özellikleri + DOM + pencere bilgisini aynı klasöre koyar.
 Klasörü issue'ya eklemek, üç ekran görüntüsü ve bir paragraf açıklamadan fazla bilgi taşır.
 
@@ -69,7 +69,7 @@ olmadan böyle bir işe başlamak körlemedir.
 ### 5. Yapay zekâya ekran bağlamı vermek
 
 Bir dil modelinden "şu ekrandaki düğmeye tıklayan kodu yaz" derken en büyük eksik, modelin
-ekranı görmemesidir. `F7` çıktısı bu boşluğu doldurur: görüntü + element özellikleri +
+ekranı görmemesidir. `F1` çıktısı bu boşluğu doldurur: görüntü + element özellikleri +
 seçiciler birlikte gider.
 
 ### Dürüst sınırlar
@@ -86,19 +86,19 @@ seçiciler birlikte gider.
 
 ## Yazılımcı olmayanlar için
 
-En çok kullanılan tuş, yazılımla hiç ilgisi olmayan **`F9`**'dur. Windows'un Ekran
+En çok kullanılan tuş, yazılımla hiç ilgisi olmayan **`F2`**'dir. Windows'un Ekran
 Alıntısı aracına benzer, üç farkla: dosya **otomatik kaydedilir**, panoya **hem resim
 hem dosya yolu** konur, ve **her uygulamada** çalışır.
 
 | Senaryo | Nasıl |
 |---|---|
-| Destek talebi | Hata mesajını `F9` ile seçin, sohbete `Ctrl+V` |
-| Fatura / dekont / bilet arşivi | Onay ekranını `F9`; dosya adı tarihli olur |
-| Alışverişte fiyat kanıtı | İndirimli fiyatı `F9` ile kaydedin |
-| Ders / toplantı notu | Grafiği veya slaytı `F9` ile alıp not defterine yapıştırın |
-| Uzun form güvenlik ağı | Doldurduğunuz bölümleri `F9` ile kaydedin |
-| Dosyayı birine göndermek | `F9` → sohbete geç → `F10` (yol yapıştırılır) |
-| Tarihli, kimlikli kanıt | `F11` — tarih ve konum görüntünün **içine** basılır |
+| Destek talebi | Hata mesajını `F2` ile seçin, sohbete `Ctrl+V` |
+| Fatura / dekont / bilet arşivi | Onay ekranını `F2`; dosya adı tarihli olur |
+| Alışverişte fiyat kanıtı | İndirimli fiyatı `F2` ile kaydedin |
+| Ders / toplantı notu | Grafiği veya slaytı `F2` ile alıp not defterine yapıştırın |
+| Uzun form güvenlik ağı | Doldurduğunuz bölümleri `F2` ile kaydedin |
+| Dosyayı birine göndermek | `F2` → sohbete geç → `F3` (yol yapıştırılır) |
+| Tarihli, kimlikli kanıt | `F4` — tarih ve konum görüntünün **içine** basılır |
 
 ---
 
@@ -106,25 +106,19 @@ hem dosya yolu** konur, ve **her uygulamada** çalışır.
 
 | Tuş | Ne yapar | Ne zaman |
 |---|---|---|
-| `F1` | İncelemeyi başlat — pencere gizlenir | Tek monitörde |
-| `F2` | İncelemeyi durdur | Her zaman; global |
-| `F3` | İncelemeyi başlat — pencere görünür kalır | Çift monitörde |
-| `F4` | Deklanşör: basılı tut → hedefe git → bırak | Açılır menü, dropdown, tooltip |
-| `F5` | Seçili elementi yeniden analiz et | Dinamik içerikte |
-| `F6` | TXT rapor → masaüstü + arşiv | Sadece bilgi lazımsa |
-| `F7` | Tam yakalama → masaüstü + arşiv | Hata raporu (en kapsamlı) |
-| `F8` | Tam yakalama → sadece arşiv | Uzun seanslarda |
-| `F9` | Bölge ekran görüntüsü | Gündelik hayatta en çok |
-| `F10` | Son yakalama yolunu yapıştır | Dosya gönderirken |
-| `F11` | Kimlik şeritli kare | Tarihli kanıt gerektiğinde |
-| `Ctrl+S` | Hızlı kaydet | Acele varken |
-| `Ctrl+C` | Element verisini kopyala | — |
+| `F1` | Tam yakalama → çıktı klasörü + arşiv | Hata raporu (en kapsamlı) |
+| `F2` | Bölge ekran görüntüsü | Gündelik hayatta en çok |
+| `F3` | Son yakalama yolunu yapıştır | Dosya gönderirken |
+| `F4` | Kimlik şeritli kare (Atlas) | Tarihli kanıt gerektiğinde |
 | `ESC` | Bölge seçimini iptal et | — |
 
-> ⚠️ Bu tuşlar **global** kaydedilir: UIBUL açıkken her uygulamada çalışırlar. Bedeli,
-> aynı tuşu kullanan başka programların o tuşu görmemesidir — örneğin **Chrome'un `F11`
-> tam ekranı UIBUL açıkken çalışmaz**. Rahatsız ederse `settings.json` içinde
-> `AtlasKisayolu` → `"Ctrl+F11"` yapın.
+> Global kısayol bu dördüdür, başkası yoktur. **İncelemeyi başlat/durdur, görünür
+> başlat, yenile, TXT rapor** ve **sadece arşive tam yakalama** üst şeritteki
+> düğmelerden ve menülerden yapılır (sonuncusu: **Tools ▸ Tam yakalama — sadece arşive**).
+
+> ⚠️ Bu dört tuş **global** kaydedilir: UIBUL açıkken her uygulamada çalışırlar. Bedeli,
+> aynı tuşu kullanan başka programların o tuşu görmemesidir. Atlas karesi başka bir tuşa
+> alınabilir: `settings.json` içinde `AtlasKisayolu`.
 
 ---
 
@@ -164,10 +158,9 @@ güncellenir, yeniden açılır. Ayarlar ve arşiv korunur.
 |---|---|
 | Kısayol çalışmıyor | Başka program tuşu kapmış olabilir; alttaki konsolda kayıt durumu yazar |
 | Yönetici uygulamaları okunmuyor | UIBUL'u "Yönetici olarak çalıştır" ile açın |
-| Özellikler eksik | Collection Profile → **Full**, sonra `F5` |
-| Chrome'da F11 çalışmıyor | Beklenen; yukarıdaki kısayol uyarısına bakın |
+| Özellikler eksik | Collection Profile → **Full**, sonra **YENİLE** |
 | Yakalama yavaş | Collection Profile → **Standard** veya **Quick** |
-| Masaüstü doldu | Tools ▸ Settings ▸ çıktı klasörü; ya da `F8` kullanın |
+| Çıktı klasörü doldu | Tools ▸ Settings ▸ çıktı klasörü; ya da **Tools ▸ Tam yakalama — sadece arşive** |
 
 ---
 
