@@ -34,7 +34,26 @@ oturumlar onu kendi çağırır, insan turu düşer.
 
 ## ② İŞİN — sırayla
 
-### ⚠️ 0. ÖNCE TASARIM NOTU — kod yazmadan ÖNCE onay al
+### 🔴 0a. EN BAŞTA PULL — atlanamaz (Emre'nin emri, 2026-09-10)
+
+```bash
+git -C C:/Users/ana/Documents/Projects/Uibul pull --ff-only
+git -C C:/Users/ana/Documents/Projects/ClaudEmre pull --ff-only
+```
+
+**Niçin — ve bu ÖLÇÜLDÜ, varsayılmadı.** Koordinatör bugün açılışta
+ClaudEmre'yi pull etti ve `Already up to date.` aldı. Bir saat sonra
+yeniden baktığında depo **5 commit gerideydi** — başka bir makine o arada
+push etmişti. Yani *"açılışta pull edildi"* ile *"şu an güncel"* **ayrı
+şeylerdir**, ve arada geçen her dakika farkı büyütür.
+
+⚠️ `--ff-only` kasıtlı: yerelde commit'siz iş varsa sessizce merge etmez,
+**DURUR.** Durursa kendi başına çözme — koordinatöre bildir (`F16`).
+⚠️ `Already up to date.` görmek de bir ölçümdür — **görmeden devam etme.**
+🔴 Ve UIBUL deposunu da pull et: koordinatör bu depoya yazıyor
+(şartnamen, `CLAUDE.md`, `TESPIH.md` oradan geliyor).
+
+### ⚠️ 0b. SONRA TASARIM NOTU — kod yazmadan ÖNCE onay al
 
 🔴 **Doğrudan koda başlama.** Önce `oturumlar/UIBUL-CLI-0910-ILERLEME.md`
 dosyasına **en çok 40 satırlık** bir tasarım notu yaz, commit et ve
@@ -47,7 +66,7 @@ koordinatöre bildir. Notta şu dört soru cevaplı olsun:
 ④ pencere nasıl adresleniyor          başlık · süreç adı · pid · HWND — hangisi
 ```
 
-Koordinatör onaylamadan ②'ye geçme. **Sebebi:** bu bir yeni işlev ve
+Koordinatör onaylamadan 1'e geçme. **Sebebi:** bu bir yeni işlev ve
 tasarımı yanlış seçilirse yazılan kodun tamamı çöpe gider.
 
 ### 1. 🔴 TEK ÖRNEK KAPISI — bu işin ASIL ZORLUĞU, ve ÖLÇTÜM

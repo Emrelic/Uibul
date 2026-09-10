@@ -29,6 +29,29 @@ ClaudEmre izi: oturumlar/ · AMAC.md · arac/ · BEKLEYENLER.md → DÖRDÜ DE Y
 
 ## ② İŞİN — altı başlık, ve SIRA BAĞLAYICI
 
+### 🔴 0. EN BAŞTA PULL — atlanamaz (Emre'nin emri, 2026-09-10)
+
+```bash
+git -C C:/Users/ana/Documents/Projects/Uibul pull --ff-only
+git -C C:/Users/ana/Documents/Projects/ClaudEmre pull --ff-only
+```
+
+**Niçin — ve bu ÖLÇÜLDÜ, varsayılmadı.** Koordinatör bugün açılışta
+ClaudEmre'yi pull etti ve `Already up to date.` aldı. Bir saat sonra
+yeniden baktığında depo **5 commit gerideydi** — başka bir makine o arada
+push etmişti. *"Açılışta pull edildi"* ile *"şu an güncel"* **ayrı
+şeylerdir.**
+
+🔴 **Senin işin için bu, ekstra kritik:** bayat bir ağacı analiz edersen
+raporun **doğdu doğmadı bayat** olur ve hiçbir alarm ötmez — `B3`ün
+(ölçütün dayandığı ölçüm bayatlar) ders kitabı vakası. Raporun başına
+`git rev-parse --short HEAD` yazarken, o sha'nın **pull SONRASI** olduğuna
+emin ol.
+
+⚠️ `--ff-only` kasıtlı: yerelde commit'siz iş varsa DURUR. Durursa kendi
+başına çözme — koordinatöre bildir (`F16`).
+⚠️ `Already up to date.` görmek de bir ölçümdür — **görmeden devam etme.**
+
 Rapor `AMAC.md §5`in altı başlığını taşır:
 
 ```

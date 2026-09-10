@@ -48,7 +48,14 @@ MODEL   Opus  — tek örnek mutex'i + WinExe konsolu; yanlış tasarım SESSİZ
 DİZİN   C:\Users\ana\Documents\Projects\Uibul
 
 Adın UIBUL-CLI-0910. Koordinatör oturum UIBUL KOORDINATOR-0910.
-Önce CLAUDE.md'yi baştan sona oku, sonra oturumlar/UIBUL-CLI-0910.md —
+
+🔴 İLK İŞ — HİÇBİR ŞEYE BAŞLAMADAN PULL:
+   git -C C:/Users/ana/Documents/Projects/Uibul pull --ff-only
+   git -C C:/Users/ana/Documents/Projects/ClaudEmre pull --ff-only
+   "Already up to date." görmek de bir ölçümdür — GÖRMEDEN devam etme.
+   --ff-only DURURSA kendin çözme, koordinatöre bildir.
+
+Sonra CLAUDE.md'yi baştan sona oku, sonra oturumlar/UIBUL-CLI-0910.md —
 şartnamen odur, ona göre çalış.
 İlk işin: koordinatöre açılış mesajı at (mcp__ccd_session_mgmt__send_message,
 session_id = local_a11c2f7d-62c5-4e42-b02a-03820968e18b):
@@ -67,7 +74,14 @@ MODEL   Opus  — kendi çıktısını sorgulaması gereken iş; küçük modele
 DİZİN   C:\Users\ana\Documents\Projects\Uibul
 
 Adın UIBUL-ANALIZ-0910. Koordinatör oturum UIBUL KOORDINATOR-0910.
-Önce CLAUDE.md'yi baştan sona oku, sonra oturumlar/UIBUL-ANALIZ-0910.md —
+
+🔴 İLK İŞ — HİÇBİR ŞEYE BAŞLAMADAN PULL:
+   git -C C:/Users/ana/Documents/Projects/Uibul pull --ff-only
+   git -C C:/Users/ana/Documents/Projects/ClaudEmre pull --ff-only
+   Bayat ağacı analiz edersen raporun DOĞDUĞU AN bayat olur ve hiçbir
+   alarm ötmez. Raporunun başındaki sha PULL SONRASI olacak.
+
+Sonra CLAUDE.md'yi baştan sona oku, sonra oturumlar/UIBUL-ANALIZ-0910.md —
 şartnamen odur, ona göre çalış.
 İlk işin: koordinatöre açılış mesajı at (mcp__ccd_session_mgmt__send_message,
 session_id = local_a11c2f7d-62c5-4e42-b02a-03820968e18b):
